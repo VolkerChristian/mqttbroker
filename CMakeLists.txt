@@ -7,17 +7,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(snodec COMPONENTS net-in-stream-legacy mqtt)
 
-set(MQTTSERVER_CPP
+set(MQTTBROKER_CPP
     mqttbroker.cpp broker/Broker.cpp broker/SocketContext.cpp
     broker/SocketContextFactory.cpp broker/SubscriberTree.cpp
     broker/TopicTree.cpp
 )
-set(MQTTSERVER_H
+set(MQTTBROKER_H
     broker/Broker.h broker/SocketContext.h broker/SocketContextFactory.h
     broker/SubscriberTree.h broker/TopicTree.h
 )
 
-add_executable(mqttbroker ${MQTTSERVER_CPP} ${MQTTSERVER_H})
+add_executable(mqttbroker ${MQTTBROKER_CPP} ${MQTTBROKER_H})
 
 target_link_libraries(
     mqttbroker PRIVATE snodec::net-in-stream-legacy snodec::mqtt
