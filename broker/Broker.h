@@ -43,7 +43,7 @@ namespace mqtt::broker {
 
         ~Broker();
 
-        void subscribe(const std::string& topic, mqtt::broker::SocketContext* socketContext);
+        void subscribe(const std::string& topic, mqtt::broker::SocketContext* socketContext, uint8_t qoSLevel);
         void publish(const std::string& topic, const std::string& message);
         void unsubscribe(const std::string& topic, mqtt::broker::SocketContext* socketContext);
         void unsubscribeFromAll(mqtt::broker::SocketContext* socketContext);

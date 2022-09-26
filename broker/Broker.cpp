@@ -36,8 +36,8 @@ namespace mqtt::broker {
     Broker::~Broker() {
     }
 
-    void Broker::subscribe(const std::string& topic, mqtt::broker::SocketContext* socketContext) {
-        subscriberTree.subscribe(topic, socketContext);
+    void Broker::subscribe(const std::string& topic, mqtt::broker::SocketContext* socketContext, uint8_t qoSLevel) {
+        subscriberTree.subscribe(topic, socketContext, qoSLevel);
     }
 
     void Broker::publish(const std::string& topic, const std::string& message) {

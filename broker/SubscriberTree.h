@@ -27,7 +27,6 @@ namespace mqtt::broker {
 
 #include <cstdint>
 #include <map>
-#include <set>
 #include <string>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
@@ -38,7 +37,7 @@ namespace mqtt::broker {
     public:
         SubscriberTree() = default;
 
-        void subscribe(const std::string& fullTopicName, mqtt::broker::SocketContext* socketContext);
+        void subscribe(const std::string& fullTopicName, mqtt::broker::SocketContext* socketContext, uint8_t qoSLevel);
 
         void publish(const std::string& fullTopicName, const std::string& message);
 
@@ -47,11 +46,14 @@ namespace mqtt::broker {
         void unsubscribe(std::string remainingTopicName, mqtt::broker::SocketContext* socketContext);
 
     private:
-        void subscribe(std::string remainingTopicName, const std::string& fullTopicName, mqtt::broker::SocketContext* socketContext);
+        void subscribe(std::string remainingTopicName,
+                       const std::string& fullTopicName,
+                       mqtt::broker::SocketContext* socketContext,
+                       uint8_t qoSLevel);
 
         void publish(std::string remainingTopicName, const std::string& fullTopicName, const std::string& message);
 
-        std::set<mqtt::broker::SocketContext*> subscribers;
+        std::map<mqtt::broker::SocketContext*, uint8_t> subscribers;
         std::map<std::string, SubscriberTree> subscriberTree;
 
         std::string fullName = "";
