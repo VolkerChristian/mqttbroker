@@ -41,9 +41,9 @@ namespace mqtt::broker {
 
         void publish(const std::string& fullTopicName, const std::string& message);
 
-        void unsubscribe(mqtt::broker::SocketContext* socketContext);
+        bool unsubscribe(mqtt::broker::SocketContext* socketContext);
 
-        void unsubscribe(std::string remainingTopicName, mqtt::broker::SocketContext* socketContext);
+        bool unsubscribe(std::string remainingTopicName, mqtt::broker::SocketContext* socketContext);
 
     private:
         void subscribe(std::string remainingTopicName,
@@ -54,7 +54,7 @@ namespace mqtt::broker {
         void publish(std::string remainingTopicName, const std::string& fullTopicName, const std::string& message);
 
         std::map<mqtt::broker::SocketContext*, uint8_t> subscribers;
-        std::map<std::string, SubscriberTree> subscriberTree;
+        std::map<std::string, SubscriberTree> subscribtions;
 
         std::string fullName = "";
     };

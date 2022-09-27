@@ -39,25 +39,38 @@ namespace mqtt::broker {
         publish(fullTopicName, fullTopicName, message);
     }
 
-    void SubscriberTree::unsubscribe(mqtt::broker::SocketContext* socketContext) {
+    bool SubscriberTree::unsubscribe(mqtt::broker::SocketContext* socketContext) {
         subscribers.erase(socketContext);
 
-        for (auto& subscriberTreeEntry : subscriberTree) {
-            subscriberTreeEntry.second.unsubscribe(socketContext);
-        }
-    }
-
-    void SubscriberTree::unsubscribe(std::string remainingTopicName, mqtt::broker::SocketContext* socketContext) {
-        if (remainingTopicName.empty()) {
-            subscribers.erase(socketContext);
-        } else {
-            std::string topicName = remainingTopicName.substr(0, fullName.find("/"));
-            remainingTopicName.erase(0, topicName.size() + 1);
-
-            if (subscriberTree.contains(topicName)) {
-                subscriberTree.find(topicName)->second.unsubscribe(remainingTopicName, socketContext);
+        for (auto it = subscribtions.begin(); it != subscribtions.end();) {
+            if (it->second.unsubscribe(socketContext)) {
+                it = subscribtions.erase(it);
+            } else {
+                ++it;
             }
         }
+
+        return subscribers.empty() && subscribtions.empty();
+    }
+
+    bool SubscriberTree::unsubscribe(std::string remainingTopicName, mqtt::broker::SocketContext* socketContext) {
+        bool empty = false;
+
+        if (remainingTopicName.empty()) {
+            subscribers.erase(socketContext);
+            empty = subscribers.empty() && subscribtions.empty();
+        } else {
+            std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
+            remainingTopicName.erase(0, topicName.size() + 1);
+
+            if (subscribtions.contains(topicName) &&
+                subscribtions.find(topicName)->second.unsubscribe(remainingTopicName, socketContext)) {
+                subscribtions.erase(topicName);
+            }
+            empty = subscribers.empty() && subscribtions.empty();
+        }
+
+        return empty;
     }
 
     void SubscriberTree::subscribe(std::string remainingTopicName,
@@ -71,10 +84,10 @@ namespace mqtt::broker {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
             remainingTopicName.erase(0, topicName.size() + 1);
 
-            if (subscriberTree.contains(topicName)) {
-                subscriberTree.find(topicName)->second.subscribe(remainingTopicName, fullTopicName, socketContext, qoSLevel);
+            if (subscribtions.contains(topicName)) {
+                subscribtions.find(topicName)->second.subscribe(remainingTopicName, fullTopicName, socketContext, qoSLevel);
             } else {
-                subscriberTree.insert({topicName, SubscriberTree()})
+                subscribtions.insert({topicName, SubscriberTree()})
                     .first->second.subscribe(remainingTopicName, fullTopicName, socketContext, qoSLevel);
             }
         }
@@ -90,12 +103,12 @@ namespace mqtt::broker {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
             remainingTopicName.erase(0, topicName.size() + 1);
 
-            if (subscriberTree.contains(topicName)) {
-                subscriberTree.find(topicName)->second.publish(remainingTopicName, fullTopicName, message);
-            } else if (subscriberTree.contains("+")) {
-                subscriberTree.find("+")->second.publish(remainingTopicName, fullTopicName, message);
-            } else if (subscriberTree.contains("#")) {
-                const SubscriberTree& foundSubscription = subscriberTree.find("#")->second;
+            if (subscribtions.contains(topicName)) {
+                subscribtions.find(topicName)->second.publish(remainingTopicName, fullTopicName, message);
+            } else if (subscribtions.contains("+")) {
+                subscribtions.find("+")->second.publish(remainingTopicName, fullTopicName, message);
+            } else if (subscribtions.contains("#")) {
+                const SubscriberTree& foundSubscription = subscribtions.find("#")->second;
 
                 for (auto& subscriber : foundSubscription.subscribers) {
                     LOG(TRACE) << "Send Publich: " << fullName << " - " << fullTopicName << " - " << message << " - " << subscriber.second;

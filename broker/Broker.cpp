@@ -48,7 +48,7 @@ namespace mqtt::broker {
         subscriberTree.unsubscribe(topic, socketContext);
     }
 
-    void Broker::unsubscribeFromAll(mqtt::broker::SocketContext* socketContext) {
+    void Broker::unsubscribe(mqtt::broker::SocketContext* socketContext) {
         subscriberTree.unsubscribe(socketContext);
     }
 

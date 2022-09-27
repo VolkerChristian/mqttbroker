@@ -33,7 +33,7 @@ namespace mqtt::broker {
     }
 
     SocketContext::~SocketContext() {
-        mqtt::broker::Broker::instance().unsubscribeFromAll(this);
+        mqtt::broker::Broker::instance().unsubscribe(this);
     }
 
     void SocketContext::onConnect(const iot::mqtt::packets::Connect& connect) {
