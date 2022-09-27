@@ -54,23 +54,18 @@ namespace mqtt::broker {
     }
 
     bool SubscriberTree::unsubscribe(std::string remainingTopicName, mqtt::broker::SocketContext* socketContext) {
-        bool empty = false;
-
         if (remainingTopicName.empty()) {
             subscribers.erase(socketContext);
-            empty = subscribers.empty() && subscribtions.empty();
         } else {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
             remainingTopicName.erase(0, topicName.size() + 1);
 
-            if (subscribtions.contains(topicName) &&
-                subscribtions.find(topicName)->second.unsubscribe(remainingTopicName, socketContext)) {
+            if (subscribtions.contains(topicName) && subscribtions.find(topicName)->second.unsubscribe(remainingTopicName, socketContext)) {
                 subscribtions.erase(topicName);
             }
-            empty = subscribers.empty() && subscribtions.empty();
         }
 
-        return empty;
+        return subscribers.empty() && subscribtions.empty();
     }
 
     void SubscriberTree::subscribe(std::string remainingTopicName,
