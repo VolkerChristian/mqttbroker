@@ -100,9 +100,11 @@ namespace mqtt::broker {
 
             if (subscribtions.contains(topicName)) {
                 subscribtions.find(topicName)->second.publish(remainingTopicName, fullTopicName, message);
-            } else if (subscribtions.contains("+")) {
+            }
+            if (subscribtions.contains("+")) {
                 subscribtions.find("+")->second.publish(remainingTopicName, fullTopicName, message);
-            } else if (subscribtions.contains("#")) {
+            }
+            if (subscribtions.contains("#")) {
                 const SubscriberTree& foundSubscription = subscribtions.find("#")->second;
 
                 for (auto& subscriber : foundSubscription.subscribers) {
