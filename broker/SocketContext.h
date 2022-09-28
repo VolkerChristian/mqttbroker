@@ -16,8 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MQTT_SERVER_SOCKETCONTEXT_H
-#define MQTT_SERVER_SOCKETCONTEXT_H
+#ifndef APPS_MQTT_SERVER_SOCKETCONTEXT_H
+#define APPS_MQTT_SERVER_SOCKETCONTEXT_H
 
 #include "iot/mqtt/SocketContext.h"
 
@@ -25,7 +25,13 @@ namespace core::socket {
     class SocketConnection;
 } // namespace core::socket
 
+namespace mqtt::broker {
+    class Broker;
+} // namespace mqtt::broker
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+#include <memory>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
@@ -33,7 +39,7 @@ namespace mqtt::broker {
 
     class SocketContext : public iot::mqtt::SocketContext {
     public:
-        explicit SocketContext(core::socket::SocketConnection* socketConnection);
+        explicit SocketContext(core::socket::SocketConnection* socketConnection, std::shared_ptr<mqtt::broker::Broker> broker);
         ~SocketContext() override;
 
     private:
@@ -51,8 +57,12 @@ namespace mqtt::broker {
         void onPingreq(const iot::mqtt::packets::Pingreq& pingreq) override;
         void onPingresp(const iot::mqtt::packets::Pingresp& pingresp) override;
         void onDisconnect(const iot::mqtt::packets::Disconnect& disconnect) override;
+
+        uint64_t subscribtionCount = 0;
+
+        std::shared_ptr<mqtt::broker::Broker> broker;
     };
 
 } // namespace mqtt::broker
 
-#endif // SERVER_SOCKETCONTEXT_H
+#endif // APPS_MQTT_SOCKETCONTEXT_H

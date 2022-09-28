@@ -18,6 +18,7 @@
 
 #include "broker/SocketContextFactory.h"
 
+#include "broker/Broker.h"
 #include "broker/SocketContext.h"
 #include "core/socket/SocketContext.h"
 
@@ -27,8 +28,12 @@
 
 namespace mqtt::broker {
 
+    SocketContextFactory::SocketContextFactory()
+        : broker(std::make_shared<mqtt::broker::Broker>()) {
+    }
+
     core::socket::SocketContext* SocketContextFactory::create(core::socket::SocketConnection* socketConnection) {
-        return new mqtt::broker::SocketContext(socketConnection);
+        return new mqtt::broker::SocketContext(socketConnection, broker);
     }
 
 } // namespace mqtt::broker

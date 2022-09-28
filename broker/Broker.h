@@ -16,11 +16,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MQTT_SERVER_BROKER_H
-#define MQTT_SERVER_BROKER_H
+#ifndef APPS_MQTT_SERVER_BROKER_H
+#define APPS_MQTT_SERVER_BROKER_H
 
-#include "broker/SubscriberTree.h"
-#include "broker/TopicTree.h"
+#include "broker/RetainTree.h"
+#include "broker/SubscribtionTree.h"
 
 namespace mqtt::broker {
     class SocketContext;
@@ -28,6 +28,8 @@ namespace mqtt::broker {
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
+#include <cstdint>
+#include <memory>
 #include <string>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
@@ -36,23 +38,23 @@ namespace mqtt::broker {
 
     class Broker {
     private:
-        Broker();
-
     public:
-        static Broker& instance();
+        Broker() = default;
 
-        ~Broker();
+        static std::shared_ptr<Broker> instance();
 
         void subscribe(const std::string& topic, mqtt::broker::SocketContext* socketContext, uint8_t qoSLevel);
-        void publish(const std::string& topic, const std::string& message);
+        void publish(const std::string& topic, const std::string& message, bool retain);
         void unsubscribe(const std::string& topic, mqtt::broker::SocketContext* socketContext);
         void unsubscribe(mqtt::broker::SocketContext* socketContext);
 
     private:
-        mqtt::broker::SubscriberTree subscriberTree;
-        mqtt::broker::TopicTree topicTree;
+        mqtt::broker::SubscribtionTree subscribtionTree;
+        mqtt::broker::RetainTree retainTree;
+
+        static std::shared_ptr<Broker> broker;
     };
 
 } // namespace mqtt::broker
 
-#endif // SERVER_BROKER_H
+#endif // APPS_MQTT_SERVER_BROKER_H

@@ -16,38 +16,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef APPS_MQTT_SERVER_SOCKETCONTEXTFACTORY_H
-#define APPS_MQTT_SERVER_SOCKETCONTEXTFACTORY_H
+#include "broker/SharedSocketContextFactory.h"
 
+#include "broker/Broker.h"
+#include "broker/SocketContext.h"
 #include "core/socket/SocketContext.h"
-#include "core/socket/SocketContextFactory.h"
-
-namespace core::socket {
-    class SocketConnection;
-} // namespace core::socket
-
-namespace mqtt::broker {
-    class Broker;
-} // namespace mqtt::broker
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-#include <memory>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
 namespace mqtt::broker {
 
-    class SocketContextFactory : public core::socket::SocketContextFactory {
-    public:
-        SocketContextFactory();
-
-    private:
-        core::socket::SocketContext* create(core::socket::SocketConnection* socketConnection) override;
-
-        std::shared_ptr<mqtt::broker::Broker> broker;
-    };
+    core::socket::SocketContext* SharedSocketContextFactory::create(core::socket::SocketConnection* socketConnection) {
+        return new mqtt::broker::SocketContext(socketConnection, mqtt::broker::Broker::instance());
+    }
 
 } // namespace mqtt::broker
-
-#endif // APPS_MQTT_SERVER_SOCKETCONTEXTFACTORY_H

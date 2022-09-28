@@ -16,38 +16,42 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef APPS_MQTT_SERVER_SOCKETCONTEXTFACTORY_H
-#define APPS_MQTT_SERVER_SOCKETCONTEXTFACTORY_H
-
-#include "core/socket/SocketContext.h"
-#include "core/socket/SocketContextFactory.h"
-
-namespace core::socket {
-    class SocketConnection;
-} // namespace core::socket
+#ifndef APPS_MQTT_SERVER_TOPICTREE_H
+#define APPS_MQTT_SERVER_TOPICTREE_H
 
 namespace mqtt::broker {
-    class Broker;
+    class SocketContext;
 } // namespace mqtt::broker
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-#include <memory>
+#include <cstdint>
+#include <map>
+#include <string>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
 namespace mqtt::broker {
 
-    class SocketContextFactory : public core::socket::SocketContextFactory {
+    class RetainTree {
     public:
-        SocketContextFactory();
+        RetainTree() = default;
+
+        void retain(const std::string& fullTopicName, const std::string& value);
+
+        void publish(std::string remainingTopicName, mqtt::broker::SocketContext* socketContext, uint8_t qoSLevel);
 
     private:
-        core::socket::SocketContext* create(core::socket::SocketConnection* socketConnection) override;
+        bool retain(const std::string& fullTopicName, std::string remainingTopicName, const std::string& value);
 
-        std::shared_ptr<mqtt::broker::Broker> broker;
+        void publish(mqtt::broker::SocketContext* socketContext, uint8_t qoSLevel);
+
+        std::string fullTopicName = "";
+        std::string message = "";
+
+        std::map<std::string, RetainTree> topicTree;
     };
 
 } // namespace mqtt::broker
 
-#endif // APPS_MQTT_SERVER_SOCKETCONTEXTFACTORY_H
+#endif // APPS_MQTT_SERVER_TOPICTREE_H

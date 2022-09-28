@@ -24,32 +24,36 @@
 
 namespace mqtt::broker {
 
-    Broker::Broker()
-        : topicTree(mqtt::broker::TopicTree("", "")) {
-    }
+    std::shared_ptr<Broker> Broker::broker;
 
-    Broker& Broker::instance() {
-        static Broker broker;
+    std::shared_ptr<Broker> Broker::instance() {
+        if (!broker) {
+            broker = std::make_shared<Broker>();
+        }
+
         return broker;
     }
 
-    Broker::~Broker() {
-    }
-
     void Broker::subscribe(const std::string& topic, mqtt::broker::SocketContext* socketContext, uint8_t qoSLevel) {
-        subscriberTree.subscribe(topic, socketContext, qoSLevel);
+        subscribtionTree.subscribe(topic, socketContext, qoSLevel);
+
+        retainTree.publish(topic, socketContext, qoSLevel);
     }
 
-    void Broker::publish(const std::string& topic, const std::string& message) {
-        subscriberTree.publish(topic, message);
+    void Broker::publish(const std::string& topic, const std::string& message, bool retain) {
+        subscribtionTree.publish(topic, message);
+
+        if (retain) {
+            retainTree.retain(topic, message);
+        }
     }
 
     void Broker::unsubscribe(const std::string& topic, mqtt::broker::SocketContext* socketContext) {
-        subscriberTree.unsubscribe(topic, socketContext);
+        subscribtionTree.unsubscribe(topic, socketContext);
     }
 
     void Broker::unsubscribe(mqtt::broker::SocketContext* socketContext) {
-        subscriberTree.unsubscribe(socketContext);
+        subscribtionTree.unsubscribe(socketContext);
     }
 
 } // namespace mqtt::broker
