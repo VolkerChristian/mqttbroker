@@ -70,19 +70,19 @@ namespace mqtt::broker {
     }
 
     void Broker::newSession(const std::string& clientId, SocketContext* socketContext) {
-        VLOG(0) << "New Session: " << clientId << " - " << socketContext;
+        LOG(TRACE) << "New session: " << clientId << " - " << socketContext;
         sessions[clientId] = socketContext;
     }
 
     void Broker::replaceSession(const std::string& clientId, SocketContext* socketContext) {
-        VLOG(0) << "Replace Session: " << clientId << " - " << socketContext;
+        LOG(TRACE) << "Replace session: " << clientId << " - " << socketContext;
         sessions[clientId] = socketContext;
 
         subscribtionTree.publishRetained(clientId);
     }
 
     void Broker::deleteSession(const std::string& clientId) {
-        VLOG(0) << "DELETE SESSION: " << clientId;
+        LOG(TRACE) << "Delete session: " << clientId;
         sessions.erase(clientId);
     }
 
@@ -97,7 +97,7 @@ namespace mqtt::broker {
                              uint8_t qoSLevel,
                              bool retain) {
         if (sessions.contains(clientId) && sessions[clientId] != nullptr) {
-            LOG(TRACE) << "Send Publich: " << clientId << ": " << fullTopicName << " - " << message << " - "
+            LOG(TRACE) << "Send Publish: " << clientId << ": " << fullTopicName << " - " << message << " - "
                        << static_cast<uint16_t>(qoSLevel);
 
             sessions[clientId]->sendPublish(fullTopicName, message, dup, qoSLevel, retain);
@@ -113,11 +113,13 @@ namespace mqtt::broker {
     }
 
     std::string Broker::getRandomClientUUID() {
-        char uuidCharArray[UUID_LEN];
+        char uuid[UUID_LEN];
+
         std::ifstream file("/proc/sys/kernel/random/uuid");
-        file.getline(uuidCharArray, UUID_LEN);
+        file.getline(uuid, UUID_LEN);
         file.close();
-        return std::string(uuidCharArray);
+
+        return std::string(uuid);
     }
 
 } // namespace mqtt::broker

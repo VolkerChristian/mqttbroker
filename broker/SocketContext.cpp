@@ -31,8 +31,10 @@ namespace mqtt::broker {
     SocketContext::SocketContext(core::socket::SocketConnection* socketConnection, std::shared_ptr<Broker> broker)
         : iot::mqtt::SocketContext(socketConnection)
         , broker(broker) {
+    }
+
+    SocketContext::~SocketContext() {
         if (broker->hasSession(clientId) && broker->getSessionContext(clientId) != nullptr) {
-            VLOG(0) << "#############################";
             if (cleanSession) {
                 if (subscribtionCount > 0) {
                     broker->unsubscribe(clientId);
@@ -44,9 +46,6 @@ namespace mqtt::broker {
 
             broker->publish(willTopic, willMessage, willRetain);
         }
-    }
-
-    SocketContext::~SocketContext() {
     }
 
     void SocketContext::onConnect(const iot::mqtt::packets::Connect& connect) {
