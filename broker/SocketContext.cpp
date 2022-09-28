@@ -34,7 +34,7 @@ namespace mqtt::broker {
     }
 
     SocketContext::~SocketContext() {
-        if (broker->hasSession(clientId) && broker->getSessionContext(clientId) != nullptr) {
+        if (broker->hasSession(clientId) && broker->getSessionContext(clientId) == this) {
             if (cleanSession) {
                 if (subscribtionCount > 0) {
                     broker->unsubscribe(clientId);
@@ -44,7 +44,9 @@ namespace mqtt::broker {
                 broker->replaceSession(clientId, nullptr);
             }
 
-            broker->publish(willTopic, willMessage, willRetain);
+            if (willFlag) {
+                broker->publish(willTopic, willMessage, willRetain);
+            }
         }
     }
 
@@ -92,19 +94,25 @@ namespace mqtt::broker {
             VLOG(0) << "Password: " << password;
         }
 
+#define MQTT_SESSION_NEW 0x00
+#define MQTT_SESSION_PRESENT 0x01
+#define MQTT_VERSION_3_1_1 0x04
+
         if (broker->hasSession(clientId)) {
-            if (cleanSession) {
-                broker->unsubscribe(clientId);
-            }
             if (broker->getSessionContext(clientId) == nullptr) {
-                sendConnack(version <= 0x04 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, 1); // Version | 0x04 = 3.1.1
+                if (cleanSession) {
+                    broker->unsubscribe(clientId);
+                }
+                sendConnack(version <= MQTT_VERSION_3_1_1 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, MQTT_SESSION_PRESENT);
 
                 broker->replaceSession(clientId, this);
             } else { // Error ClientId already used
+                LOG(TRACE) << "ClientID \'" << clientId << "\' already in use ... disconnecting";
+
                 close();
             }
         } else {
-            sendConnack(version <= 0x04 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, 0); // Version | 0x04 = 3.1.1
+            sendConnack(version <= MQTT_VERSION_3_1_1 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, MQTT_SESSION_NEW);
 
             broker->newSession(clientId, this);
         }
@@ -293,7 +301,7 @@ namespace mqtt::broker {
             broker->replaceSession(clientId, nullptr);
         }
 
-        close();
+        shutdown();
     }
 
 } // namespace mqtt::broker
