@@ -30,6 +30,10 @@
 
 namespace mqtt::broker {
 
+    RetainTree::RetainTree(Broker* broker)
+        : broker(broker) {
+    }
+
     void RetainTree::retain(const std::string& fullTopicName, const std::string& message) {
         retain(fullTopicName, fullTopicName, message);
     }
@@ -43,7 +47,7 @@ namespace mqtt::broker {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
             remainingTopicName.erase(0, topicName.size() + 1);
 
-            if (topicTree[topicName].retain(fullTopicName, remainingTopicName, message)) {
+            if (topicTree.insert({topicName, RetainTree(broker)}).first->second.retain(fullTopicName, remainingTopicName, message)) {
                 topicTree.erase(topicName);
             }
         }
@@ -60,7 +64,7 @@ namespace mqtt::broker {
             remainingTopicName.erase(0, topicName.size() + 1);
 
             if (topicTree.contains(topicName)) {
-                topicTree[topicName].publish(remainingTopicName, socketContext, qoSLevel);
+                topicTree.find(topicName)->second.publish(remainingTopicName, socketContext, qoSLevel);
             } else if (topicName == "+") {
                 for (auto& topicTreeEntry : topicTree) {
                     topicTreeEntry.second.publish(remainingTopicName, socketContext, qoSLevel);

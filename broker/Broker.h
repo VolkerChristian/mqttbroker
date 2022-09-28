@@ -29,6 +29,7 @@ namespace mqtt::broker {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 #include <cstdint>
+#include <map>
 #include <memory>
 #include <string>
 
@@ -39,7 +40,7 @@ namespace mqtt::broker {
     class Broker {
     private:
     public:
-        Broker() = default;
+        Broker();
 
         static std::shared_ptr<Broker> instance();
 
@@ -48,9 +49,17 @@ namespace mqtt::broker {
         void unsubscribe(const std::string& topic, mqtt::broker::SocketContext* socketContext);
         void unsubscribe(mqtt::broker::SocketContext* socketContext);
 
+        void addSession(const std::string& clientId, mqtt::broker::SocketContext* socketContext);
+        void deleteSession(const std::string& clinetId);
+        mqtt::broker::SocketContext* getSessionContext(const std::string& clientId);
+
+        std::string getRandomClientUUID();
+
     private:
         mqtt::broker::SubscribtionTree subscribtionTree;
         mqtt::broker::RetainTree retainTree;
+
+        std::map<std::string, mqtt::broker::SocketContext*> sessions;
 
         static std::shared_ptr<Broker> broker;
     };

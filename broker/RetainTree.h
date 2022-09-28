@@ -20,6 +20,7 @@
 #define APPS_MQTT_SERVER_TOPICTREE_H
 
 namespace mqtt::broker {
+    class Broker;
     class SocketContext;
 } // namespace mqtt::broker
 
@@ -35,7 +36,7 @@ namespace mqtt::broker {
 
     class RetainTree {
     public:
-        RetainTree() = default;
+        explicit RetainTree(mqtt::broker::Broker* broker);
 
         void retain(const std::string& fullTopicName, const std::string& value);
 
@@ -50,6 +51,8 @@ namespace mqtt::broker {
         std::string message = "";
 
         std::map<std::string, RetainTree> topicTree;
+
+        mqtt::broker::Broker* broker;
     };
 
 } // namespace mqtt::broker

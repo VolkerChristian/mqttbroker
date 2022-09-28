@@ -61,6 +61,20 @@ namespace mqtt::broker {
         uint64_t subscribtionCount = 0;
 
         std::shared_ptr<mqtt::broker::Broker> broker;
+
+        std::string protocol;
+        uint8_t version = 0;
+        uint8_t flags = 0;
+        uint16_t keepAlive = 0;
+        std::string clientId;
+        bool willFlag = false;
+        std::string willTopic;
+        std::string willMessage;
+        uint8_t willQoS = 0;
+        bool willRetain = false;
+        std::string username;
+        std::string password;
+        bool cleanSession = false;
     };
 
 } // namespace mqtt::broker

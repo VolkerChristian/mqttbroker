@@ -20,6 +20,7 @@
 #define APPS_MQTT_SERVER_SUBSCRIBERTREE_H
 
 namespace mqtt::broker {
+    class Broker;
     class SocketContext;
 } // namespace mqtt::broker
 
@@ -35,7 +36,7 @@ namespace mqtt::broker {
 
     class SubscribtionTree {
     public:
-        SubscribtionTree() = default;
+        explicit SubscribtionTree(mqtt::broker::Broker* broker);
 
         void subscribe(const std::string& fullTopicName, mqtt::broker::SocketContext* socketContext, uint8_t qoSLevel);
 
@@ -57,6 +58,8 @@ namespace mqtt::broker {
         std::map<std::string, SubscribtionTree> subscribtions;
 
         std::string subscribedTopicName = "";
+
+        mqtt::broker::Broker* broker;
     };
 
 } // namespace mqtt::broker

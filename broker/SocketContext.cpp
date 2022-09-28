@@ -40,17 +40,50 @@ namespace mqtt::broker {
     }
 
     void SocketContext::onConnect(const iot::mqtt::packets::Connect& connect) {
+        protocol = connect.getProtocol();
+        version = connect.getVersion();
+        flags = connect.getFlags();
+        keepAlive = connect.getKeepAlive();
+        if (!connect.getClientId().empty()) {
+            clientId = connect.getClientId();
+        } else {
+            clientId = broker->getRandomClientUUID();
+        }
+        willFlag = connect.getWillFlag();
+        willTopic = connect.getWillTopic();
+        willMessage = connect.getWillMessage();
+        willQoS = connect.getWillQoS();
+        willRetain = connect.getWillRetain();
+        username = connect.getUsername();
+        password = connect.getPassword();
+        cleanSession = connect.getCleanSession();
+
         VLOG(0) << "CONNECT";
         VLOG(0) << "=======";
         VLOG(0) << "Error: " << connect.isError();
         VLOG(0) << "Type: " << static_cast<uint16_t>(connect.getType());
         VLOG(0) << "Reserved: " << static_cast<uint16_t>(connect.getReserved());
         VLOG(0) << "RemainingLength: " << connect.getRemainingLength();
-        VLOG(0) << "Protocol: " << connect.getProtocol();
-        VLOG(0) << "Version: " << static_cast<uint16_t>(connect.getVersion());
-        VLOG(0) << "ConnectFlags: " << static_cast<uint16_t>(connect.getFlags());
-        VLOG(0) << "KeepAlive: " << connect.getKeepAlive();
-        VLOG(0) << "ClientID: " << connect.getClientId();
+        VLOG(0) << "Protocol: " << protocol;
+        VLOG(0) << "Version: " << static_cast<uint16_t>(version);
+        VLOG(0) << "ConnectFlags: " << static_cast<uint16_t>(flags);
+        VLOG(0) << "KeepAlive: " << keepAlive;
+        VLOG(0) << "ClientID: " << clientId;
+        VLOG(0) << "CleanSession: " << cleanSession;
+        if (connect.getWillFlag()) {
+            VLOG(0) << "WillTopic: " << willTopic;
+            VLOG(0) << "WillMessage: " << willMessage;
+            VLOG(0) << "WillQoS: " << static_cast<uint16_t>(willQoS);
+            VLOG(0) << "WillRetain: " << willRetain;
+        }
+        if (connect.getUsernameFlag()) {
+            VLOG(0) << "Username: " << username;
+        }
+        if (connect.getPasswordFlag()) {
+            VLOG(0) << "Password: " << password;
+        }
+
+        broker->addSession(clientId, this);
 
         sendConnack(connect.getVersion() <= 0x04 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION); // Version | 0x04 = 3.1.1
     }
@@ -228,6 +261,8 @@ namespace mqtt::broker {
         VLOG(0) << "Type: " << static_cast<uint16_t>(disconnect.getType());
         VLOG(0) << "Reserved: " << static_cast<uint16_t>(disconnect.getReserved());
         VLOG(0) << "RemainingLength: " << disconnect.getRemainingLength();
+
+        broker->deleteSession(clientId);
 
         close();
     }

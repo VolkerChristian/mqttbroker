@@ -20,11 +20,20 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
+#include <fstream>
+
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
+
+#define UUID_LEN 36
 
 namespace mqtt::broker {
 
     std::shared_ptr<Broker> Broker::broker;
+
+    Broker::Broker()
+        : subscribtionTree(this)
+        , retainTree(this) {
+    }
 
     std::shared_ptr<Broker> Broker::instance() {
         if (!broker) {
@@ -54,6 +63,26 @@ namespace mqtt::broker {
 
     void Broker::unsubscribe(mqtt::broker::SocketContext* socketContext) {
         subscribtionTree.unsubscribe(socketContext);
+    }
+
+    void Broker::addSession(const std::string& clientId, SocketContext* socketContext) {
+        sessions[clientId] = socketContext;
+    }
+
+    void Broker::deleteSession(const std::string& clientId) {
+        sessions.erase(clientId);
+    }
+
+    SocketContext* Broker::getSessionContext(const std::string& clientId) {
+        return sessions[clientId];
+    }
+
+    std::string Broker::getRandomClientUUID() {
+        char uuidCharArray[UUID_LEN];
+        std::ifstream file("/proc/sys/kernel/random/uuid");
+        file.getline(uuidCharArray, UUID_LEN);
+        file.close();
+        return std::string(uuidCharArray);
     }
 
 } // namespace mqtt::broker

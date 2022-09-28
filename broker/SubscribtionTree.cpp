@@ -31,6 +31,10 @@
 
 namespace mqtt::broker {
 
+    SubscribtionTree::SubscribtionTree(Broker* broker)
+        : broker(broker) {
+    }
+
     void SubscribtionTree::subscribe(const std::string& fullTopicName, mqtt::broker::SocketContext* socketContext, uint8_t qoSLevel) {
         subscribe(fullTopicName, fullTopicName, socketContext, qoSLevel);
     }
@@ -60,7 +64,7 @@ namespace mqtt::broker {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
             remainingTopicName.erase(0, topicName.size() + 1);
 
-            if (subscribtions.contains(topicName) && subscribtions[topicName].unsubscribe(remainingTopicName, socketContext)) {
+            if (subscribtions.contains(topicName) && subscribtions.find(topicName)->second.unsubscribe(remainingTopicName, socketContext)) {
                 subscribtions.erase(topicName);
             }
         }
@@ -79,7 +83,8 @@ namespace mqtt::broker {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
             remainingTopicName.erase(0, topicName.size() + 1);
 
-            subscribtions[topicName].subscribe(remainingTopicName, fullTopicName, socketContext, qoSLevel);
+            subscribtions.insert({topicName, mqtt::broker::SubscribtionTree(broker)})
+                .first->second.subscribe(remainingTopicName, fullTopicName, socketContext, qoSLevel);
         }
     }
 
@@ -94,10 +99,10 @@ namespace mqtt::broker {
             remainingTopicName.erase(0, topicName.size() + 1);
 
             if (subscribtions.contains(topicName)) {
-                subscribtions[topicName].publish(remainingTopicName, fullTopicName, message);
+                subscribtions.find(topicName)->second.publish(remainingTopicName, fullTopicName, message);
             }
             if (subscribtions.contains("+")) {
-                subscribtions["+"].publish(remainingTopicName, fullTopicName, message);
+                subscribtions.find("+")->second.publish(remainingTopicName, fullTopicName, message);
             }
             if (subscribtions.contains("#")) {
                 const SubscribtionTree& foundSubscription = subscribtions.find("#")->second;
