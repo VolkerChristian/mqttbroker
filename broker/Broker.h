@@ -44,10 +44,10 @@ namespace mqtt::broker {
 
         static std::shared_ptr<Broker> instance();
 
-        void subscribe(const std::string& topic, mqtt::broker::SocketContext* socketContext, uint8_t qoSLevel);
+        void subscribe(const std::string& topic, const std::string& clientId, uint8_t qoSLevel);
         void publish(const std::string& topic, const std::string& message, bool retain);
-        void unsubscribe(const std::string& topic, mqtt::broker::SocketContext* socketContext);
-        void unsubscribe(mqtt::broker::SocketContext* socketContext);
+        void unsubscribe(const std::string& topic, const std::string& clientId);
+        void unsubscribe(const std::string& clientId);
 
         void addSession(const std::string& clientId, mqtt::broker::SocketContext* socketContext);
         void deleteSession(const std::string& clinetId);

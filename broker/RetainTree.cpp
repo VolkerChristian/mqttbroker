@@ -18,6 +18,7 @@
 
 #include "broker/RetainTree.h"
 
+#include "broker/Broker.h"
 #include "broker/SocketContext.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -55,34 +56,34 @@ namespace mqtt::broker {
         return this->message.empty() && topicTree.empty();
     }
 
-    void RetainTree::publish(std::string remainingTopicName, SocketContext* socketContext, uint8_t qoSLevel) {
+    void RetainTree::publish(std::string remainingTopicName, const std::string& clientId, uint8_t qoSLevel) {
         if (remainingTopicName.empty() && !message.empty()) {
             LOG(TRACE) << "Send Publish (retained): " << fullTopicName << " - " << message << " - " << static_cast<uint16_t>(qoSLevel);
-            socketContext->sendPublish(fullTopicName, message, 0, qoSLevel, true);
+            broker->getSessionContext(clientId)->sendPublish(fullTopicName, message, 0, qoSLevel, true);
         } else {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
             remainingTopicName.erase(0, topicName.size() + 1);
 
             if (topicTree.contains(topicName)) {
-                topicTree.find(topicName)->second.publish(remainingTopicName, socketContext, qoSLevel);
+                topicTree.find(topicName)->second.publish(remainingTopicName, clientId, qoSLevel);
             } else if (topicName == "+") {
                 for (auto& topicTreeEntry : topicTree) {
-                    topicTreeEntry.second.publish(remainingTopicName, socketContext, qoSLevel);
+                    topicTreeEntry.second.publish(remainingTopicName, clientId, qoSLevel);
                 }
             } else if (topicName == "#") {
-                publish(socketContext, qoSLevel);
+                publish(clientId, qoSLevel);
             }
         }
     }
 
-    void RetainTree::publish(SocketContext* socketContext, uint8_t qoSLevel) {
+    void RetainTree::publish(const std::string& clientId, uint8_t qoSLevel) {
         LOG(TRACE) << "Send Publish (retained): " << fullTopicName << " - " << message << " - " << static_cast<uint16_t>(qoSLevel);
         if (!message.empty()) {
-            socketContext->sendPublish(fullTopicName, message, 0, qoSLevel, true);
+            broker->getSessionContext(clientId)->sendPublish(fullTopicName, message, 0, qoSLevel, true);
         }
 
         for (auto& [topicName, topicTree] : topicTree) {
-            topicTree.publish(socketContext, qoSLevel);
+            topicTree.publish(clientId, qoSLevel);
         }
     }
 

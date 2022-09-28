@@ -43,10 +43,10 @@ namespace mqtt::broker {
         return broker;
     }
 
-    void Broker::subscribe(const std::string& topic, mqtt::broker::SocketContext* socketContext, uint8_t qoSLevel) {
-        subscribtionTree.subscribe(topic, socketContext, qoSLevel);
+    void Broker::subscribe(const std::string& topic, const std::string& clientId, uint8_t qoSLevel) {
+        subscribtionTree.subscribe(topic, clientId, qoSLevel);
 
-        retainTree.publish(topic, socketContext, qoSLevel);
+        retainTree.publish(topic, clientId, qoSLevel);
     }
 
     void Broker::publish(const std::string& topic, const std::string& message, bool retain) {
@@ -57,12 +57,12 @@ namespace mqtt::broker {
         }
     }
 
-    void Broker::unsubscribe(const std::string& topic, mqtt::broker::SocketContext* socketContext) {
-        subscribtionTree.unsubscribe(topic, socketContext);
+    void Broker::unsubscribe(const std::string& topic, const std::string& clientId) {
+        subscribtionTree.unsubscribe(topic, clientId);
     }
 
-    void Broker::unsubscribe(mqtt::broker::SocketContext* socketContext) {
-        subscribtionTree.unsubscribe(socketContext);
+    void Broker::unsubscribe(const std::string& clientId) {
+        subscribtionTree.unsubscribe(clientId);
     }
 
     void Broker::addSession(const std::string& clientId, SocketContext* socketContext) {

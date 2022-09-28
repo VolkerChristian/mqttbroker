@@ -18,6 +18,7 @@
 
 #include "broker/SubscribtionTree.h"
 
+#include "broker/Broker.h"
 #include "broker/SocketContext.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -35,19 +36,19 @@ namespace mqtt::broker {
         : broker(broker) {
     }
 
-    void SubscribtionTree::subscribe(const std::string& fullTopicName, mqtt::broker::SocketContext* socketContext, uint8_t qoSLevel) {
-        subscribe(fullTopicName, fullTopicName, socketContext, qoSLevel);
+    void SubscribtionTree::subscribe(const std::string& fullTopicName, const std::string& clientId, uint8_t qoSLevel) {
+        subscribe(fullTopicName, fullTopicName, clientId, qoSLevel);
     }
 
     void SubscribtionTree::publish(const std::string& fullTopicName, const std::string& message) {
         publish(fullTopicName, fullTopicName, message);
     }
 
-    bool SubscribtionTree::unsubscribe(mqtt::broker::SocketContext* socketContext) {
-        subscribers.erase(socketContext);
+    bool SubscribtionTree::unsubscribe(const std::string& clientId) {
+        subscribers.erase(clientId);
 
         for (auto it = subscribtions.begin(); it != subscribtions.end();) {
-            if (it->second.unsubscribe(socketContext)) {
+            if (it->second.unsubscribe(clientId)) {
                 it = subscribtions.erase(it);
             } else {
                 ++it;
@@ -57,14 +58,14 @@ namespace mqtt::broker {
         return subscribers.empty() && subscribtions.empty();
     }
 
-    bool SubscribtionTree::unsubscribe(std::string remainingTopicName, mqtt::broker::SocketContext* socketContext) {
+    bool SubscribtionTree::unsubscribe(std::string remainingTopicName, const std::string& clientId) {
         if (remainingTopicName.empty()) {
-            subscribers.erase(socketContext);
+            subscribers.erase(clientId);
         } else {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
             remainingTopicName.erase(0, topicName.size() + 1);
 
-            if (subscribtions.contains(topicName) && subscribtions.find(topicName)->second.unsubscribe(remainingTopicName, socketContext)) {
+            if (subscribtions.contains(topicName) && subscribtions.find(topicName)->second.unsubscribe(remainingTopicName, clientId)) {
                 subscribtions.erase(topicName);
             }
         }
@@ -74,25 +75,25 @@ namespace mqtt::broker {
 
     void SubscribtionTree::subscribe(std::string remainingTopicName,
                                      const std::string& fullTopicName,
-                                     mqtt::broker::SocketContext* socketContext,
+                                     const std::string& clientId,
                                      uint8_t qoSLevel) {
         if (remainingTopicName.empty()) {
             subscribedTopicName = fullTopicName;
-            subscribers[socketContext] = qoSLevel;
+            subscribers[clientId] = qoSLevel;
         } else {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
             remainingTopicName.erase(0, topicName.size() + 1);
 
             subscribtions.insert({topicName, mqtt::broker::SubscribtionTree(broker)})
-                .first->second.subscribe(remainingTopicName, fullTopicName, socketContext, qoSLevel);
+                .first->second.subscribe(remainingTopicName, fullTopicName, clientId, qoSLevel);
         }
     }
 
     void SubscribtionTree::publish(std::string remainingTopicName, const std::string& fullTopicName, const std::string& message) {
         if (remainingTopicName.empty()) {
-            for (auto& [subscriber, qoS] : subscribers) {
+            for (auto& [clientId, qoS] : subscribers) {
                 LOG(TRACE) << "Send Publich: " << subscribedTopicName << " - " << fullTopicName << " - " << message << " - " << qoS;
-                subscriber->sendPublish(fullTopicName, message, 0, qoS, 0);
+                broker->getSessionContext(clientId)->sendPublish(fullTopicName, message, 0, qoS, 0);
             }
         } else {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
@@ -107,9 +108,9 @@ namespace mqtt::broker {
             if (subscribtions.contains("#")) {
                 const SubscribtionTree& foundSubscription = subscribtions.find("#")->second;
 
-                for (auto& [subscriber, qoS] : foundSubscription.subscribers) {
+                for (auto& [clientId, qoS] : foundSubscription.subscribers) {
                     LOG(TRACE) << "Send Publich: " << subscribedTopicName << " - " << fullTopicName << " - " << message << " - " << qoS;
-                    subscriber->sendPublish(fullTopicName, message, 0, qoS, 0);
+                    broker->getSessionContext(clientId)->sendPublish(fullTopicName, message, 0, qoS, 0);
                 }
             }
         }

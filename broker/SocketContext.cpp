@@ -35,7 +35,7 @@ namespace mqtt::broker {
 
     SocketContext::~SocketContext() {
         if (subscribtionCount > 0) {
-            broker->unsubscribe(this);
+            broker->unsubscribe(clientId);
         }
     }
 
@@ -182,7 +182,7 @@ namespace mqtt::broker {
 
         for (const iot::mqtt::Topic& topic : subscribe.getTopics()) {
             VLOG(0) << "  Topic: " << topic.getName() << ", requestedQoS: " << static_cast<uint16_t>(topic.getRequestedQoS());
-            broker->subscribe(topic.getName(), this, topic.getRequestedQoS());
+            broker->subscribe(topic.getName(), clientId, topic.getRequestedQoS());
 
             returnCodes.push_back(topic.getRequestedQoS() | 0x00 /* 0x80 */); // QoS + Success
         }
@@ -217,7 +217,7 @@ namespace mqtt::broker {
 
         for (const std::string& topic : unsubscribe.getTopics()) {
             VLOG(0) << "  Topic: " << topic;
-            broker->unsubscribe(topic, this);
+            broker->unsubscribe(topic, clientId);
         }
 
         sendUnsuback(unsubscribe.getPacketIdentifier());

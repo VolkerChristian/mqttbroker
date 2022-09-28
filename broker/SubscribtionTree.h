@@ -38,23 +38,20 @@ namespace mqtt::broker {
     public:
         explicit SubscribtionTree(mqtt::broker::Broker* broker);
 
-        void subscribe(const std::string& fullTopicName, mqtt::broker::SocketContext* socketContext, uint8_t qoSLevel);
+        void subscribe(const std::string& fullTopicName, const std::string& clientId, uint8_t qoSLevel);
 
         void publish(const std::string& fullTopicName, const std::string& message);
 
-        bool unsubscribe(mqtt::broker::SocketContext* socketContext);
+        bool unsubscribe(const std::string& clientId);
 
-        bool unsubscribe(std::string remainingTopicName, mqtt::broker::SocketContext* socketContext);
+        bool unsubscribe(std::string remainingTopicName, const std::string& clientId);
 
     private:
-        void subscribe(std::string remainingTopicName,
-                       const std::string& fullTopicName,
-                       mqtt::broker::SocketContext* socketContext,
-                       uint8_t qoSLevel);
+        void subscribe(std::string remainingTopicName, const std::string& fullTopicName, const std::string& clientId, uint8_t qoSLevel);
 
         void publish(std::string remainingTopicName, const std::string& fullTopicName, const std::string& message);
 
-        std::map<mqtt::broker::SocketContext*, uint8_t> subscribers;
+        std::map<std::string, uint8_t> subscribers;
         std::map<std::string, SubscribtionTree> subscribtions;
 
         std::string subscribedTopicName = "";
