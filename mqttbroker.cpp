@@ -34,7 +34,6 @@ int main(int argc, char* argv[]) {
     core::SNodeC::init(argc, argv);
 
     using MQTTLegacyInServer = net::in::stream::legacy::SocketServer<mqtt::broker::SharedSocketContextFactory>;
-
     using LegacyInSocketConnection = MQTTLegacyInServer::SocketConnection;
 
     MQTTLegacyInServer mqttLegacyInServer(
