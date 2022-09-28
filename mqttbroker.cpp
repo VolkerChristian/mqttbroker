@@ -48,13 +48,13 @@ int main(int argc, char* argv[]) {
             VLOG(0) << "OnDisconnected";
         });
 
-    mqttLegacyInServer.listen([](const MQTTLegacyInServer::SocketAddress& socketAddress, int errnum) -> void {
+    mqttLegacyInServer.listen([mqttLegacyInServer](const MQTTLegacyInServer::SocketAddress& socketAddress, int errnum) mutable -> void {
         if (errnum < 0) {
             PLOG(ERROR) << "OnError";
         } else if (errnum > 0) {
             PLOG(ERROR) << "OnError: " << socketAddress.toString();
         } else {
-            VLOG(0) << "mqttbroker listening on " << socketAddress.toString();
+            VLOG(0) << mqttLegacyInServer.getConfig().getName() << " listening on " << socketAddress.toString();
         }
     });
 
@@ -81,13 +81,13 @@ int main(int argc, char* argv[]) {
 
     mqttTLSInServer.addSniCerts(sniCerts);
 
-    mqttTLSInServer.listen([](const MQTTTLSInServer::SocketAddress& socketAddress, int errnum) -> void {
+    mqttTLSInServer.listen([mqttTLSInServer](const MQTTTLSInServer::SocketAddress& socketAddress, int errnum) mutable -> void {
         if (errnum < 0) {
             PLOG(ERROR) << "OnError";
         } else if (errnum > 0) {
             PLOG(ERROR) << "OnError: " << socketAddress.toString();
         } else {
-            VLOG(0) << "mqttbroker listening on " << socketAddress.toString();
+            VLOG(0) << mqttTLSInServer.getConfig().getName() << " listening on " << socketAddress.toString();
         }
     });
 
@@ -106,15 +106,16 @@ int main(int argc, char* argv[]) {
             VLOG(0) << "OnDisconnected";
         });
 
-    mqttLegacyUnServer.listen([](const LegacyUnSocketConnection::SocketAddress& socketAddress, int errnum) -> void {
-        if (errnum < 0) {
-            PLOG(ERROR) << "OnError";
-        } else if (errnum > 0) {
-            PLOG(ERROR) << "OnError: " << socketAddress.toString();
-        } else {
-            VLOG(0) << "mqttbroker listening on " << socketAddress.toString();
-        }
-    });
+    mqttLegacyUnServer.listen(
+        [mqttLegacyUnServer](const LegacyUnSocketConnection::SocketAddress& socketAddress, int errnum) mutable -> void {
+            if (errnum < 0) {
+                PLOG(ERROR) << "OnError";
+            } else if (errnum > 0) {
+                PLOG(ERROR) << "OnError: " << socketAddress.toString();
+            } else {
+                VLOG(0) << mqttLegacyUnServer.getConfig().getName() << " listening on " << socketAddress.toString();
+            }
+        });
 
     return core::SNodeC::start();
 }
