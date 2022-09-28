@@ -19,7 +19,6 @@
 #include "broker/RetainTree.h"
 
 #include "broker/Broker.h"
-#include "broker/SocketContext.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -58,8 +57,10 @@ namespace mqtt::broker {
 
     void RetainTree::publish(std::string remainingTopicName, const std::string& clientId, uint8_t qoSLevel) {
         if (remainingTopicName.empty() && !message.empty()) {
-            LOG(TRACE) << "Send Publish (retained): " << fullTopicName << " - " << message << " - " << static_cast<uint16_t>(qoSLevel);
-            broker->getSessionContext(clientId)->sendPublish(fullTopicName, message, 0, qoSLevel, true);
+            LOG(TRACE) << "Found retained message: " << fullTopicName << " - " << message << " - " << static_cast<uint16_t>(qoSLevel);
+            LOG(TRACE) << "Distribute message ...";
+            broker->sendPublish(clientId, fullTopicName, message, false, qoSLevel, true);
+            LOG(TRACE) << "... completed!";
         } else {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
             remainingTopicName.erase(0, topicName.size() + 1);
@@ -77,9 +78,11 @@ namespace mqtt::broker {
     }
 
     void RetainTree::publish(const std::string& clientId, uint8_t qoSLevel) {
-        LOG(TRACE) << "Send Publish (retained): " << fullTopicName << " - " << message << " - " << static_cast<uint16_t>(qoSLevel);
         if (!message.empty()) {
-            broker->getSessionContext(clientId)->sendPublish(fullTopicName, message, 0, qoSLevel, true);
+            LOG(TRACE) << "Found retained message: " << fullTopicName << " - " << message << " - " << static_cast<uint16_t>(qoSLevel);
+            LOG(TRACE) << "Distribute message ...";
+            broker->sendPublish(clientId, fullTopicName, message, false, qoSLevel, true);
+            LOG(TRACE) << "... completed!";
         }
 
         for (auto& [topicName, topicTree] : topicTree) {

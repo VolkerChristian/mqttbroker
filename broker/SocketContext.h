@@ -40,7 +40,8 @@ namespace mqtt::broker {
     class SocketContext : public iot::mqtt::SocketContext {
     public:
         explicit SocketContext(core::socket::SocketConnection* socketConnection, std::shared_ptr<mqtt::broker::Broker> broker);
-        ~SocketContext() override;
+
+        ~SocketContext();
 
     private:
         void onConnect(const iot::mqtt::packets::Connect& connect) override;

@@ -19,7 +19,6 @@
 #include "broker/SubscribtionTree.h"
 
 #include "broker/Broker.h"
-#include "broker/SocketContext.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -34,6 +33,16 @@ namespace mqtt::broker {
 
     SubscribtionTree::SubscribtionTree(Broker* broker)
         : broker(broker) {
+    }
+
+    void SubscribtionTree::publishRetained(const std::string& clientId) {
+        if (subscribers.contains(clientId) && !subscribedTopicName.empty()) {
+            broker->sendRetained(clientId, subscribedTopicName, subscribers[clientId]);
+        }
+
+        for (auto& [topicName, subscribtion] : subscribtions) {
+            subscribtion.publishRetained(clientId);
+        }
     }
 
     void SubscribtionTree::subscribe(const std::string& fullTopicName, const std::string& clientId, uint8_t qoSLevel) {
@@ -92,8 +101,11 @@ namespace mqtt::broker {
     void SubscribtionTree::publish(std::string remainingTopicName, const std::string& fullTopicName, const std::string& message) {
         if (remainingTopicName.empty()) {
             for (auto& [clientId, qoS] : subscribers) {
-                LOG(TRACE) << "Send Publich: " << subscribedTopicName << " - " << fullTopicName << " - " << message << " - " << qoS;
-                broker->getSessionContext(clientId)->sendPublish(fullTopicName, message, 0, qoS, 0);
+                LOG(TRACE) << "Found Match: " << subscribedTopicName << " - " << fullTopicName << " - " << message << " - "
+                           << static_cast<uint16_t>(qoS);
+                LOG(TRACE) << "Distribute Publish ...";
+                broker->sendPublish(clientId, fullTopicName, message, false, qoS, false);
+                LOG(TRACE) << "... completed!";
             }
         } else {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
@@ -109,8 +121,11 @@ namespace mqtt::broker {
                 const SubscribtionTree& foundSubscription = subscribtions.find("#")->second;
 
                 for (auto& [clientId, qoS] : foundSubscription.subscribers) {
-                    LOG(TRACE) << "Send Publich: " << subscribedTopicName << " - " << fullTopicName << " - " << message << " - " << qoS;
-                    broker->getSessionContext(clientId)->sendPublish(fullTopicName, message, 0, qoS, 0);
+                    LOG(TRACE) << "Found Match: " << subscribedTopicName << " - " << fullTopicName << " - " << message << " - "
+                               << static_cast<uint16_t>(qoS);
+                    LOG(TRACE) << "Distribute Publish ...";
+                    broker->sendPublish(clientId, fullTopicName, message, false, qoS, false);
+                    LOG(TRACE) << "... completed!";
                 }
             }
         }

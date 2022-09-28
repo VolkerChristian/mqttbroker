@@ -21,7 +21,6 @@
 
 namespace mqtt::broker {
     class Broker;
-    class SocketContext;
 } // namespace mqtt::broker
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

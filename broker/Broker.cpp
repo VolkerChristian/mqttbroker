@@ -18,7 +18,11 @@
 
 #include "broker/Broker.h"
 
+#include "broker/SocketContext.h"
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+#include "log/Logger.h"
 
 #include <fstream>
 
@@ -65,12 +69,43 @@ namespace mqtt::broker {
         subscribtionTree.unsubscribe(clientId);
     }
 
-    void Broker::addSession(const std::string& clientId, SocketContext* socketContext) {
+    void Broker::newSession(const std::string& clientId, SocketContext* socketContext) {
+        VLOG(0) << "New Session: " << clientId << " - " << socketContext;
         sessions[clientId] = socketContext;
     }
 
+    void Broker::replaceSession(const std::string& clientId, SocketContext* socketContext) {
+        VLOG(0) << "Replace Session: " << clientId << " - " << socketContext;
+        sessions[clientId] = socketContext;
+
+        subscribtionTree.publishRetained(clientId);
+    }
+
     void Broker::deleteSession(const std::string& clientId) {
+        VLOG(0) << "DELETE SESSION: " << clientId;
         sessions.erase(clientId);
+    }
+
+    bool Broker::hasSession(const std::string& clientId) {
+        return sessions.contains(clientId);
+    }
+
+    void Broker::sendPublish(const std::string& clientId,
+                             const std::string& fullTopicName,
+                             const std::string& message,
+                             bool dup,
+                             uint8_t qoSLevel,
+                             bool retain) {
+        if (sessions.contains(clientId) && sessions[clientId] != nullptr) {
+            LOG(TRACE) << "Send Publich: " << clientId << ": " << fullTopicName << " - " << message << " - "
+                       << static_cast<uint16_t>(qoSLevel);
+
+            sessions[clientId]->sendPublish(fullTopicName, message, dup, qoSLevel, retain);
+        }
+    }
+
+    void Broker::sendRetained(const std::string& clientId, const std::string& topicName, uint8_t qoSLevel) {
+        retainTree.publish(topicName, clientId, qoSLevel);
     }
 
     SocketContext* Broker::getSessionContext(const std::string& clientId) {

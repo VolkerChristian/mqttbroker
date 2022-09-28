@@ -31,12 +31,22 @@ namespace mqtt::broker {
     SocketContext::SocketContext(core::socket::SocketConnection* socketConnection, std::shared_ptr<Broker> broker)
         : iot::mqtt::SocketContext(socketConnection)
         , broker(broker) {
+        if (broker->hasSession(clientId) && broker->getSessionContext(clientId) != nullptr) {
+            VLOG(0) << "#############################";
+            if (cleanSession) {
+                if (subscribtionCount > 0) {
+                    broker->unsubscribe(clientId);
+                }
+                broker->deleteSession(clientId);
+            } else {
+                broker->replaceSession(clientId, nullptr);
+            }
+
+            broker->publish(willTopic, willMessage, willRetain);
+        }
     }
 
     SocketContext::~SocketContext() {
-        if (subscribtionCount > 0) {
-            broker->unsubscribe(clientId);
-        }
     }
 
     void SocketContext::onConnect(const iot::mqtt::packets::Connect& connect) {
@@ -83,9 +93,22 @@ namespace mqtt::broker {
             VLOG(0) << "Password: " << password;
         }
 
-        broker->addSession(clientId, this);
+        if (broker->hasSession(clientId)) {
+            if (cleanSession) {
+                broker->unsubscribe(clientId);
+            }
+            if (broker->getSessionContext(clientId) == nullptr) {
+                sendConnack(version <= 0x04 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, 1); // Version | 0x04 = 3.1.1
 
-        sendConnack(connect.getVersion() <= 0x04 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION); // Version | 0x04 = 3.1.1
+                broker->replaceSession(clientId, this);
+            } else { // Error ClientId already used
+                close();
+            }
+        } else {
+            sendConnack(version <= 0x04 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, 0); // Version | 0x04 = 3.1.1
+
+            broker->newSession(clientId, this);
+        }
     }
 
     void SocketContext::onConnack(const iot::mqtt::packets::Connack& connack) {
@@ -262,7 +285,14 @@ namespace mqtt::broker {
         VLOG(0) << "Reserved: " << static_cast<uint16_t>(disconnect.getReserved());
         VLOG(0) << "RemainingLength: " << disconnect.getRemainingLength();
 
-        broker->deleteSession(clientId);
+        if (cleanSession) {
+            if (subscribtionCount > 0) {
+                broker->unsubscribe(clientId);
+            }
+            broker->deleteSession(clientId);
+        } else {
+            broker->replaceSession(clientId, nullptr);
+        }
 
         close();
     }

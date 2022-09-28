@@ -21,7 +21,6 @@
 
 namespace mqtt::broker {
     class Broker;
-    class SocketContext;
 } // namespace mqtt::broker
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -37,6 +36,8 @@ namespace mqtt::broker {
     class SubscribtionTree {
     public:
         explicit SubscribtionTree(mqtt::broker::Broker* broker);
+
+        void publishRetained(const std::string& clientId);
 
         void subscribe(const std::string& fullTopicName, const std::string& clientId, uint8_t qoSLevel);
 
