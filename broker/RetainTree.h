@@ -37,12 +37,12 @@ namespace mqtt::broker {
     public:
         explicit RetainTree(mqtt::broker::Broker* broker);
 
-        void retain(const std::string& fullTopicName, const std::string& value);
+        void retain(const std::string& fullTopicName, const std::string& message);
 
         void publish(std::string remainingTopicName, const std::string& clientId, uint8_t qoSLevel);
 
     private:
-        bool retain(const std::string& fullTopicName, std::string remainingTopicName, const std::string& value);
+        bool retain(const std::string& fullTopicName, std::string remainingTopicName, const std::string& message);
 
         void publish(const std::string& clientId, uint8_t qoSLevel);
 

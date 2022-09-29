@@ -75,11 +75,13 @@ namespace mqtt::broker {
 
     void Broker::newSession(const std::string& clientId, SocketContext* socketContext) {
         LOG(TRACE) << "New session: " << clientId << " - " << socketContext;
+
         sessions[clientId] = socketContext;
     }
 
     void Broker::renewSession(const std::string& clientId, SocketContext* socketContext) {
         LOG(TRACE) << "Attach session: " << clientId << " - " << socketContext;
+
         sessions[clientId] = socketContext;
 
         if (socketContext != nullptr) {
@@ -89,11 +91,13 @@ namespace mqtt::broker {
 
     void Broker::retainSession(const std::string& clientId) {
         LOG(TRACE) << "Retain session: " << clientId;
+
         sessions[clientId] = nullptr;
     }
 
     void Broker::deleteSession(const std::string& clientId) {
         LOG(TRACE) << "Delete session: " << clientId;
+
         sessions.erase(clientId);
     }
 
