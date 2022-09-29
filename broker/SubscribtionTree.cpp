@@ -37,7 +37,7 @@ namespace mqtt::broker {
 
     void SubscribtionTree::publishRetained(const std::string& clientId) {
         if (subscribers.contains(clientId) && !subscribedTopicName.empty()) {
-            broker->sendRetained(clientId, subscribedTopicName, subscribers[clientId]);
+            broker->sendRetained(subscribedTopicName, clientId, subscribers[clientId]);
         }
 
         for (auto& [topicName, subscribtion] : subscribtions) {
@@ -45,12 +45,12 @@ namespace mqtt::broker {
         }
     }
 
-    void SubscribtionTree::subscribe(const std::string& fullTopicName, const std::string& clientId, uint8_t qoSLevel) {
-        subscribe(fullTopicName, fullTopicName, clientId, qoSLevel);
+    void SubscribtionTree::subscribe(const std::string& fullTopicName, const std::string& clientId, uint8_t clientQoSLevel) {
+        subscribe(fullTopicName, fullTopicName, clientId, clientQoSLevel);
     }
 
-    void SubscribtionTree::publish(const std::string& fullTopicName, const std::string& message) {
-        publish(fullTopicName, fullTopicName, message);
+    void SubscribtionTree::publish(const std::string& fullTopicName, const std::string& message, uint8_t qoSLevel, bool retained) {
+        publish(fullTopicName, fullTopicName, message, qoSLevel, retained);
     }
 
     bool SubscribtionTree::unsubscribe(const std::string& clientId) {
@@ -85,26 +85,27 @@ namespace mqtt::broker {
     void SubscribtionTree::subscribe(std::string remainingTopicName,
                                      const std::string& fullTopicName,
                                      const std::string& clientId,
-                                     uint8_t qoSLevel) {
+                                     uint8_t clientQoSLevel) {
         if (remainingTopicName.empty()) {
             subscribedTopicName = fullTopicName;
-            subscribers[clientId] = qoSLevel;
+            subscribers[clientId] = clientQoSLevel;
         } else {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
             remainingTopicName.erase(0, topicName.size() + 1);
 
             subscribtions.insert({topicName, mqtt::broker::SubscribtionTree(broker)})
-                .first->second.subscribe(remainingTopicName, fullTopicName, clientId, qoSLevel);
+                .first->second.subscribe(remainingTopicName, fullTopicName, clientId, clientQoSLevel);
         }
     }
 
-    void SubscribtionTree::publish(std::string remainingTopicName, const std::string& fullTopicName, const std::string& message) {
+    void SubscribtionTree::publish(
+        std::string remainingTopicName, const std::string& fullTopicName, const std::string& message, uint8_t qoSLevel, bool retained) {
         if (remainingTopicName.empty()) {
-            for (auto& [clientId, qoS] : subscribers) {
+            for (auto& [clientId, clientQoSLevel] : subscribers) {
                 LOG(TRACE) << "Found Match: " << subscribedTopicName << " - " << fullTopicName << " - " << message << " - "
-                           << static_cast<uint16_t>(qoS);
+                           << static_cast<uint16_t>(clientQoSLevel);
                 LOG(TRACE) << "Distribute Publish ...";
-                broker->sendPublish(clientId, fullTopicName, message, false, qoS, false);
+                broker->sendPublish(clientId, fullTopicName, message, false, qoSLevel, retained, clientQoSLevel);
                 LOG(TRACE) << "... completed!";
             }
         } else {
@@ -112,19 +113,19 @@ namespace mqtt::broker {
             remainingTopicName.erase(0, topicName.size() + 1);
 
             if (subscribtions.contains(topicName)) {
-                subscribtions.find(topicName)->second.publish(remainingTopicName, fullTopicName, message);
+                subscribtions.find(topicName)->second.publish(remainingTopicName, fullTopicName, message, qoSLevel, retained);
             }
             if (subscribtions.contains("+")) {
-                subscribtions.find("+")->second.publish(remainingTopicName, fullTopicName, message);
+                subscribtions.find("+")->second.publish(remainingTopicName, fullTopicName, message, qoSLevel, retained);
             }
             if (subscribtions.contains("#")) {
                 const SubscribtionTree& foundSubscription = subscribtions.find("#")->second;
 
-                for (auto& [clientId, qoS] : foundSubscription.subscribers) {
+                for (auto& [clientId, clientQoSLevel] : foundSubscription.subscribers) {
                     LOG(TRACE) << "Found Match: " << subscribedTopicName << " - " << fullTopicName << " - " << message << " - "
-                               << static_cast<uint16_t>(qoS);
+                               << static_cast<uint16_t>(clientQoSLevel);
                     LOG(TRACE) << "Distribute Publish ...";
-                    broker->sendPublish(clientId, fullTopicName, message, false, qoS, false);
+                    broker->sendPublish(clientId, fullTopicName, message, false, qoSLevel, retained, clientQoSLevel);
                     LOG(TRACE) << "... completed!";
                 }
             }

@@ -37,7 +37,7 @@ namespace mqtt::broker {
         releaseSession();
 
         if (willFlag) {
-            broker->publish(willTopic, willMessage, willRetain);
+            broker->publish(willTopic, willMessage, willQoS, willRetain);
         }
     }
 
@@ -120,9 +120,18 @@ namespace mqtt::broker {
             case 2:
                 sendPubrec(publish.getPacketIdentifier());
                 break;
+            case 3:
+                LOG(TRACE) << "Received publish with QoS-Level 3 ... closing";
+                close();
+                break;
         }
 
-        broker->publish(publish.getTopic(), publish.getMessage(), publish.getRetain());
+        if (publish.getQoSLevel() < 3) {
+            broker->publish(publish.getTopic(), publish.getMessage(), publish.getQoSLevel());
+            if (publish.getRetain()) {
+                broker->retain(publish.getTopic(), publish.getMessage(), publish.getQoSLevel());
+            }
+        }
     }
 
     void SocketContext::onPuback(const iot::mqtt::packets::Puback& puback) {
@@ -300,6 +309,8 @@ namespace mqtt::broker {
             } else {
                 broker->retainSession(clientId);
             }
+        } else {
+            willFlag = false;
         }
     }
 

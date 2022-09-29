@@ -24,6 +24,7 @@
 
 #include "log/Logger.h"
 
+#include <algorithm>
 #include <fstream>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
@@ -47,18 +48,18 @@ namespace mqtt::broker {
         return broker;
     }
 
-    void Broker::subscribe(const std::string& topic, const std::string& clientId, uint8_t qoSLevel) {
-        subscribtionTree.subscribe(topic, clientId, qoSLevel);
+    void Broker::subscribe(const std::string& topic, const std::string& clientId, uint8_t clientQoSLevel) {
+        subscribtionTree.subscribe(topic, clientId, clientQoSLevel);
 
-        retainTree.publish(topic, clientId, qoSLevel);
+        retainTree.publish(topic, clientId, clientQoSLevel);
     }
 
-    void Broker::publish(const std::string& topic, const std::string& message, bool retain) {
-        subscribtionTree.publish(topic, message);
+    void Broker::publish(const std::string& topic, const std::string& message, uint8_t qoSLevel, bool retain) {
+        subscribtionTree.publish(topic, message, qoSLevel, retain);
+    }
 
-        if (retain) {
-            retainTree.retain(topic, message);
-        }
+    void Broker::retain(const std::string& topic, const std::string& message, uint8_t qoSLevel) {
+        retainTree.retain(topic, message, qoSLevel);
     }
 
     void Broker::unsubscribe(const std::string& topic, const std::string& clientId) {
@@ -86,6 +87,7 @@ namespace mqtt::broker {
 
         if (socketContext != nullptr) {
             subscribtionTree.publishRetained(clientId);
+            // send queued messages
         }
     }
 
@@ -106,17 +108,24 @@ namespace mqtt::broker {
                              const std::string& message,
                              bool dup,
                              uint8_t qoSLevel,
-                             bool retain) {
-        if (sessions.contains(clientId) && sessions[clientId] != nullptr) {
-            LOG(TRACE) << "Send Publish: " << clientId << ": " << fullTopicName << " - " << message << " - "
-                       << static_cast<uint16_t>(qoSLevel);
+                             bool retain,
+                             uint8_t clientQoSLevel) {
+        if (sessions.contains(clientId)) {
+            if (sessions[clientId] != nullptr) { // client online
+                LOG(TRACE) << "Send Publish: " << clientId << ": " << fullTopicName << " - " << message << " - "
+                           << static_cast<uint16_t>(std::min(clientQoSLevel, qoSLevel));
 
-            sessions[clientId]->sendPublish(fullTopicName, message, dup, qoSLevel, retain);
+                sessions[clientId]->sendPublish(fullTopicName, message, dup, std::min(qoSLevel, clientQoSLevel), retain);
+            } else if (qoSLevel > 0) { // only for QoS = 1 and 2
+                // Queue Messages for offline clients
+            } else {
+                // Discard all queued messages and use current message as the only one queued message
+            }
         }
     }
 
-    void Broker::sendRetained(const std::string& clientId, const std::string& topicName, uint8_t qoSLevel) {
-        retainTree.publish(topicName, clientId, qoSLevel);
+    void Broker::sendRetained(const std::string& topic, const std::string& clientId, uint8_t clientQoSLevel) {
+        retainTree.publish(topic, clientId, clientQoSLevel);
     }
 
     SocketContext* Broker::getSessionContext(const std::string& clientId) {

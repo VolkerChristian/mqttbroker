@@ -34,20 +34,23 @@ namespace mqtt::broker {
         : broker(broker) {
     }
 
-    void RetainTree::retain(const std::string& fullTopicName, const std::string& message) {
-        retain(fullTopicName, fullTopicName, message);
+    void RetainTree::retain(const std::string& fullTopicName, const std::string& message, uint8_t qoSLevel) {
+        retain(fullTopicName, fullTopicName, message, qoSLevel);
     }
 
-    bool RetainTree::retain(const std::string& fullTopicName, std::string remainingTopicName, const std::string& message) {
+    bool
+    RetainTree::retain(const std::string& fullTopicName, std::string remainingTopicName, const std::string& message, uint8_t qoSLevel) {
         if (remainingTopicName.empty()) {
             LOG(TRACE) << "Retaining: " << fullTopicName << " - " << message;
             this->fullTopicName = fullTopicName;
             this->message = message;
+            this->qoSLevel = qoSLevel;
         } else {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
             remainingTopicName.erase(0, topicName.size() + 1);
 
-            if (topicTree.insert({topicName, RetainTree(broker)}).first->second.retain(fullTopicName, remainingTopicName, message)) {
+            if (topicTree.insert({topicName, RetainTree(broker)})
+                    .first->second.retain(fullTopicName, remainingTopicName, message, qoSLevel)) {
                 topicTree.erase(topicName);
             }
         }
@@ -55,38 +58,38 @@ namespace mqtt::broker {
         return this->message.empty() && topicTree.empty();
     }
 
-    void RetainTree::publish(std::string remainingTopicName, const std::string& clientId, uint8_t qoSLevel) {
+    void RetainTree::publish(std::string remainingTopicName, const std::string& clientId, uint8_t clientQoSLevel) {
         if (remainingTopicName.empty() && !message.empty()) {
             LOG(TRACE) << "Found retained message: " << fullTopicName << " - " << message << " - " << static_cast<uint16_t>(qoSLevel);
             LOG(TRACE) << "Distribute message ...";
-            broker->sendPublish(clientId, fullTopicName, message, false, qoSLevel, true);
+            broker->sendPublish(clientId, fullTopicName, message, false, qoSLevel, true, clientQoSLevel);
             LOG(TRACE) << "... completed!";
         } else {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
             remainingTopicName.erase(0, topicName.size() + 1);
 
             if (topicTree.contains(topicName)) {
-                topicTree.find(topicName)->second.publish(remainingTopicName, clientId, qoSLevel);
+                topicTree.find(topicName)->second.publish(remainingTopicName, clientId, clientQoSLevel);
             } else if (topicName == "+") {
                 for (auto& topicTreeEntry : topicTree) {
-                    topicTreeEntry.second.publish(remainingTopicName, clientId, qoSLevel);
+                    topicTreeEntry.second.publish(remainingTopicName, clientId, clientQoSLevel);
                 }
             } else if (topicName == "#") {
-                publish(clientId, qoSLevel);
+                publish(clientId, clientQoSLevel);
             }
         }
     }
 
-    void RetainTree::publish(const std::string& clientId, uint8_t qoSLevel) {
+    void RetainTree::publish(const std::string& clientId, uint8_t clientQoSLevel) {
         if (!message.empty()) {
             LOG(TRACE) << "Found retained message: " << fullTopicName << " - " << message << " - " << static_cast<uint16_t>(qoSLevel);
             LOG(TRACE) << "Distribute message ...";
-            broker->sendPublish(clientId, fullTopicName, message, false, qoSLevel, true);
+            broker->sendPublish(clientId, fullTopicName, message, false, qoSLevel, true, clientQoSLevel);
             LOG(TRACE) << "... completed!";
         }
 
         for (auto& [topicName, topicTree] : topicTree) {
-            topicTree.publish(clientId, qoSLevel);
+            topicTree.publish(clientId, clientQoSLevel);
         }
     }
 

@@ -38,14 +38,14 @@ namespace mqtt::broker {
 namespace mqtt::broker {
 
     class Broker {
-    private:
     public:
         Broker();
 
         static std::shared_ptr<Broker> instance();
 
-        void subscribe(const std::string& topic, const std::string& clientId, uint8_t qoSLevel);
-        void publish(const std::string& topic, const std::string& message, bool retain);
+        void subscribe(const std::string& topic, const std::string& clientId, uint8_t clientQoSLevel);
+        void publish(const std::string& topic, const std::string& message, uint8_t qoSLevel, bool retain = false);
+        void retain(const std::string& topic, const std::string& message, uint8_t qoSLevel);
         void unsubscribe(const std::string& topic, const std::string& clientId);
         void unsubscribe(const std::string& clientId);
 
@@ -60,9 +60,10 @@ namespace mqtt::broker {
                          const std::string& message,
                          bool dup,
                          uint8_t qoSLevel,
-                         bool retain);
+                         bool retain,
+                         uint8_t clientQoSLevel);
 
-        void sendRetained(const std::string& clientId, const std::string& topicName, uint8_t qoSLevel);
+        void sendRetained(const std::string& topic, const std::string& clientId, uint8_t clientQoSLevel);
 
         mqtt::broker::SocketContext* getSessionContext(const std::string& clientId);
 
