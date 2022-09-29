@@ -65,7 +65,7 @@ namespace mqtt::broker {
 
         void sendRetained(const std::string& topic, const std::string& clientId, uint8_t clientQoSLevel);
 
-        mqtt::broker::SocketContext* getSessionContext(const std::string& clientId);
+        mqtt::broker::SocketContext* getSocketContext(const std::string& clientId);
 
         std::string getRandomClientId();
 

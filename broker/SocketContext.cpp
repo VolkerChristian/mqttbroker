@@ -49,7 +49,7 @@ namespace mqtt::broker {
             sendConnack(level <= MQTT_VERSION_3_1_1 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, MQTT_SESSION_NEW);
 
             broker->newSession(clientId, this);
-        } else if (broker->getSessionContext(clientId) == nullptr) {
+        } else if (broker->getSocketContext(clientId) == nullptr) {
             if (cleanSession) {
                 broker->unsubscribe(clientId);
             }

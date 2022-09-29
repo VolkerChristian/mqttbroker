@@ -126,7 +126,7 @@ namespace mqtt::broker {
         retainTree.publish(topic, clientId, clientQoSLevel);
     }
 
-    SocketContext* Broker::getSessionContext(const std::string& clientId) {
+    SocketContext* Broker::getSocketContext(const std::string& clientId) {
         return sessions[clientId];
     }
 
