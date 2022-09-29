@@ -48,10 +48,10 @@ namespace mqtt::broker {
         return broker;
     }
 
-    void Broker::subscribe(const std::string& topic, const std::string& clientId, uint8_t clientQoSLevel) {
-        subscribtionTree.subscribe(topic, clientId, clientQoSLevel);
+    void Broker::subscribe(const std::string& topic, const std::string& clientId, uint8_t suscribedQoSLevel) {
+        subscribtionTree.subscribe(topic, clientId, suscribedQoSLevel);
 
-        retainTree.publish(topic, clientId, clientQoSLevel);
+        retainTree.publish(topic, clientId, suscribedQoSLevel);
     }
 
     void Broker::publish(const std::string& topic, const std::string& message, uint8_t qoSLevel, bool retain) {
@@ -84,11 +84,9 @@ namespace mqtt::broker {
         LOG(TRACE) << "Attach session: " << clientId << " - " << socketContext;
 
         sessions[clientId] = socketContext;
+        subscribtionTree.publishRetained(clientId);
 
-        if (socketContext != nullptr) {
-            subscribtionTree.publishRetained(clientId);
-            // send queued messages
-        }
+        // TODO: send queued messages
     }
 
     void Broker::retainSession(const std::string& clientId) {
@@ -132,7 +130,7 @@ namespace mqtt::broker {
         return sessions[clientId];
     }
 
-    std::string Broker::getRandomClientUUID() {
+    std::string Broker::getRandomClientId() {
         char uuid[UUID_LEN];
 
         std::ifstream file("/proc/sys/kernel/random/uuid");
