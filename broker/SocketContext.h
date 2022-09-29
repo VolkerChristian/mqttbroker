@@ -44,6 +44,9 @@ namespace mqtt::broker {
         ~SocketContext() override;
 
     private:
+        void initSession();
+        void releaseSession();
+
         void onConnect(const iot::mqtt::packets::Connect& connect) override;
         void onConnack(const iot::mqtt::packets::Connack& connack) override;
         void onPublish(const iot::mqtt::packets::Publish& publish) override;
@@ -59,25 +62,29 @@ namespace mqtt::broker {
         void onPingresp(const iot::mqtt::packets::Pingresp& pingresp) override;
         void onDisconnect(const iot::mqtt::packets::Disconnect& disconnect) override;
 
-        void initSession();
-        void releaseSession();
-
         uint64_t subscribtionCount = 0;
 
         std::shared_ptr<mqtt::broker::Broker> broker;
 
+        // V-Header
         std::string protocol;
-        uint8_t version = 0;
-        uint8_t flags = 0;
+        uint8_t level = 0;
+        uint8_t connectFlags = 0;
         uint16_t keepAlive = 0;
+
+        // Payload
         std::string clientId;
-        bool willFlag = false;
         std::string willTopic;
         std::string willMessage;
-        uint8_t willQoS = 0;
-        bool willRetain = false;
         std::string username;
         std::string password;
+
+        // Derived from flags
+        bool usernameFlag = false;
+        bool passwordFlag = false;
+        bool willRetain = false;
+        uint8_t willQoS = 0;
+        bool willFlag = false;
         bool cleanSession = false;
     };
 
