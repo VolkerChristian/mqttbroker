@@ -49,10 +49,11 @@ namespace mqtt::broker {
         void unsubscribe(const std::string& topic, const std::string& clientId);
         void unsubscribe(const std::string& clientId);
 
-        void newSession(const std::string& clientId, mqtt::broker::SocketContext* socketContext);
-        void replaceSession(const std::string& clientId, mqtt::broker::SocketContext* socketContext);
-        void deleteSession(const std::string& clinetId);
         bool hasSession(const std::string& clientId);
+        void newSession(const std::string& clientId, mqtt::broker::SocketContext* socketContext);
+        void renewSession(const std::string& clientId, mqtt::broker::SocketContext* socketContext);
+        void retainSession(const std::string& clientId);
+        void deleteSession(const std::string& clinetId);
 
         void sendPublish(const std::string& clientId,
                          const std::string& fullTopicName,
