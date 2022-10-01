@@ -35,13 +35,13 @@ namespace mqtt::broker {
         : broker(broker) {
     }
 
-    void SubscribtionTree::publishRetainedMessages(const std::string& clientId) {
+    void SubscribtionTree::publishRetained(const std::string& clientId) {
         if (subscribers.contains(clientId) && !subscribedTopicName.empty()) {
-            broker->sendRetainedMessages(subscribedTopicName, clientId, subscribers[clientId]);
+            broker->publishRetained(subscribedTopicName, clientId, subscribers[clientId]);
         }
 
         for (auto& [topicName, subscribtion] : subscribtions) {
-            subscribtion.publishRetainedMessages(clientId);
+            subscribtion.publishRetained(clientId);
         }
     }
 

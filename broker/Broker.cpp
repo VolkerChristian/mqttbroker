@@ -51,7 +51,7 @@ namespace mqtt::broker {
     void Broker::subscribe(const std::string& topic, const std::string& clientId, uint8_t suscribedQoSLevel) {
         subscribtionTree.subscribe(topic, clientId, suscribedQoSLevel);
 
-        retainTree.publishRetainedMessages(topic, clientId, suscribedQoSLevel);
+        retainTree.publish(topic, clientId, suscribedQoSLevel);
     }
 
     void Broker::publish(const std::string& topic, const std::string& message, uint8_t qoSLevel, bool retain) {
@@ -88,7 +88,7 @@ namespace mqtt::broker {
         LOG(TRACE) << "Attach session: " << clientId << " - " << socketContext;
 
         sessions[clientId] = socketContext;
-        subscribtionTree.publishRetainedMessages(clientId);
+        subscribtionTree.publishRetained(clientId);
 
         // TODO: send queued messages
     }
@@ -129,8 +129,8 @@ namespace mqtt::broker {
         }
     }
 
-    void Broker::sendRetainedMessages(const std::string& topic, const std::string& clientId, uint8_t clientQoSLevel) {
-        retainTree.publishRetainedMessages(topic, clientId, clientQoSLevel);
+    void Broker::publishRetained(const std::string& topic, const std::string& clientId, uint8_t clientQoSLevel) {
+        retainTree.publish(topic, clientId, clientQoSLevel);
     }
 
     SocketContext* Broker::getSocketContext(const std::string& clientId) {

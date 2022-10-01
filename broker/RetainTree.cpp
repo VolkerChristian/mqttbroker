@@ -58,7 +58,7 @@ namespace mqtt::broker {
         return this->message.empty() && topicTree.empty();
     }
 
-    void RetainTree::publishRetainedMessages(std::string remainingTopicName, const std::string& clientId, uint8_t clientQoSLevel) {
+    void RetainTree::publish(std::string remainingTopicName, const std::string& clientId, uint8_t clientQoSLevel) {
         if (remainingTopicName.empty() && !message.empty()) {
             LOG(TRACE) << "Found retained message: " << fullTopicName << " - " << message << " - " << static_cast<uint16_t>(qoSLevel);
             LOG(TRACE) << "Distribute message ...";
@@ -69,18 +69,18 @@ namespace mqtt::broker {
             remainingTopicName.erase(0, topicName.size() + 1);
 
             if (topicTree.contains(topicName)) {
-                topicTree.find(topicName)->second.publishRetainedMessages(remainingTopicName, clientId, clientQoSLevel);
+                topicTree.find(topicName)->second.publish(remainingTopicName, clientId, clientQoSLevel);
             } else if (topicName == "+") {
                 for (auto& topicTreeEntry : topicTree) {
-                    topicTreeEntry.second.publishRetainedMessages(remainingTopicName, clientId, clientQoSLevel);
+                    topicTreeEntry.second.publish(remainingTopicName, clientId, clientQoSLevel);
                 }
             } else if (topicName == "#") {
-                publishRetainedMessages(clientId, clientQoSLevel);
+                publish(clientId, clientQoSLevel);
             }
         }
     }
 
-    void RetainTree::publishRetainedMessages(const std::string& clientId, uint8_t clientQoSLevel) {
+    void RetainTree::publish(const std::string& clientId, uint8_t clientQoSLevel) {
         if (!message.empty()) {
             LOG(TRACE) << "Found retained message: " << fullTopicName << " - " << message << " - " << static_cast<uint16_t>(qoSLevel);
             LOG(TRACE) << "Distribute message ...";
@@ -89,7 +89,7 @@ namespace mqtt::broker {
         }
 
         for (auto& [topicName, topicTree] : topicTree) {
-            topicTree.publishRetainedMessages(clientId, clientQoSLevel);
+            topicTree.publish(clientId, clientQoSLevel);
         }
     }
 
