@@ -37,7 +37,7 @@ namespace mqtt::broker {
     public:
         explicit SubscribtionTree(mqtt::broker::Broker* broker);
 
-        void publishRetained(const std::string& clientId);
+        void publishRetainedMessages(const std::string& clientId);
 
         void subscribe(const std::string& fullTopicName, const std::string& clientId, uint8_t clientQoSLevel);
 

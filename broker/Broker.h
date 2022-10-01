@@ -35,6 +35,11 @@ namespace mqtt::broker {
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
+#define DUP_FALSE false
+#define DUP_TRUE true
+#define RETAIN_FALSE false
+#define RETAIN_TRUE true
+
 namespace mqtt::broker {
 
     class Broker {
@@ -64,7 +69,7 @@ namespace mqtt::broker {
                          bool retain,
                          uint8_t clientQoSLevel);
 
-        void sendRetained(const std::string& topic, const std::string& clientId, uint8_t clientQoSLevel);
+        void sendRetainedMessages(const std::string& topic, const std::string& clientId, uint8_t clientQoSLevel);
 
         mqtt::broker::SocketContext* getSocketContext(const std::string& clientId);
 

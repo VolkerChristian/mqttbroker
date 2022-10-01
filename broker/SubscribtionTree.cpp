@@ -35,13 +35,13 @@ namespace mqtt::broker {
         : broker(broker) {
     }
 
-    void SubscribtionTree::publishRetained(const std::string& clientId) {
+    void SubscribtionTree::publishRetainedMessages(const std::string& clientId) {
         if (subscribers.contains(clientId) && !subscribedTopicName.empty()) {
-            broker->sendRetained(subscribedTopicName, clientId, subscribers[clientId]);
+            broker->sendRetainedMessages(subscribedTopicName, clientId, subscribers[clientId]);
         }
 
         for (auto& [topicName, subscribtion] : subscribtions) {
-            subscribtion.publishRetained(clientId);
+            subscribtion.publishRetainedMessages(clientId);
         }
     }
 
@@ -104,7 +104,7 @@ namespace mqtt::broker {
             for (auto& [clientId, clientQoSLevel] : subscribers) {
                 LOG(TRACE) << "Found Match: " << subscribedTopicName << " = " << fullTopicName << " -> " << message;
                 LOG(TRACE) << "Distribute Publish ...";
-                broker->sendPublish(clientId, fullTopicName, message, false, qoSLevel, retained, clientQoSLevel);
+                broker->sendPublish(clientId, fullTopicName, message, DUP_FALSE, qoSLevel, retained, clientQoSLevel);
                 LOG(TRACE) << "... completed!";
             }
         } else {
@@ -123,7 +123,7 @@ namespace mqtt::broker {
                 LOG(TRACE) << "Found Match: " << subscribedTopicName << " = " << fullTopicName << " -> " << message;
                 LOG(TRACE) << "Distribute Publish ...";
                 for (auto& [clientId, clientQoSLevel] : foundSubscription.subscribers) {
-                    broker->sendPublish(clientId, fullTopicName, message, false, qoSLevel, retained, clientQoSLevel);
+                    broker->sendPublish(clientId, fullTopicName, message, DUP_FALSE, qoSLevel, retained, clientQoSLevel);
                 }
                 LOG(TRACE) << "... completed!";
             }

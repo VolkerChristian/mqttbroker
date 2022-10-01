@@ -49,6 +49,7 @@ namespace mqtt::broker {
             close();
         } else if (broker->hasRetainedSession(clientId)) {
             LOG(TRACE) << "ClientId \'" << clientId << "\' found retained session ... renewing";
+            sendConnack(level <= MQTT_VERSION_3_1_1 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, MQTT_SESSION_PRESENT);
 
             if (cleanSession) {
                 LOG(TRACE) << "  ... discarding subscribtions";
@@ -56,12 +57,10 @@ namespace mqtt::broker {
             } else {
                 LOG(TRACE) << "  ... retaining subscribtions";
             }
-            sendConnack(level <= MQTT_VERSION_3_1_1 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, MQTT_SESSION_PRESENT);
 
             broker->renewSession(clientId, this);
         } else {
             LOG(TRACE) << "ClientId \'" << clientId << "\' no existing session ... creating";
-
             sendConnack(level <= MQTT_VERSION_3_1_1 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, MQTT_SESSION_NEW);
 
             broker->newSession(clientId, this);

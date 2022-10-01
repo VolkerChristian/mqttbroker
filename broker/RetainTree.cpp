@@ -58,38 +58,38 @@ namespace mqtt::broker {
         return this->message.empty() && topicTree.empty();
     }
 
-    void RetainTree::publish(std::string remainingTopicName, const std::string& clientId, uint8_t clientQoSLevel) {
+    void RetainTree::publishRetainedMessages(std::string remainingTopicName, const std::string& clientId, uint8_t clientQoSLevel) {
         if (remainingTopicName.empty() && !message.empty()) {
             LOG(TRACE) << "Found retained message: " << fullTopicName << " - " << message << " - " << static_cast<uint16_t>(qoSLevel);
             LOG(TRACE) << "Distribute message ...";
-            broker->sendPublish(clientId, fullTopicName, message, false, qoSLevel, true, clientQoSLevel);
+            broker->sendPublish(clientId, fullTopicName, message, DUP_FALSE, qoSLevel, RETAIN_TRUE, clientQoSLevel);
             LOG(TRACE) << "... completed!";
         } else {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
             remainingTopicName.erase(0, topicName.size() + 1);
 
             if (topicTree.contains(topicName)) {
-                topicTree.find(topicName)->second.publish(remainingTopicName, clientId, clientQoSLevel);
+                topicTree.find(topicName)->second.publishRetainedMessages(remainingTopicName, clientId, clientQoSLevel);
             } else if (topicName == "+") {
                 for (auto& topicTreeEntry : topicTree) {
-                    topicTreeEntry.second.publish(remainingTopicName, clientId, clientQoSLevel);
+                    topicTreeEntry.second.publishRetainedMessages(remainingTopicName, clientId, clientQoSLevel);
                 }
             } else if (topicName == "#") {
-                publish(clientId, clientQoSLevel);
+                publishRetainedMessages(clientId, clientQoSLevel);
             }
         }
     }
 
-    void RetainTree::publish(const std::string& clientId, uint8_t clientQoSLevel) {
+    void RetainTree::publishRetainedMessages(const std::string& clientId, uint8_t clientQoSLevel) {
         if (!message.empty()) {
             LOG(TRACE) << "Found retained message: " << fullTopicName << " - " << message << " - " << static_cast<uint16_t>(qoSLevel);
             LOG(TRACE) << "Distribute message ...";
-            broker->sendPublish(clientId, fullTopicName, message, false, qoSLevel, true, clientQoSLevel);
+            broker->sendPublish(clientId, fullTopicName, message, DUP_FALSE, qoSLevel, RETAIN_TRUE, clientQoSLevel);
             LOG(TRACE) << "... completed!";
         }
 
         for (auto& [topicName, topicTree] : topicTree) {
-            topicTree.publish(clientId, clientQoSLevel);
+            topicTree.publishRetainedMessages(clientId, clientQoSLevel);
         }
     }
 
