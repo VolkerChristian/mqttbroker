@@ -70,8 +70,12 @@ namespace mqtt::broker {
         subscribtionTree.unsubscribe(clientId);
     }
 
-    bool Broker::hasSession(const std::string& clientId) {
-        return sessions.contains(clientId);
+    bool Broker::hasActiveSession(const std::string& clientId) {
+        return sessions.contains(clientId) && sessions[clientId] != nullptr;
+    }
+
+    bool Broker::hasRetainedSession(const std::string& clientId) {
+        return sessions.contains(clientId) && sessions[clientId] == nullptr;
     }
 
     void Broker::newSession(const std::string& clientId, SocketContext* socketContext) {
@@ -89,16 +93,21 @@ namespace mqtt::broker {
         // TODO: send queued messages
     }
 
-    void Broker::retainSession(const std::string& clientId) {
-        LOG(TRACE) << "Retain session: " << clientId;
+    void Broker::retainSession(const std::string& clientId, SocketContext* socketContext) {
+        if (sessions.contains(clientId) && sessions[clientId] == socketContext) {
+            LOG(TRACE) << "Retain session: " << clientId;
 
-        sessions[clientId] = nullptr;
+            sessions[clientId] = nullptr;
+        }
     }
 
-    void Broker::deleteSession(const std::string& clientId) {
-        LOG(TRACE) << "Delete session: " << clientId;
+    void Broker::deleteSession(const std::string& clientId, SocketContext* socketContext) {
+        if (sessions.contains(clientId) && sessions[clientId] == socketContext) {
+            LOG(TRACE) << "Delete session: " << clientId;
 
-        sessions.erase(clientId);
+            subscribtionTree.unsubscribe(clientId);
+            sessions.erase(clientId);
+        }
     }
 
     void Broker::sendPublish(const std::string& clientId,
@@ -108,17 +117,15 @@ namespace mqtt::broker {
                              uint8_t qoSLevel,
                              bool retain,
                              uint8_t clientQoSLevel) {
-        if (sessions.contains(clientId)) {
-            if (sessions[clientId] != nullptr) { // client online
-                LOG(TRACE) << "Send Publish: " << clientId << ": " << fullTopicName << " - " << message << " - "
-                           << static_cast<uint16_t>(std::min(clientQoSLevel, qoSLevel));
+        if (hasActiveSession(clientId)) {
+            LOG(TRACE) << "Send Publish: " << clientId << ": " << fullTopicName << " - " << message << " - "
+                       << static_cast<uint16_t>(std::min(clientQoSLevel, qoSLevel));
 
-                sessions[clientId]->sendPublish(fullTopicName, message, dup, std::min(qoSLevel, clientQoSLevel), retain);
-            } else if (qoSLevel > 0) { // only for QoS = 1 and 2
-                // Queue Messages for offline clients
-            } else {
-                // Discard all queued messages and use current message as the only one queued message
-            }
+            sessions[clientId]->sendPublish(fullTopicName, message, dup, std::min(qoSLevel, clientQoSLevel), retain);
+        } else if (hasRetainedSession(clientId) && qoSLevel > 0) { // only for QoS = 1 and 2
+            // Queue Messages for offline clients
+        } else {
+            // Discard all queued messages and use current message as the only one queued message
         }
     }
 

@@ -62,7 +62,7 @@ namespace mqtt::broker {
         void onPingresp(const iot::mqtt::packets::Pingresp& pingresp) override;
         void onDisconnect(const iot::mqtt::packets::Disconnect& disconnect) override;
 
-        uint64_t subscribtionCount = 0;
+        //        uint64_t subscribtionCount = 0;
 
         std::shared_ptr<mqtt::broker::Broker> broker;
 

@@ -35,9 +35,7 @@ namespace mqtt::broker {
     }
 
     SocketContext::~SocketContext() {
-        if (cleanSession) {
-            broker->deleteSession(clientId);
-        }
+        releaseSession();
 
         if (willFlag) {
             broker->publish(willTopic, willMessage, willQoS, willRetain);
@@ -45,31 +43,37 @@ namespace mqtt::broker {
     }
 
     void SocketContext::initSession() {
-        if (!broker->hasSession(clientId)) {
-            sendConnack(level <= MQTT_VERSION_3_1_1 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, MQTT_SESSION_NEW);
+        if (broker->hasActiveSession(clientId)) {
+            LOG(TRACE) << "ClientID \'" << clientId << "\' already in use ... disconnecting";
 
-            broker->newSession(clientId, this);
-        } else if (broker->getSocketContext(clientId) == nullptr) {
+            close();
+        } else if (broker->hasRetainedSession(clientId)) {
+            LOG(TRACE) << "ClientId \'" << clientId << "\' found retained session ... renewing";
+
             if (cleanSession) {
+                LOG(TRACE) << "  ... discarding subscribtions";
                 broker->unsubscribe(clientId);
+            } else {
+                LOG(TRACE) << "  ... retaining subscribtions";
             }
             sendConnack(level <= MQTT_VERSION_3_1_1 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, MQTT_SESSION_PRESENT);
 
             broker->renewSession(clientId, this);
-        } else { // Error ClientId already used
-            LOG(TRACE) << "ClientID \'" << clientId << "\' already in use ... disconnecting";
+        } else {
+            LOG(TRACE) << "ClientId \'" << clientId << "\' no existing session ... creating";
 
-            close(); // from base class
+            sendConnack(level <= MQTT_VERSION_3_1_1 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, MQTT_SESSION_NEW);
+
+            broker->newSession(clientId, this);
         }
     }
 
     void SocketContext::releaseSession() {
-        if (cleanSession && subscribtionCount > 0) {
-            broker->unsubscribe(clientId);
+        if (cleanSession) {
+            broker->deleteSession(clientId, this);
+        } else {
+            broker->retainSession(clientId, this);
         }
-        broker->retainSession(clientId);
-
-        willFlag = false;
     }
 
     void SocketContext::onConnect(const iot::mqtt::packets::Connect& connect) {
@@ -241,8 +245,6 @@ namespace mqtt::broker {
         }
 
         sendSuback(subscribe.getPacketIdentifier(), returnCodes);
-
-        subscribtionCount++;
     }
 
     void SocketContext::onSuback(const iot::mqtt::packets::Suback& suback) {
@@ -274,8 +276,6 @@ namespace mqtt::broker {
         }
 
         sendUnsuback(unsubscribe.getPacketIdentifier());
-
-        subscribtionCount--;
     }
 
     void SocketContext::onUnsuback(const iot::mqtt::packets::Unsuback& unsuback) {
@@ -314,6 +314,8 @@ namespace mqtt::broker {
         LOG(DEBUG) << "Type: " << static_cast<uint16_t>(disconnect.getType());
         LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(disconnect.getReserved());
         LOG(DEBUG) << "RemainingLength: " << disconnect.getRemainingLength();
+
+        willFlag = false;
 
         releaseSession();
 
