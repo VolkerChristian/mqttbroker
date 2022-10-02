@@ -19,7 +19,7 @@
 #ifndef APPS_MQTT_SERVER_SOCKETCONTEXT_H
 #define APPS_MQTT_SERVER_SOCKETCONTEXT_H
 
-#include "iot/mqtt/SocketContext.h"
+#include "iot/mqtt1/SocketContext.h"
 
 namespace core::socket {
     class SocketConnection;
@@ -37,7 +37,7 @@ namespace mqtt::broker {
 
 namespace mqtt::broker {
 
-    class SocketContext : public iot::mqtt::SocketContext {
+    class SocketContext : public iot::mqtt1::SocketContext {
     public:
         explicit SocketContext(core::socket::SocketConnection* socketConnection, std::shared_ptr<mqtt::broker::Broker> broker);
 
@@ -47,20 +47,20 @@ namespace mqtt::broker {
         void initSession();
         void releaseSession();
 
-        void onConnect(const iot::mqtt::packets::Connect& connect) override;
-        void onConnack(const iot::mqtt::packets::Connack& connack) override;
-        void onPublish(const iot::mqtt::packets::Publish& publish) override;
-        void onPuback(const iot::mqtt::packets::Puback& puback) override;
-        void onPubrec(const iot::mqtt::packets::Pubrec& pubrec) override;
-        void onPubrel(const iot::mqtt::packets::Pubrel& pubrel) override;
-        void onPubcomp(const iot::mqtt::packets::Pubcomp& pubcomp) override;
-        void onSubscribe(const iot::mqtt::packets::Subscribe& subscribe) override;
-        void onSuback(const iot::mqtt::packets::Suback& suback) override;
-        void onUnsubscribe(const iot::mqtt::packets::Unsubscribe& unsubscribe) override;
-        void onUnsuback(const iot::mqtt::packets::Unsuback& unsuback) override;
-        void onPingreq(const iot::mqtt::packets::Pingreq& pingreq) override;
-        void onPingresp(const iot::mqtt::packets::Pingresp& pingresp) override;
-        void onDisconnect(const iot::mqtt::packets::Disconnect& disconnect) override;
+        void onConnect(const iot::mqtt1::packets::Connect& connect) override;
+        void onConnack(const iot::mqtt1::packets::Connack& connack) override;
+        void onPublish(const iot::mqtt1::packets::Publish& publish) override;
+        void onPuback(const iot::mqtt1::packets::Puback& puback) override;
+        void onPubrec(const iot::mqtt1::packets::Pubrec& pubrec) override;
+        void onPubrel(const iot::mqtt1::packets::Pubrel& pubrel) override;
+        void onPubcomp(const iot::mqtt1::packets::Pubcomp& pubcomp) override;
+        void onSubscribe(const iot::mqtt1::packets::Subscribe& subscribe) override;
+        void onSuback(const iot::mqtt1::packets::Suback& suback) override;
+        void onUnsubscribe(const iot::mqtt1::packets::Unsubscribe& unsubscribe) override;
+        void onUnsuback(const iot::mqtt1::packets::Unsuback& unsuback) override;
+        void onPingreq(const iot::mqtt1::packets::Pingreq& pingreq) override;
+        void onPingresp(const iot::mqtt1::packets::Pingresp& pingresp) override;
+        void onDisconnect(const iot::mqtt1::packets::Disconnect& disconnect) override;
 
         //        uint64_t subscribtionCount = 0;
 

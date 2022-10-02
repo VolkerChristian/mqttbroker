@@ -164,10 +164,10 @@ namespace mqtt::broker1 {
 
         switch (publish.getQoSLevel()) {
             case 1:
-                //                sendPuback(publish.getPacketIdentifier());
+                sendPuback(publish.getPacketIdentifier());
                 break;
             case 2:
-                //                sendPubrec(publish.getPacketIdentifier());
+                sendPubrec(publish.getPacketIdentifier());
                 break;
             case 3:
                 LOG(TRACE) << "Received publish with QoS-Level 3 ... closing";
@@ -185,8 +185,8 @@ namespace mqtt::broker1 {
             close();
         }
     }
-    /*
-    void SocketContext::onPuback(const iot::mqtt::packets::Puback& puback) {
+
+    void SocketContext::onPuback(const iot::mqtt1::packets::Puback& puback) {
         LOG(DEBUG) << "PUBACK";
         LOG(DEBUG) << "======";
         LOG(DEBUG) << "Error: " << puback.isError();
@@ -196,7 +196,7 @@ namespace mqtt::broker1 {
         LOG(DEBUG) << "PacketIdentifier: " << puback.getPacketIdentifier();
     }
 
-    void SocketContext::onPubrec(const iot::mqtt::packets::Pubrec& pubrec) {
+    void SocketContext::onPubrec(const iot::mqtt1::packets::Pubrec& pubrec) {
         LOG(DEBUG) << "PUBREC";
         LOG(DEBUG) << "======";
         LOG(DEBUG) << "Error: " << pubrec.isError();
@@ -208,7 +208,7 @@ namespace mqtt::broker1 {
         sendPubrel(pubrec.getPacketIdentifier());
     }
 
-    void SocketContext::onPubrel(const iot::mqtt::packets::Pubrel& pubrel) {
+    void SocketContext::onPubrel(const iot::mqtt1::packets::Pubrel& pubrel) {
         LOG(DEBUG) << "PUBREL";
         LOG(DEBUG) << "======";
         LOG(DEBUG) << "Error: " << pubrel.isError();
@@ -220,7 +220,7 @@ namespace mqtt::broker1 {
         sendPubcomp(pubrel.getPacketIdentifier());
     }
 
-    void SocketContext::onPubcomp(const iot::mqtt::packets::Pubcomp& pubcomp) {
+    void SocketContext::onPubcomp(const iot::mqtt1::packets::Pubcomp& pubcomp) {
         LOG(DEBUG) << "PUBCOMP";
         LOG(DEBUG) << "=======";
         LOG(DEBUG) << "Error: " << pubcomp.isError();
@@ -229,7 +229,7 @@ namespace mqtt::broker1 {
         LOG(DEBUG) << "RemainingLength: " << pubcomp.getRemainingLength();
         LOG(DEBUG) << "PacketIdentifier: " << pubcomp.getPacketIdentifier();
     }
-    */
+
     void SocketContext::onSubscribe(const iot::mqtt1::packets::Subscribe& subscribe) {
         LOG(DEBUG) << "SUBSCRIBE";
         LOG(DEBUG) << "=========";
@@ -265,8 +265,7 @@ namespace mqtt::broker1 {
         }
     }
 
-    /*
-    void SocketContext::onUnsubscribe(const iot::mqtt::packets::Unsubscribe& unsubscribe) {
+    void SocketContext::onUnsubscribe(const iot::mqtt1::packets::Unsubscribe& unsubscribe) {
         LOG(DEBUG) << "UNSUBSCRIBE";
         LOG(DEBUG) << "===========";
         LOG(DEBUG) << "Error: " << unsubscribe.isError();
@@ -277,13 +276,13 @@ namespace mqtt::broker1 {
 
         for (const std::string& topic : unsubscribe.getTopics()) {
             LOG(DEBUG) << "  Topic: " << topic;
-            broker->unsubscribe(topic, clientId);
+            //            broker->unsubscribe(topic, clientId);
         }
 
-        sendUnsuback(unsubscribe.getPacketIdentifier());
+        //        sendUnsuback(unsubscribe.getPacketIdentifier());
     }
 
-    void SocketContext::onUnsuback(const iot::mqtt::packets::Unsuback& unsuback) {
+    void SocketContext::onUnsuback(const iot::mqtt1::packets::Unsuback& unsuback) {
         LOG(DEBUG) << "UNSUBACK";
         LOG(DEBUG) << "========";
         LOG(DEBUG) << "Error: " << unsuback.isError();
@@ -292,8 +291,7 @@ namespace mqtt::broker1 {
         LOG(DEBUG) << "RemainingLength: " << unsuback.getRemainingLength();
         LOG(DEBUG) << "PacketIdentifier: " << unsuback.getPacketIdentifier();
     }
-
-    void SocketContext::onPingreq(const iot::mqtt::packets::Pingreq& pingreq) {
+    void SocketContext::onPingreq(const iot::mqtt1::packets::Pingreq& pingreq) {
         LOG(DEBUG) << "PINGREQ";
         LOG(DEBUG) << "=======";
         LOG(DEBUG) << "Error: " << pingreq.isError();
@@ -304,7 +302,7 @@ namespace mqtt::broker1 {
         sendPingresp();
     }
 
-    void SocketContext::onPingresp(const iot::mqtt::packets::Pingresp& pingresp) {
+    void SocketContext::onPingresp(const iot::mqtt1::packets::Pingresp& pingresp) {
         LOG(DEBUG) << "PINGRESP";
         LOG(DEBUG) << "========";
         LOG(DEBUG) << "Error: " << pingresp.isError();
@@ -312,7 +310,7 @@ namespace mqtt::broker1 {
         LOG(DEBUG) << "RemainingLength: " << pingresp.getRemainingLength();
     }
 
-    void SocketContext::onDisconnect(const iot::mqtt::packets::Disconnect& disconnect) {
+    void SocketContext::onDisconnect(const iot::mqtt1::packets::Disconnect& disconnect) {
         LOG(DEBUG) << "DISCONNECT";
         LOG(DEBUG) << "==========";
         LOG(DEBUG) << "Error: " << disconnect.isError();
@@ -326,6 +324,5 @@ namespace mqtt::broker1 {
 
         shutdown(); // from base class
     }
-*/
 
 } // namespace mqtt::broker1
