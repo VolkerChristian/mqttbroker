@@ -1,27 +1,51 @@
 
-#include <cstdint>
-#include <iostream>
-#include <list>
-#include <vector>
+#include "broker1/SocketContextFactory.h" // IWYU pragma: keep
+#include "core/SNodeC.h"
+#include "log/Logger.h"
+#include "net/in/stream/legacy/SocketServer.h"
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
-    std::vector<char> vec;
-    vec.reserve(5);
+    core::SNodeC::init(argc, argv);
 
-    vec.push_back('a');
-    vec.push_back('b');
-    vec.push_back('c');
+    using MQTTLegacyInServer = net::in::stream::legacy::SocketServer<mqtt::broker1::SocketContextFactory>;
+    using LegacyInSocketConnection = MQTTLegacyInServer::SocketConnection;
 
-    std::list<int> li(vec.begin(), vec.end());
+    MQTTLegacyInServer mqttLegacyInServer(
+        "legacyin",
+        []([[maybe_unused]] LegacyInSocketConnection* socketConnection) -> void { // OnConnect
+            VLOG(0) << "OnConnect";
 
-    std::string s(vec.begin(), vec.end());
+            VLOG(0) << "\tLocal: (" + socketConnection->getLocalAddress().address() + ") " + socketConnection->getLocalAddress().toString();
+            VLOG(0) << "\tPeer:  (" + socketConnection->getRemoteAddress().address() + ") " +
+                           socketConnection->getRemoteAddress().toString();
 
-    for (auto value : li) {
-        std::cout << static_cast<uint16_t>(value) << ", ";
-    }
-    std::cout << std::endl;
+        },
+        []([[maybe_unused]] LegacyInSocketConnection* socketConnection) -> void { // OnConnected
+            VLOG(0) << "OnConnected";
 
-    std::cout << s << std::endl;
+            VLOG(0) << "\tLocal: (" + socketConnection->getLocalAddress().address() + ") " + socketConnection->getLocalAddress().toString();
+            VLOG(0) << "\tPeer:  (" + socketConnection->getRemoteAddress().address() + ") " +
+                           socketConnection->getRemoteAddress().toString();
 
-    return 0;
+        },
+        []([[maybe_unused]] LegacyInSocketConnection* socketConnection) -> void { // OnDisconnected
+            VLOG(0) << "OnDisconnected";
+
+            VLOG(0) << "\tLocal: (" + socketConnection->getLocalAddress().address() + ") " + socketConnection->getLocalAddress().toString();
+            VLOG(0) << "\tPeer:  (" + socketConnection->getRemoteAddress().address() + ") " +
+                           socketConnection->getRemoteAddress().toString();
+
+        });
+
+    mqttLegacyInServer.listen([mqttLegacyInServer](const MQTTLegacyInServer::SocketAddress& socketAddress, int errnum) mutable -> void {
+        if (errnum < 0) {
+            PLOG(ERROR) << "OnError";
+        } else if (errnum > 0) {
+            PLOG(ERROR) << "OnError: " << socketAddress.toString();
+        } else {
+            VLOG(0) << mqttLegacyInServer.getConfig().getName() << " listening on " << socketAddress.toString();
+        }
+    });
+
+    return core::SNodeC::start();
 }
