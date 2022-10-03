@@ -16,9 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "broker/SocketContext.h"
-
-#include "broker/Broker.h"
+#include "broker1/SocketContext.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -27,55 +25,61 @@
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
-namespace mqtt::broker {
+namespace mqtt::broker1 {
 
-    SocketContext::SocketContext(core::socket::SocketConnection* socketConnection, std::shared_ptr<Broker> broker)
-        : iot::mqtt1::SocketContext(socketConnection)
-        , broker(broker) {
+    SocketContext::SocketContext(core::socket::SocketConnection* socketConnection)
+        : iot::mqtt1::SocketContext(socketConnection) {
     }
 
     SocketContext::~SocketContext() {
-        releaseSession();
+        /*
+                releaseSession();
 
-        if (willFlag) {
-            broker->publish(willTopic, willMessage, willQoS, willRetain);
-        }
+                if (willFlag) {
+                    broker->publish(willTopic, willMessage, willQoS, willRetain);
+                }
+        */
     }
 
     void SocketContext::initSession() {
-        if (broker->hasActiveSession(clientId)) {
-            LOG(TRACE) << "ClientID \'" << clientId << "\' already in use ... disconnecting";
+        sendConnack(level <= MQTT_VERSION_3_1_1 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, MQTT_SESSION_NEW);
+        /*
+                if (broker->hasActiveSession(clientId)) {
+                    LOG(TRACE) << "ClientID \'" << clientId << "\' already in use ... disconnecting";
 
-            close();
-        } else if (broker->hasRetainedSession(clientId)) {
-            LOG(TRACE) << "ClientId \'" << clientId << "\' found retained session ... renewing";
-            sendConnack(level <= MQTT_VERSION_3_1_1 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, MQTT_SESSION_PRESENT);
+                    close();
+                } else if (broker->hasRetainedSession(clientId)) {
+                    LOG(TRACE) << "ClientId \'" << clientId << "\' found retained session ... renewing";
+                    sendConnack(level <= MQTT_VERSION_3_1_1 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, MQTT_SESSION_PRESENT);
 
-            if (cleanSession) {
-                LOG(TRACE) << "  ... discarding subscribtions";
-                broker->unsubscribe(clientId);
-            } else {
-                LOG(TRACE) << "  ... retaining subscribtions";
-            }
+                    if (cleanSession) {
+                        LOG(TRACE) << "  ... discarding subscribtions";
+                        broker->unsubscribe(clientId);
+                    } else {
+                        LOG(TRACE) << "  ... retaining subscribtions";
+                    }
 
-            broker->renewSession(clientId, this);
-        } else {
-            LOG(TRACE) << "ClientId \'" << clientId << "\' no existing session ... creating";
-            sendConnack(level <= MQTT_VERSION_3_1_1 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, MQTT_SESSION_NEW);
+                    broker->renewSession(clientId, this);
+                } else {
+                    LOG(TRACE) << "ClientId \'" << clientId << "\' no existing session ... creating";
+                    sendConnack(level <= MQTT_VERSION_3_1_1 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, MQTT_SESSION_NEW);
 
-            broker->newSession(clientId, this);
-        }
+                    broker->newSession(clientId, this);
+                }
+        */
     }
 
     void SocketContext::releaseSession() {
-        if (cleanSession) {
-            broker->deleteSession(clientId, this);
-        } else {
-            broker->retainSession(clientId, this);
-        }
+        /*
+                if (cleanSession) {
+                    broker->deleteSession(clientId, this);
+                } else {
+                    broker->retainSession(clientId, this);
+                }
+        */
     }
 
-    void SocketContext::onConnect(const iot::mqtt1::packets::Connect& connect) {
+    void SocketContext::onConnect([[maybe_unused]] const iot::mqtt1::packets::Connect& connect) {
         // V-Header
         protocol = connect.getProtocol();
         level = connect.getLevel();
@@ -84,9 +88,9 @@ namespace mqtt::broker {
 
         // Payload
         clientId = connect.getClientId();
-        if (clientId.empty()) {
-            clientId = broker->getRandomClientId();
-        }
+        //        if (clientId.empty()) {
+        //            clientId = broker->getRandomClientId();
+        //        }
         willTopic = connect.getWillTopic();
         willMessage = connect.getWillMessage();
         username = connect.getUsername();
@@ -172,10 +176,11 @@ namespace mqtt::broker {
         }
 
         if (publish.getQoSLevel() < 3) {
+            /*
             broker->publish(publish.getTopic(), publish.getMessage(), publish.getQoSLevel());
             if (publish.getRetain()) {
                 broker->retain(publish.getTopic(), publish.getMessage(), publish.getQoSLevel());
-            }
+            }*/
         } else {
             close();
         }
@@ -238,9 +243,9 @@ namespace mqtt::broker {
 
         for (const iot::mqtt1::Topic& topic : subscribe.getTopics()) {
             LOG(DEBUG) << "  Topic: " << topic.getName() << ", requestedQoS: " << static_cast<uint16_t>(topic.getRequestedQoS());
-            broker->subscribe(topic.getName(), clientId, topic.getRequestedQoS());
+            //            broker->subscribe(topic.getName(), clientId, topic.getRequestedQoS());
 
-            returnCodes.push_back(topic.getRequestedQoS() | 0x00 /* 0x80 */); // QoS + Success
+            returnCodes.push_back(topic.getRequestedQoS() | 0x00); // QoS + Success
         }
 
         sendSuback(subscribe.getPacketIdentifier(), returnCodes);
@@ -271,10 +276,10 @@ namespace mqtt::broker {
 
         for (const std::string& topic : unsubscribe.getTopics()) {
             LOG(DEBUG) << "  Topic: " << topic;
-            broker->unsubscribe(topic, clientId);
+            //            broker->unsubscribe(topic, clientId);
         }
 
-        sendUnsuback(unsubscribe.getPacketIdentifier());
+        //        sendUnsuback(unsubscribe.getPacketIdentifier());
     }
 
     void SocketContext::onUnsuback(const iot::mqtt1::packets::Unsuback& unsuback) {
@@ -286,7 +291,6 @@ namespace mqtt::broker {
         LOG(DEBUG) << "RemainingLength: " << unsuback.getRemainingLength();
         LOG(DEBUG) << "PacketIdentifier: " << unsuback.getPacketIdentifier();
     }
-
     void SocketContext::onPingreq(const iot::mqtt1::packets::Pingreq& pingreq) {
         LOG(DEBUG) << "PINGREQ";
         LOG(DEBUG) << "=======";
@@ -321,4 +325,4 @@ namespace mqtt::broker {
         shutdown(); // from base class
     }
 
-} // namespace mqtt::broker
+} // namespace mqtt::broker1

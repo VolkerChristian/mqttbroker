@@ -25,21 +25,15 @@ namespace core::socket {
     class SocketConnection;
 } // namespace core::socket
 
-namespace mqtt::broker {
-    class Broker;
-} // namespace mqtt::broker
-
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-#include <memory>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
-namespace mqtt::broker {
+namespace mqtt::broker1 {
 
     class SocketContext : public iot::mqtt1::SocketContext {
     public:
-        explicit SocketContext(core::socket::SocketConnection* socketConnection, std::shared_ptr<mqtt::broker::Broker> broker);
+        explicit SocketContext(core::socket::SocketConnection* socketConnection);
 
         ~SocketContext() override;
 
@@ -64,8 +58,6 @@ namespace mqtt::broker {
 
         //        uint64_t subscribtionCount = 0;
 
-        std::shared_ptr<mqtt::broker::Broker> broker;
-
         // V-Header
         std::string protocol;
         uint8_t level = 0;
@@ -88,6 +80,6 @@ namespace mqtt::broker {
         bool cleanSession = false;
     };
 
-} // namespace mqtt::broker
+} // namespace mqtt::broker1
 
 #endif // APPS_MQTT_SOCKETCONTEXT_H

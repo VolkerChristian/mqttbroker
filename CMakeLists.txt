@@ -64,7 +64,7 @@ target_include_directories(
 )
 
 target_link_libraries(
-    mqttbroker PUBLIC snodec::mqtt snodec::net-in-stream-legacy
+    mqttbroker PUBLIC snodec::mqtt1 snodec::net-in-stream-legacy
                       snodec::net-in-stream-tls snodec::net-un-stream-legacy
 )
 
@@ -73,14 +73,14 @@ set_target_properties(mqttbroker PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 install(TARGETS mqttbroker RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 
-add_executable(mqttnew mqtt.cpp)
+add_executable(mqttnew mqtt.cpp broker1/SocketContext.cpp broker1/SocketContextFactory.cpp)
 
 target_include_directories(
     mqttnew PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 target_link_libraries(
-    mqttnew PUBLIC snodec::mqtt snodec::net-in-stream-legacy
+    mqttnew PUBLIC snodec::mqtt1 snodec::net-in-stream-legacy
                       snodec::net-in-stream-tls snodec::net-un-stream-legacy
 )
 
