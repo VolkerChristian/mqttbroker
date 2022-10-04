@@ -43,27 +43,47 @@ namespace mqtt::broker {
     }
 
     void SocketContext::initSession() {
-        if (broker->hasActiveSession(clientId)) {
-            LOG(TRACE) << "ClientID \'" << clientId << "\' already in use ... disconnecting";
-
-            close();
-        } else if (broker->hasRetainedSession(clientId)) {
-            LOG(TRACE) << "ClientId \'" << clientId << "\' found retained session ... renewing";
-            sendConnack(level <= MQTT_VERSION_3_1_1 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, MQTT_SESSION_PRESENT);
-
+        if (clientId.empty()) {
             if (cleanSession) {
-                LOG(TRACE) << "  ... discarding subscribtions";
-                broker->unsubscribe(clientId);
+                sendConnack(MQTT_CONNACK_IDENTIFIERREJECTED, MQTT_SESSION_NEW);
             } else {
-                LOG(TRACE) << "  ... retaining subscribtions";
+                clientId = broker->getRandomClientId();
             }
+        }
 
-            broker->renewSession(clientId, this);
+        if (clientId.empty() && cleanSession) {
+            sendConnack(MQTT_CONNACK_IDENTIFIERREJECTED, MQTT_SESSION_NEW);
+            shutdown();
         } else {
-            LOG(TRACE) << "ClientId \'" << clientId << "\' no existing session ... creating";
-            sendConnack(level <= MQTT_VERSION_3_1_1 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, MQTT_SESSION_NEW);
+            if (clientId.empty()) {
+                clientId = broker->getRandomClientId();
 
-            broker->newSession(clientId, this);
+                LOG(TRACE) << "ClientId \'" << clientId << "\' creating session";
+                sendConnack(level <= MQTT_VERSION_3_1_1 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, MQTT_SESSION_NEW);
+
+                broker->newSession(clientId, this);
+            } else if (broker->hasActiveSession(clientId)) {
+                LOG(TRACE) << "ClientID \'" << clientId << "\' already in use ... disconnecting";
+
+                close();
+            } else if (broker->hasRetainedSession(clientId)) {
+                LOG(TRACE) << "ClientId \'" << clientId << "\' found retained session ... renewing";
+                sendConnack(level <= MQTT_VERSION_3_1_1 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, MQTT_SESSION_PRESENT);
+
+                if (cleanSession) {
+                    LOG(TRACE) << "CleanSession ... discarding subscribtions";
+                    broker->unsubscribe(clientId);
+                } else {
+                    LOG(TRACE) << "RetainSession ... retaining subscribtions";
+                }
+
+                broker->renewSession(clientId, this);
+            } else {
+                LOG(TRACE) << "ClientId \'" << clientId << "\' no existing session ... creating";
+                sendConnack(level <= MQTT_VERSION_3_1_1 ? MQTT_CONNACK_ACCEPT : MQTT_CONNACK_UNACEPTABLEVERSION, MQTT_SESSION_NEW);
+
+                broker->newSession(clientId, this);
+            }
         }
     }
 
@@ -79,7 +99,7 @@ namespace mqtt::broker {
         // V-Header
         protocol = connect.getProtocol();
         level = connect.getLevel();
-        connectFlags = connect.getFlags();
+        connectFlags = connect.getConnectFlags();
         keepAlive = connect.getKeepAlive();
 
         // Payload
@@ -104,7 +124,7 @@ namespace mqtt::broker {
         LOG(DEBUG) << "=======";
         LOG(DEBUG) << "Error: " << connect.isError();
         LOG(DEBUG) << "Type: " << static_cast<uint16_t>(connect.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(connect.getReserved());
+        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(connect.getFlags());
         LOG(DEBUG) << "RemainingLength: " << connect.getRemainingLength();
         LOG(DEBUG) << "Protocol: " << protocol;
         LOG(DEBUG) << "Version: " << static_cast<uint16_t>(level);
@@ -138,7 +158,7 @@ namespace mqtt::broker {
         LOG(DEBUG) << "=======";
         LOG(DEBUG) << "Error: " << connack.isError();
         LOG(DEBUG) << "Type: " << static_cast<uint16_t>(connack.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(connack.getReserved());
+        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(connack.getFlags());
         LOG(DEBUG) << "RemainingLength: " << connack.getRemainingLength();
         LOG(DEBUG) << "Flags: " << static_cast<uint16_t>(connack.getFlags());
         LOG(DEBUG) << "Reason: " << connack.getReturnCode();
@@ -149,7 +169,7 @@ namespace mqtt::broker {
         LOG(DEBUG) << "=======";
         LOG(DEBUG) << "Error: " << publish.isError();
         LOG(DEBUG) << "Type: " << static_cast<uint16_t>(publish.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(publish.getReserved());
+        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(publish.getFlags());
         LOG(DEBUG) << "RemainingLength: " << publish.getRemainingLength();
         LOG(DEBUG) << "DUP: " << publish.getDup();
         LOG(DEBUG) << "QoSLevel: " << static_cast<uint16_t>(publish.getQoSLevel());
@@ -186,7 +206,7 @@ namespace mqtt::broker {
         LOG(DEBUG) << "======";
         LOG(DEBUG) << "Error: " << puback.isError();
         LOG(DEBUG) << "Type: " << static_cast<uint16_t>(puback.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(puback.getReserved());
+        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(puback.getFlags());
         LOG(DEBUG) << "RemainingLength: " << puback.getRemainingLength();
         LOG(DEBUG) << "PacketIdentifier: " << puback.getPacketIdentifier();
     }
@@ -196,7 +216,7 @@ namespace mqtt::broker {
         LOG(DEBUG) << "======";
         LOG(DEBUG) << "Error: " << pubrec.isError();
         LOG(DEBUG) << "Type: " << static_cast<uint16_t>(pubrec.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(pubrec.getReserved());
+        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(pubrec.getFlags());
         LOG(DEBUG) << "RemainingLength: " << pubrec.getRemainingLength();
         LOG(DEBUG) << "PacketIdentifier: " << pubrec.getPacketIdentifier();
 
@@ -208,7 +228,7 @@ namespace mqtt::broker {
         LOG(DEBUG) << "======";
         LOG(DEBUG) << "Error: " << pubrel.isError();
         LOG(DEBUG) << "Type: " << static_cast<uint16_t>(pubrel.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(pubrel.getReserved());
+        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(pubrel.getFlags());
         LOG(DEBUG) << "RemainingLength: " << pubrel.getRemainingLength();
         LOG(DEBUG) << "PacketIdentifier: " << pubrel.getPacketIdentifier();
 
@@ -220,7 +240,7 @@ namespace mqtt::broker {
         LOG(DEBUG) << "=======";
         LOG(DEBUG) << "Error: " << pubcomp.isError();
         LOG(DEBUG) << "Type: " << static_cast<uint16_t>(pubcomp.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(pubcomp.getReserved());
+        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(pubcomp.getFlags());
         LOG(DEBUG) << "RemainingLength: " << pubcomp.getRemainingLength();
         LOG(DEBUG) << "PacketIdentifier: " << pubcomp.getPacketIdentifier();
     }
@@ -230,7 +250,7 @@ namespace mqtt::broker {
         LOG(DEBUG) << "=========";
         LOG(DEBUG) << "Error: " << subscribe.isError();
         LOG(DEBUG) << "Type: " << static_cast<uint16_t>(subscribe.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(subscribe.getReserved());
+        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(subscribe.getFlags());
         LOG(DEBUG) << "RemainingLength: " << subscribe.getRemainingLength();
         LOG(DEBUG) << "PacketIdentifier: " << subscribe.getPacketIdentifier();
 
@@ -251,7 +271,7 @@ namespace mqtt::broker {
         LOG(DEBUG) << "======";
         LOG(DEBUG) << "Error: " << suback.isError();
         LOG(DEBUG) << "Type: " << static_cast<uint16_t>(suback.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(suback.getReserved());
+        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(suback.getFlags());
         LOG(DEBUG) << "RemainingLength: " << suback.getRemainingLength();
         LOG(DEBUG) << "PacketIdentifier: " << suback.getPacketIdentifier();
 
@@ -265,7 +285,7 @@ namespace mqtt::broker {
         LOG(DEBUG) << "===========";
         LOG(DEBUG) << "Error: " << unsubscribe.isError();
         LOG(DEBUG) << "Type: " << static_cast<uint16_t>(unsubscribe.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(unsubscribe.getReserved());
+        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(unsubscribe.getFlags());
         LOG(DEBUG) << "RemainingLength: " << unsubscribe.getRemainingLength();
         LOG(DEBUG) << "PacketIdentifier: " << unsubscribe.getPacketIdentifier();
 
@@ -282,7 +302,7 @@ namespace mqtt::broker {
         LOG(DEBUG) << "========";
         LOG(DEBUG) << "Error: " << unsuback.isError();
         LOG(DEBUG) << "Type: " << static_cast<uint16_t>(unsuback.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(unsuback.getReserved());
+        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(unsuback.getFlags());
         LOG(DEBUG) << "RemainingLength: " << unsuback.getRemainingLength();
         LOG(DEBUG) << "PacketIdentifier: " << unsuback.getPacketIdentifier();
     }
@@ -292,7 +312,7 @@ namespace mqtt::broker {
         LOG(DEBUG) << "=======";
         LOG(DEBUG) << "Error: " << pingreq.isError();
         LOG(DEBUG) << "Type: " << static_cast<uint16_t>(pingreq.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(pingreq.getReserved());
+        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(pingreq.getFlags());
         LOG(DEBUG) << "RemainingLength: " << pingreq.getRemainingLength();
 
         sendPingresp();
@@ -311,7 +331,7 @@ namespace mqtt::broker {
         LOG(DEBUG) << "==========";
         LOG(DEBUG) << "Error: " << disconnect.isError();
         LOG(DEBUG) << "Type: " << static_cast<uint16_t>(disconnect.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(disconnect.getReserved());
+        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(disconnect.getFlags());
         LOG(DEBUG) << "RemainingLength: " << disconnect.getRemainingLength();
 
         willFlag = false;

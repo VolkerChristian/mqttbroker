@@ -16,8 +16,13 @@ endif(NOT SNODEC_INTREE_BUILD)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(ADDITIONAL_OPTIONS
-        -Weverything -Wno-c++98-compat -Wno-exit-time-destructors
-        -Wno-global-constructors -Wno-padded -Wno-shadow -Wno-used-but-marked-unused
+        -Weverything
+        -Wno-c++98-compat
+        -Wno-exit-time-destructors
+        -Wno-global-constructors
+        -Wno-padded
+        -Wno-shadow
+        -Wno-used-but-marked-unused
     )
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # using GCC
