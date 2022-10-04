@@ -10,14 +10,14 @@ configure_file(config.h.in config.h @ONLY)
 if(NOT SNODEC_INTREE_BUILD)
     find_package(
         snodec COMPONENTS net-in-stream-legacy net-in-stream-tls
-                          net-un-stream-legacy mqtt
+                          net-un-stream-legacy mqtt1
     )
 endif(NOT SNODEC_INTREE_BUILD)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(ADDITIONAL_OPTIONS
         -Weverything -Wno-c++98-compat -Wno-exit-time-destructors
-        -Wno-global-constructors -Wno-padded -Wno-shadow
+        -Wno-global-constructors -Wno-padded -Wno-shadow -Wno-used-but-marked-unused
     )
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # using GCC
@@ -71,19 +71,3 @@ target_link_libraries(
 set_target_properties(mqttbroker PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 install(TARGETS mqttbroker RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
-
-add_executable(mqttnew mqtt.cpp broker1/SocketContext.cpp broker1/SocketContextFactory.cpp)
-
-target_include_directories(
-    mqttnew PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
-)
-
-target_link_libraries(
-    mqttnew PUBLIC snodec::mqtt1 snodec::net-in-stream-legacy
-                      snodec::net-in-stream-tls snodec::net-un-stream-legacy
-)
-
-set_target_properties(mqttnew PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-install(TARGETS mqttnew RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
