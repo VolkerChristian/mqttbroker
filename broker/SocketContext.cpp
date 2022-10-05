@@ -30,7 +30,7 @@
 namespace mqtt::broker {
 
     SocketContext::SocketContext(core::socket::SocketConnection* socketConnection, std::shared_ptr<Broker> broker)
-        : iot::mqtt1::SocketContext(socketConnection)
+        : iot::mqtt::SocketContext(socketConnection)
         , broker(broker) {
     }
 
@@ -95,7 +95,7 @@ namespace mqtt::broker {
         }
     }
 
-    void SocketContext::onConnect(const iot::mqtt1::packets::Connect& connect) {
+    void SocketContext::onConnect(const iot::mqtt::packets::Connect& connect) {
         // V-Header
         protocol = connect.getProtocol();
         level = connect.getLevel();
@@ -153,7 +153,7 @@ namespace mqtt::broker {
         initSession();
     }
 
-    void SocketContext::onConnack(const iot::mqtt1::packets::Connack& connack) {
+    void SocketContext::onConnack(const iot::mqtt::packets::Connack& connack) {
         LOG(DEBUG) << "CONNACK";
         LOG(DEBUG) << "=======";
         LOG(DEBUG) << "Error: " << connack.isError();
@@ -164,7 +164,7 @@ namespace mqtt::broker {
         LOG(DEBUG) << "Reason: " << connack.getReturnCode();
     }
 
-    void SocketContext::onPublish(const iot::mqtt1::packets::Publish& publish) {
+    void SocketContext::onPublish(const iot::mqtt::packets::Publish& publish) {
         LOG(DEBUG) << "PUBLISH";
         LOG(DEBUG) << "=======";
         LOG(DEBUG) << "Error: " << publish.isError();
@@ -201,7 +201,7 @@ namespace mqtt::broker {
         }
     }
 
-    void SocketContext::onPuback(const iot::mqtt1::packets::Puback& puback) {
+    void SocketContext::onPuback(const iot::mqtt::packets::Puback& puback) {
         LOG(DEBUG) << "PUBACK";
         LOG(DEBUG) << "======";
         LOG(DEBUG) << "Error: " << puback.isError();
@@ -211,7 +211,7 @@ namespace mqtt::broker {
         LOG(DEBUG) << "PacketIdentifier: " << puback.getPacketIdentifier();
     }
 
-    void SocketContext::onPubrec(const iot::mqtt1::packets::Pubrec& pubrec) {
+    void SocketContext::onPubrec(const iot::mqtt::packets::Pubrec& pubrec) {
         LOG(DEBUG) << "PUBREC";
         LOG(DEBUG) << "======";
         LOG(DEBUG) << "Error: " << pubrec.isError();
@@ -223,7 +223,7 @@ namespace mqtt::broker {
         sendPubrel(pubrec.getPacketIdentifier());
     }
 
-    void SocketContext::onPubrel(const iot::mqtt1::packets::Pubrel& pubrel) {
+    void SocketContext::onPubrel(const iot::mqtt::packets::Pubrel& pubrel) {
         LOG(DEBUG) << "PUBREL";
         LOG(DEBUG) << "======";
         LOG(DEBUG) << "Error: " << pubrel.isError();
@@ -235,7 +235,7 @@ namespace mqtt::broker {
         sendPubcomp(pubrel.getPacketIdentifier());
     }
 
-    void SocketContext::onPubcomp(const iot::mqtt1::packets::Pubcomp& pubcomp) {
+    void SocketContext::onPubcomp(const iot::mqtt::packets::Pubcomp& pubcomp) {
         LOG(DEBUG) << "PUBCOMP";
         LOG(DEBUG) << "=======";
         LOG(DEBUG) << "Error: " << pubcomp.isError();
@@ -245,7 +245,7 @@ namespace mqtt::broker {
         LOG(DEBUG) << "PacketIdentifier: " << pubcomp.getPacketIdentifier();
     }
 
-    void SocketContext::onSubscribe(const iot::mqtt1::packets::Subscribe& subscribe) {
+    void SocketContext::onSubscribe(const iot::mqtt::packets::Subscribe& subscribe) {
         LOG(DEBUG) << "SUBSCRIBE";
         LOG(DEBUG) << "=========";
         LOG(DEBUG) << "Error: " << subscribe.isError();
@@ -256,7 +256,7 @@ namespace mqtt::broker {
 
         std::list<uint8_t> returnCodes;
 
-        for (const iot::mqtt1::Topic& topic : subscribe.getTopics()) {
+        for (const iot::mqtt::Topic& topic : subscribe.getTopics()) {
             LOG(DEBUG) << "  Topic: " << topic.getName() << ", requestedQoS: " << static_cast<uint16_t>(topic.getRequestedQoS());
             broker->subscribe(topic.getName(), clientId, topic.getRequestedQoS());
 
@@ -266,7 +266,7 @@ namespace mqtt::broker {
         sendSuback(subscribe.getPacketIdentifier(), returnCodes);
     }
 
-    void SocketContext::onSuback(const iot::mqtt1::packets::Suback& suback) {
+    void SocketContext::onSuback(const iot::mqtt::packets::Suback& suback) {
         LOG(DEBUG) << "SUBACK";
         LOG(DEBUG) << "======";
         LOG(DEBUG) << "Error: " << suback.isError();
@@ -280,7 +280,7 @@ namespace mqtt::broker {
         }
     }
 
-    void SocketContext::onUnsubscribe(const iot::mqtt1::packets::Unsubscribe& unsubscribe) {
+    void SocketContext::onUnsubscribe(const iot::mqtt::packets::Unsubscribe& unsubscribe) {
         LOG(DEBUG) << "UNSUBSCRIBE";
         LOG(DEBUG) << "===========";
         LOG(DEBUG) << "Error: " << unsubscribe.isError();
@@ -297,7 +297,7 @@ namespace mqtt::broker {
         sendUnsuback(unsubscribe.getPacketIdentifier());
     }
 
-    void SocketContext::onUnsuback(const iot::mqtt1::packets::Unsuback& unsuback) {
+    void SocketContext::onUnsuback(const iot::mqtt::packets::Unsuback& unsuback) {
         LOG(DEBUG) << "UNSUBACK";
         LOG(DEBUG) << "========";
         LOG(DEBUG) << "Error: " << unsuback.isError();
@@ -307,7 +307,7 @@ namespace mqtt::broker {
         LOG(DEBUG) << "PacketIdentifier: " << unsuback.getPacketIdentifier();
     }
 
-    void SocketContext::onPingreq(const iot::mqtt1::packets::Pingreq& pingreq) {
+    void SocketContext::onPingreq(const iot::mqtt::packets::Pingreq& pingreq) {
         LOG(DEBUG) << "PINGREQ";
         LOG(DEBUG) << "=======";
         LOG(DEBUG) << "Error: " << pingreq.isError();
@@ -318,7 +318,7 @@ namespace mqtt::broker {
         sendPingresp();
     }
 
-    void SocketContext::onPingresp(const iot::mqtt1::packets::Pingresp& pingresp) {
+    void SocketContext::onPingresp(const iot::mqtt::packets::Pingresp& pingresp) {
         LOG(DEBUG) << "PINGRESP";
         LOG(DEBUG) << "========";
         LOG(DEBUG) << "Error: " << pingresp.isError();
@@ -326,7 +326,7 @@ namespace mqtt::broker {
         LOG(DEBUG) << "RemainingLength: " << pingresp.getRemainingLength();
     }
 
-    void SocketContext::onDisconnect(const iot::mqtt1::packets::Disconnect& disconnect) {
+    void SocketContext::onDisconnect(const iot::mqtt::packets::Disconnect& disconnect) {
         LOG(DEBUG) << "DISCONNECT";
         LOG(DEBUG) << "==========";
         LOG(DEBUG) << "Error: " << disconnect.isError();

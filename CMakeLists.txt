@@ -10,7 +10,7 @@ configure_file(config.h.in config.h @ONLY)
 if(NOT SNODEC_INTREE_BUILD)
     find_package(
         snodec COMPONENTS net-in-stream-legacy net-in-stream-tls
-                          net-un-stream-legacy mqtt1
+                          net-un-stream-legacy mqtt
     )
 endif(NOT SNODEC_INTREE_BUILD)
 
@@ -69,7 +69,7 @@ target_include_directories(
 )
 
 target_link_libraries(
-    mqttbroker PUBLIC snodec::mqtt1 snodec::net-in-stream-legacy
+    mqttbroker PUBLIC snodec::mqtt snodec::net-in-stream-legacy
                       snodec::net-in-stream-tls snodec::net-un-stream-legacy
 )
 
