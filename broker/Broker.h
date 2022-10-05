@@ -73,8 +73,6 @@ namespace mqtt::broker {
 
         mqtt::broker::SocketContext* getSocketContext(const std::string& clientId);
 
-        std::string getRandomClientId();
-
     private:
         mqtt::broker::SubscribtionTree subscribtionTree;
         mqtt::broker::RetainTree retainTree;

@@ -25,11 +25,8 @@
 #include "log/Logger.h"
 
 #include <algorithm>
-#include <fstream>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
-
-#define UUID_LEN 36
 
 namespace mqtt::broker {
 
@@ -135,16 +132,6 @@ namespace mqtt::broker {
 
     SocketContext* Broker::getSocketContext(const std::string& clientId) {
         return sessions[clientId];
-    }
-
-    std::string Broker::getRandomClientId() {
-        char uuid[UUID_LEN];
-
-        std::ifstream file("/proc/sys/kernel/random/uuid");
-        file.getline(uuid, UUID_LEN);
-        file.close();
-
-        return std::string(uuid);
     }
 
 } // namespace mqtt::broker
