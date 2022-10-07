@@ -62,6 +62,8 @@ namespace mqtt::broker {
         void onPingresp(const iot::mqtt::packets::Pingresp& pingresp) override;
         void onDisconnect(const iot::mqtt::packets::Disconnect& disconnect) override;
 
+        void printStandardHeader(const iot::mqtt::ControlPacket& packet);
+
         std::shared_ptr<mqtt::broker::Broker> broker;
 
         // V-Header

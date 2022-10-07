@@ -25,6 +25,8 @@
 #include "log/Logger.h"
 #include "utils/Timeval.h" // IWYU pragma: keep
 
+#include <iomanip>
+
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
 namespace mqtt::broker {
@@ -99,10 +101,7 @@ namespace mqtt::broker {
 
         LOG(DEBUG) << "CONNECT";
         LOG(DEBUG) << "=======";
-        LOG(DEBUG) << "Error: " << connect.isError();
-        LOG(DEBUG) << "Type: " << static_cast<uint16_t>(connect.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(connect.getFlags());
-        LOG(DEBUG) << "RemainingLength: " << connect.getRemainingLength();
+        printStandardHeader(connect);
         LOG(DEBUG) << "Protocol: " << protocol;
         LOG(DEBUG) << "Version: " << static_cast<uint16_t>(level);
         LOG(DEBUG) << "ConnectFlags: " << static_cast<uint16_t>(connectFlags);
@@ -133,10 +132,7 @@ namespace mqtt::broker {
     void SocketContext::onConnack(const iot::mqtt::packets::Connack& connack) {
         LOG(DEBUG) << "CONNACK";
         LOG(DEBUG) << "=======";
-        LOG(DEBUG) << "Error: " << connack.isError();
-        LOG(DEBUG) << "Type: " << static_cast<uint16_t>(connack.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(connack.getFlags());
-        LOG(DEBUG) << "RemainingLength: " << connack.getRemainingLength();
+        printStandardHeader(connack);
         LOG(DEBUG) << "Flags: " << static_cast<uint16_t>(connack.getFlags());
         LOG(DEBUG) << "Reason: " << connack.getReturnCode();
     }
@@ -144,10 +140,7 @@ namespace mqtt::broker {
     void SocketContext::onPublish(const iot::mqtt::packets::Publish& publish) {
         LOG(DEBUG) << "PUBLISH";
         LOG(DEBUG) << "=======";
-        LOG(DEBUG) << "Error: " << publish.isError();
-        LOG(DEBUG) << "Type: " << static_cast<uint16_t>(publish.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(publish.getFlags());
-        LOG(DEBUG) << "RemainingLength: " << publish.getRemainingLength();
+        printStandardHeader(publish);
         LOG(DEBUG) << "DUP: " << publish.getDup();
         LOG(DEBUG) << "QoSLevel: " << static_cast<uint16_t>(publish.getQoSLevel());
         LOG(DEBUG) << "Retain: " << publish.getRetain();
@@ -164,50 +157,35 @@ namespace mqtt::broker {
     void SocketContext::onPuback(const iot::mqtt::packets::Puback& puback) {
         LOG(DEBUG) << "PUBACK";
         LOG(DEBUG) << "======";
-        LOG(DEBUG) << "Error: " << puback.isError();
-        LOG(DEBUG) << "Type: " << static_cast<uint16_t>(puback.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(puback.getFlags());
-        LOG(DEBUG) << "RemainingLength: " << puback.getRemainingLength();
+        printStandardHeader(puback);
         LOG(DEBUG) << "PacketIdentifier: " << puback.getPacketIdentifier();
     }
 
     void SocketContext::onPubrec(const iot::mqtt::packets::Pubrec& pubrec) {
         LOG(DEBUG) << "PUBREC";
         LOG(DEBUG) << "======";
-        LOG(DEBUG) << "Error: " << pubrec.isError();
-        LOG(DEBUG) << "Type: " << static_cast<uint16_t>(pubrec.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(pubrec.getFlags());
-        LOG(DEBUG) << "RemainingLength: " << pubrec.getRemainingLength();
+        printStandardHeader(pubrec);
         LOG(DEBUG) << "PacketIdentifier: " << pubrec.getPacketIdentifier();
     }
 
     void SocketContext::onPubrel(const iot::mqtt::packets::Pubrel& pubrel) {
         LOG(DEBUG) << "PUBREL";
         LOG(DEBUG) << "======";
-        LOG(DEBUG) << "Error: " << pubrel.isError();
-        LOG(DEBUG) << "Type: " << static_cast<uint16_t>(pubrel.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(pubrel.getFlags());
-        LOG(DEBUG) << "RemainingLength: " << pubrel.getRemainingLength();
+        printStandardHeader(pubrel);
         LOG(DEBUG) << "PacketIdentifier: " << pubrel.getPacketIdentifier();
     }
 
     void SocketContext::onPubcomp(const iot::mqtt::packets::Pubcomp& pubcomp) {
         LOG(DEBUG) << "PUBCOMP";
         LOG(DEBUG) << "=======";
-        LOG(DEBUG) << "Error: " << pubcomp.isError();
-        LOG(DEBUG) << "Type: " << static_cast<uint16_t>(pubcomp.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(pubcomp.getFlags());
-        LOG(DEBUG) << "RemainingLength: " << pubcomp.getRemainingLength();
+        printStandardHeader(pubcomp);
         LOG(DEBUG) << "PacketIdentifier: " << pubcomp.getPacketIdentifier();
     }
 
     void SocketContext::onSubscribe(const iot::mqtt::packets::Subscribe& subscribe) {
         LOG(DEBUG) << "SUBSCRIBE";
         LOG(DEBUG) << "=========";
-        LOG(DEBUG) << "Error: " << subscribe.isError();
-        LOG(DEBUG) << "Type: " << static_cast<uint16_t>(subscribe.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(subscribe.getFlags());
-        LOG(DEBUG) << "RemainingLength: " << subscribe.getRemainingLength();
+        printStandardHeader(subscribe);
         LOG(DEBUG) << "PacketIdentifier: " << subscribe.getPacketIdentifier();
 
         for (const iot::mqtt::Topic& topic : subscribe.getTopics()) {
@@ -219,10 +197,7 @@ namespace mqtt::broker {
     void SocketContext::onSuback(const iot::mqtt::packets::Suback& suback) {
         LOG(DEBUG) << "SUBACK";
         LOG(DEBUG) << "======";
-        LOG(DEBUG) << "Error: " << suback.isError();
-        LOG(DEBUG) << "Type: " << static_cast<uint16_t>(suback.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(suback.getFlags());
-        LOG(DEBUG) << "RemainingLength: " << suback.getRemainingLength();
+        printStandardHeader(suback);
         LOG(DEBUG) << "PacketIdentifier: " << suback.getPacketIdentifier();
 
         for (uint8_t returnCode : suback.getReturnCodes()) {
@@ -233,10 +208,7 @@ namespace mqtt::broker {
     void SocketContext::onUnsubscribe(const iot::mqtt::packets::Unsubscribe& unsubscribe) {
         LOG(DEBUG) << "UNSUBSCRIBE";
         LOG(DEBUG) << "===========";
-        LOG(DEBUG) << "Error: " << unsubscribe.isError();
-        LOG(DEBUG) << "Type: " << static_cast<uint16_t>(unsubscribe.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(unsubscribe.getFlags());
-        LOG(DEBUG) << "RemainingLength: " << unsubscribe.getRemainingLength();
+        printStandardHeader(unsubscribe);
         LOG(DEBUG) << "PacketIdentifier: " << unsubscribe.getPacketIdentifier();
 
         for (const std::string& topic : unsubscribe.getTopics()) {
@@ -248,41 +220,37 @@ namespace mqtt::broker {
     void SocketContext::onUnsuback(const iot::mqtt::packets::Unsuback& unsuback) {
         LOG(DEBUG) << "UNSUBACK";
         LOG(DEBUG) << "========";
-        LOG(DEBUG) << "Error: " << unsuback.isError();
-        LOG(DEBUG) << "Type: " << static_cast<uint16_t>(unsuback.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(unsuback.getFlags());
-        LOG(DEBUG) << "RemainingLength: " << unsuback.getRemainingLength();
+        printStandardHeader(unsuback);
         LOG(DEBUG) << "PacketIdentifier: " << unsuback.getPacketIdentifier();
     }
 
     void SocketContext::onPingreq(const iot::mqtt::packets::Pingreq& pingreq) {
         LOG(DEBUG) << "PINGREQ";
         LOG(DEBUG) << "=======";
-        LOG(DEBUG) << "Error: " << pingreq.isError();
-        LOG(DEBUG) << "Type: " << static_cast<uint16_t>(pingreq.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(pingreq.getFlags());
-        LOG(DEBUG) << "RemainingLength: " << pingreq.getRemainingLength();
+        printStandardHeader(pingreq);
     }
 
     void SocketContext::onPingresp(const iot::mqtt::packets::Pingresp& pingresp) {
         LOG(DEBUG) << "PINGRESP";
         LOG(DEBUG) << "========";
-        LOG(DEBUG) << "Error: " << pingresp.isError();
-        LOG(DEBUG) << "Type: " << static_cast<uint16_t>(pingresp.getType());
-        LOG(DEBUG) << "RemainingLength: " << pingresp.getRemainingLength();
+        printStandardHeader(pingresp);
     }
 
     void SocketContext::onDisconnect(const iot::mqtt::packets::Disconnect& disconnect) {
         LOG(DEBUG) << "DISCONNECT";
         LOG(DEBUG) << "==========";
-        LOG(DEBUG) << "Error: " << disconnect.isError();
-        LOG(DEBUG) << "Type: " << static_cast<uint16_t>(disconnect.getType());
-        LOG(DEBUG) << "Reserved: " << static_cast<uint16_t>(disconnect.getFlags());
-        LOG(DEBUG) << "RemainingLength: " << disconnect.getRemainingLength();
+        printStandardHeader(disconnect);
 
         willFlag = false;
 
         releaseSession();
+    }
+
+    void SocketContext::printStandardHeader(const iot::mqtt::ControlPacket& packet) {
+        LOG(DEBUG) << "Error: " << packet.isError();
+        LOG(DEBUG) << "Type: 0x" << std::hex << std::setfill('0') << std::setw(2) << static_cast<uint16_t>(packet.getType());
+        LOG(DEBUG) << "Flags: 0x" << std::hex << std::setfill('0') << std::setw(2) << static_cast<uint16_t>(packet.getFlags());
+        LOG(DEBUG) << "RemainingLength: " << packet.getRemainingLength();
     }
 
 } // namespace mqtt::broker
