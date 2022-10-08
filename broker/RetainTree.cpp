@@ -38,8 +38,8 @@ namespace mqtt::broker {
         head.retain(fullTopicName, message, qoSLevel, fullTopicName, false);
     }
 
-    void RetainTree::publish(std::string fullTopicName, const std::string& clientId, uint8_t clientQoSLevel) {
-        head.publish(clientId, clientQoSLevel, fullTopicName, false);
+    void RetainTree::publish(std::string subscribedTopicName, const std::string& clientId, uint8_t clientQoSLevel) {
+        head.publish(clientId, clientQoSLevel, subscribedTopicName, false);
     }
 
     RetainTree::RetainTreeNode::RetainTreeNode(mqtt::broker::Broker* broker)
@@ -74,7 +74,7 @@ namespace mqtt::broker {
 
     void RetainTree::RetainTreeNode::publish(const std::string& clientId,
                                              uint8_t clientQoSLevel,
-                                             std::string remainingTopicName,
+                                             std::string remainingSubscribedTopicName,
                                              bool leafFound) {
         if (leafFound) {
             if (!fullTopicName.empty()) {
@@ -84,18 +84,18 @@ namespace mqtt::broker {
                 LOG(TRACE) << "... completed!";
             }
         } else {
-            std::string::size_type slashPosition = remainingTopicName.find('/');
+            std::string::size_type slashPosition = remainingSubscribedTopicName.find('/');
 
-            std::string topicName = remainingTopicName.substr(0, slashPosition);
+            std::string topicName = remainingSubscribedTopicName.substr(0, slashPosition);
             bool leafFound = slashPosition == std::string::npos;
 
-            remainingTopicName.erase(0, topicName.size() + 1);
+            remainingSubscribedTopicName.erase(0, topicName.size() + 1);
 
             if (topicTreeNodes.contains(topicName)) {
-                topicTreeNodes.find(topicName)->second.publish(clientId, clientQoSLevel, remainingTopicName, leafFound);
+                topicTreeNodes.find(topicName)->second.publish(clientId, clientQoSLevel, remainingSubscribedTopicName, leafFound);
             } else if (topicName == "+") {
                 for (auto& [notUsed, topicTree] : topicTreeNodes) {
-                    topicTree.publish(clientId, clientQoSLevel, remainingTopicName, leafFound);
+                    topicTree.publish(clientId, clientQoSLevel, remainingSubscribedTopicName, leafFound);
                 }
             } else if (topicName == "#") {
                 publish(clientId, clientQoSLevel);

@@ -38,7 +38,7 @@ namespace mqtt::broker {
         explicit RetainTree(mqtt::broker::Broker* broker);
 
         void retain(const std::string& fullTopicName, const std::string& message, uint8_t qosLevel);
-        void publish(std::string fullTopicName, const std::string& clientId, uint8_t clientQoSLevel);
+        void publish(std::string subscribedTopicName, const std::string& clientId, uint8_t clientQoSLevel);
 
     private:
         class RetainTreeNode {
@@ -50,7 +50,7 @@ namespace mqtt::broker {
                         uint8_t qoSLevel,
                         std::string remainingTopicName,
                         bool leafFound);
-            void publish(const std::string& clientId, uint8_t clientQoSLevel, std::string remainingTopicName, bool leafFound);
+            void publish(const std::string& clientId, uint8_t clientQoSLevel, std::string remainingSubscribedTopicName, bool leafFound);
             void publish(const std::string& clientId, uint8_t clientQoSLevel);
 
         private:
