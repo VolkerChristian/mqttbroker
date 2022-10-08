@@ -19,6 +19,7 @@
 #include "broker/SocketContext.h"
 
 #include "broker/Broker.h"
+#include "core/DescriptorEventReceiver.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -109,7 +110,7 @@ namespace mqtt::broker {
         if (keepAlive != 0) {
             setTimeout(1.5 * keepAlive);
         } else {
-            // Leave the read- and write-timeouts as configured for this SocketContext (default 60 sec)
+            setTimeout(core::DescriptorEventReceiver::TIMEOUT::DISABLE);
         }
         LOG(DEBUG) << "ClientID: " << clientId;
         LOG(DEBUG) << "CleanSession: " << cleanSession;
