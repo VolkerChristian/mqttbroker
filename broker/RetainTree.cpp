@@ -44,7 +44,7 @@ namespace mqtt::broker {
 
     bool RetainTree::retain(
         const std::string& fullTopicName, std::string remainingTopicName, const std::string& message, uint8_t qoSLevel, bool leafFound) {
-        if (remainingTopicName.empty() && leafFound) {
+        if (leafFound) {
             LOG(TRACE) << "Retaining: " << fullTopicName << " - " << message;
             this->fullTopicName = fullTopicName;
             this->message = message;
@@ -66,10 +66,12 @@ namespace mqtt::broker {
     }
 
     void RetainTree::publish(std::string remainingTopicName, const std::string& clientId, uint8_t clientQoSLevel, bool leafFound) {
-        if (remainingTopicName.empty() && !message.empty() && leafFound /* && expandedTopicName == fullTopicName */) {
+        if (leafFound) {
             LOG(TRACE) << "Found retained message: " << fullTopicName << " - " << message << " - " << static_cast<uint16_t>(qoSLevel);
             LOG(TRACE) << "Distribute message ...";
-            broker->sendPublish(clientId, fullTopicName, message, DUP_FALSE, qoSLevel, RETAIN_TRUE, clientQoSLevel);
+            if (!fullTopicName.empty()) {
+                broker->sendPublish(clientId, fullTopicName, message, DUP_FALSE, qoSLevel, RETAIN_TRUE, clientQoSLevel);
+            }
             LOG(TRACE) << "... completed!";
         } else {
             std::string::size_type slashPosition = remainingTopicName.find('/');
@@ -79,11 +81,9 @@ namespace mqtt::broker {
             bool leafFound = slashPosition == std::string::npos;
 
             if (topicTree.contains(topicName)) {
-                // Expand expandedTopicName
                 topicTree.find(topicName)->second.publish(remainingTopicName, clientId, clientQoSLevel, leafFound);
             } else if (topicName == "+") {
                 for (auto& topicTreeEntry : topicTree) {
-                    // Expand expandedTopicName
                     topicTreeEntry.second.publish(remainingTopicName, clientId, clientQoSLevel, leafFound);
                 }
             } else if (topicName == "#") {
