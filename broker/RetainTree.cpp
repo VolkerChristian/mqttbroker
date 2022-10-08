@@ -31,18 +31,22 @@
 namespace mqtt::broker {
 
     RetainTree::RetainTree(Broker* broker)
-        : broker(broker) {
+        : head(broker) {
     }
 
     void RetainTree::retain(const std::string& fullTopicName, const std::string& message, uint8_t qoSLevel) {
-        retain(fullTopicName, message, qoSLevel, fullTopicName, false);
+        head.retain(fullTopicName, message, qoSLevel, fullTopicName, false);
     }
 
     void RetainTree::publish(std::string fullTopicName, const std::string& clientId, uint8_t clientQoSLevel) {
-        publish(clientId, clientQoSLevel, fullTopicName, false);
+        head.publish(clientId, clientQoSLevel, fullTopicName, false);
     }
 
-    bool RetainTree::retain(
+    RetainTree::RetainTreeNode::RetainTreeNode(mqtt::broker::Broker* broker)
+        : broker(broker) {
+    }
+
+    bool RetainTree::RetainTreeNode::retain(
         const std::string& fullTopicName, const std::string& message, uint8_t qoSLevel, std::string remainingTopicName, bool leafFound) {
         if (leafFound) {
             if (!fullTopicName.empty()) {
@@ -59,16 +63,19 @@ namespace mqtt::broker {
 
             remainingTopicName.erase(0, topicName.size() + 1);
 
-            if (topicTree.insert({topicName, RetainTree(broker)})
+            if (topicTreeNodes.insert({topicName, RetainTreeNode(broker)})
                     .first->second.retain(fullTopicName, message, qoSLevel, remainingTopicName, leafFound)) {
-                topicTree.erase(topicName);
+                topicTreeNodes.erase(topicName);
             }
         }
 
-        return this->message.empty() && topicTree.empty();
+        return this->message.empty() && topicTreeNodes.empty();
     }
 
-    void RetainTree::publish(const std::string& clientId, uint8_t clientQoSLevel, std::string remainingTopicName, bool leafFound) {
+    void RetainTree::RetainTreeNode::publish(const std::string& clientId,
+                                             uint8_t clientQoSLevel,
+                                             std::string remainingTopicName,
+                                             bool leafFound) {
         if (leafFound) {
             if (!fullTopicName.empty()) {
                 LOG(TRACE) << "Found retained message: " << fullTopicName << " - " << message << " - " << static_cast<uint16_t>(qoSLevel);
@@ -84,11 +91,11 @@ namespace mqtt::broker {
 
             remainingTopicName.erase(0, topicName.size() + 1);
 
-            if (topicTree.contains(topicName)) {
-                topicTree.find(topicName)->second.publish(clientId, clientQoSLevel, remainingTopicName, leafFound);
+            if (topicTreeNodes.contains(topicName)) {
+                topicTreeNodes.find(topicName)->second.publish(clientId, clientQoSLevel, remainingTopicName, leafFound);
             } else if (topicName == "+") {
-                for (auto& topicTreeEntry : topicTree) {
-                    topicTreeEntry.second.publish(clientId, clientQoSLevel, remainingTopicName, leafFound);
+                for (auto& [notUsed, topicTree] : topicTreeNodes) {
+                    topicTree.publish(clientId, clientQoSLevel, remainingTopicName, leafFound);
                 }
             } else if (topicName == "#") {
                 publish(clientId, clientQoSLevel);
@@ -96,7 +103,7 @@ namespace mqtt::broker {
         }
     }
 
-    void RetainTree::publish(const std::string& clientId, uint8_t clientQoSLevel) {
+    void RetainTree::RetainTreeNode::publish(const std::string& clientId, uint8_t clientQoSLevel) {
         if (!fullTopicName.empty()) {
             LOG(TRACE) << "Found retained message: " << fullTopicName << " - " << message << " - " << static_cast<uint16_t>(qoSLevel);
             LOG(TRACE) << "Distribute message ...";
@@ -104,7 +111,7 @@ namespace mqtt::broker {
             LOG(TRACE) << "... completed!";
         }
 
-        for (auto& [topicName, topicTree] : topicTree) {
+        for (auto& [topicName, topicTree] : topicTreeNodes) {
             topicTree.publish(clientId, clientQoSLevel);
         }
     }

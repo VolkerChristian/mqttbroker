@@ -32,10 +32,34 @@
 namespace mqtt::broker {
 
     SubscribtionTree::SubscribtionTree(Broker* broker)
-        : broker(broker) {
+        : head(broker) {
     }
 
     void SubscribtionTree::publishRetained(const std::string& clientId) {
+        head.publishRetained(clientId);
+    }
+
+    bool SubscribtionTree::subscribe(const std::string& fullTopicName, const std::string& clientId, uint8_t clientQoSLevel) {
+        return head.subscribe(fullTopicName, clientId, clientQoSLevel, fullTopicName, false);
+    }
+
+    void SubscribtionTree::publish(const std::string& fullTopicName, const std::string& message, uint8_t qoSLevel, bool retained) {
+        head.publish(fullTopicName, message, qoSLevel, retained, fullTopicName, false);
+    }
+
+    bool SubscribtionTree::unsubscribe(std::string fullTopicName, const std::string& clientId) {
+        return head.unsubscribe(clientId, fullTopicName, false);
+    }
+
+    bool SubscribtionTree::unsubscribe(const std::string& clientId) {
+        return head.unsubscribe(clientId);
+    }
+
+    SubscribtionTree::SubscribtionTreeNode::SubscribtionTreeNode(Broker* broker)
+        : broker(broker) {
+    }
+
+    void SubscribtionTree::SubscribtionTreeNode::publishRetained(const std::string& clientId) {
         if (subscribers.contains(clientId) && !subscribedTopicName.empty()) {
             broker->publishRetained(subscribedTopicName, clientId, subscribers[clientId]);
         }
@@ -45,57 +69,11 @@ namespace mqtt::broker {
         }
     }
 
-    bool SubscribtionTree::subscribe(const std::string& fullTopicName, const std::string& clientId, uint8_t clientQoSLevel) {
-        return subscribe(fullTopicName, fullTopicName, clientId, clientQoSLevel, false);
-    }
-
-    void SubscribtionTree::publish(const std::string& fullTopicName, const std::string& message, uint8_t qoSLevel, bool retained) {
-        publish(fullTopicName, fullTopicName, message, qoSLevel, retained, false);
-    }
-
-    bool SubscribtionTree::unsubscribe(const std::string& clientId) {
-        subscribers.erase(clientId);
-
-        for (auto it = subscribtions.begin(); it != subscribtions.end();) {
-            if (it->second.unsubscribe(clientId)) {
-                it = subscribtions.erase(it);
-            } else {
-                ++it;
-            }
-        }
-
-        return subscribers.empty() && subscribtions.empty();
-    }
-
-    bool SubscribtionTree::unsubscribe(std::string remainingTopicName, const std::string& clientId) {
-        return unsubscribe(remainingTopicName, clientId, false);
-    }
-
-    bool SubscribtionTree::unsubscribe(std::string remainingTopicName, const std::string& clientId, bool leafFound) {
-        if (leafFound) {
-            subscribers.erase(clientId);
-        } else {
-            std::string::size_type slashPosition = remainingTopicName.find('/');
-
-            std::string topicName = remainingTopicName.substr(0, slashPosition);
-            bool leafFound = slashPosition == std::string::npos;
-
-            remainingTopicName.erase(0, topicName.size() + 1);
-
-            if (subscribtions.contains(topicName) &&
-                subscribtions.find(topicName)->second.unsubscribe(remainingTopicName, clientId, leafFound)) {
-                subscribtions.erase(topicName);
-            }
-        }
-
-        return subscribers.empty() && subscribtions.empty();
-    }
-
-    bool SubscribtionTree::subscribe(std::string remainingTopicName,
-                                     const std::string& fullTopicName,
-                                     const std::string& clientId,
-                                     uint8_t clientQoSLevel,
-                                     bool leafFound) {
+    bool SubscribtionTree::SubscribtionTreeNode::subscribe(const std::string& fullTopicName,
+                                                           const std::string& clientId,
+                                                           uint8_t clientQoSLevel,
+                                                           std::string remainingTopicName,
+                                                           bool leafFound) {
         bool success = true;
 
         if (leafFound) {
@@ -112,20 +90,20 @@ namespace mqtt::broker {
             } else {
                 remainingTopicName.erase(0, topicName.size() + 1);
 
-                success = subscribtions.insert({topicName, mqtt::broker::SubscribtionTree(broker)})
-                              .first->second.subscribe(remainingTopicName, fullTopicName, clientId, clientQoSLevel, leafFound);
+                success = subscribtions.insert({topicName, SubscribtionTree::SubscribtionTreeNode(broker)})
+                              .first->second.subscribe(fullTopicName, clientId, clientQoSLevel, remainingTopicName, leafFound);
             }
         }
 
         return success;
     }
 
-    void SubscribtionTree::publish(std::string remainingTopicName,
-                                   const std::string& fullTopicName,
-                                   const std::string& message,
-                                   uint8_t qoSLevel,
-                                   bool retained,
-                                   bool leafFound) {
+    void SubscribtionTree::SubscribtionTreeNode::publish(const std::string& fullTopicName,
+                                                         const std::string& message,
+                                                         uint8_t qoSLevel,
+                                                         bool retained,
+                                                         std::string remainingTopicName,
+                                                         bool leafFound) {
         if (leafFound) {
             LOG(TRACE) << "Found Match: Subscribed Topic: '" << subscribedTopicName << "', Matched Topic: '" << fullTopicName
                        << "', Message: '" << message << "'";
@@ -143,13 +121,13 @@ namespace mqtt::broker {
             remainingTopicName.erase(0, topicName.size() + 1);
 
             if (subscribtions.contains(topicName)) {
-                subscribtions.find(topicName)->second.publish(remainingTopicName, fullTopicName, message, qoSLevel, retained, leafFound);
+                subscribtions.find(topicName)->second.publish(fullTopicName, message, qoSLevel, retained, remainingTopicName, leafFound);
             }
             if (subscribtions.contains("+")) {
-                subscribtions.find("+")->second.publish(remainingTopicName, fullTopicName, message, qoSLevel, retained, leafFound);
+                subscribtions.find("+")->second.publish(fullTopicName, message, qoSLevel, retained, remainingTopicName, leafFound);
             }
             if (subscribtions.contains("#")) {
-                const SubscribtionTree& foundSubscription = subscribtions.find("#")->second;
+                const SubscribtionTreeNode& foundSubscription = subscribtions.find("#")->second;
 
                 LOG(TRACE) << "Found Match: Subscribed Topic: '" << foundSubscription.subscribedTopicName << "', Matched Topic: '"
                            << fullTopicName << "', Message: '" << message << "'";
@@ -160,6 +138,40 @@ namespace mqtt::broker {
                 LOG(TRACE) << "... completed!";
             }
         }
+    }
+
+    bool SubscribtionTree::SubscribtionTreeNode::unsubscribe(const std::string& clientId, std::string remainingTopicName, bool leafFound) {
+        if (leafFound) {
+            subscribers.erase(clientId);
+        } else {
+            std::string::size_type slashPosition = remainingTopicName.find('/');
+
+            std::string topicName = remainingTopicName.substr(0, slashPosition);
+            bool leafFound = slashPosition == std::string::npos;
+
+            remainingTopicName.erase(0, topicName.size() + 1);
+
+            if (subscribtions.contains(topicName) &&
+                subscribtions.find(topicName)->second.unsubscribe(clientId, remainingTopicName, leafFound)) {
+                subscribtions.erase(topicName);
+            }
+        }
+
+        return subscribers.empty() && subscribtions.empty();
+    }
+
+    bool SubscribtionTree::SubscribtionTreeNode::unsubscribe(const std::string& clientId) {
+        subscribers.erase(clientId);
+
+        for (auto it = subscribtions.begin(); it != subscribtions.end();) {
+            if (it->second.unsubscribe(clientId)) {
+                it = subscribtions.erase(it);
+            } else {
+                ++it;
+            }
+        }
+
+        return subscribers.empty() && subscribtions.empty();
     }
 
 } // namespace mqtt::broker

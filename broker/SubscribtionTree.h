@@ -43,31 +43,42 @@ namespace mqtt::broker {
 
         void publish(const std::string& fullTopicName, const std::string& message, uint8_t qoSLevel, bool retained);
 
+        bool unsubscribe(std::string fullTopicName, const std::string& clientId);
         bool unsubscribe(const std::string& clientId);
-        bool unsubscribe(std::string remainingTopicName, const std::string& clientId);
 
     private:
-        bool subscribe(std::string remainingTopicName,
-                       const std::string& fullTopicName,
-                       const std::string& clientId,
-                       uint8_t clientQoSLevel,
-                       bool leafFound);
+        class SubscribtionTreeNode {
+        public:
+            explicit SubscribtionTreeNode(mqtt::broker::Broker* broker);
 
-        bool unsubscribe(std::string remainingTopicName, const std::string& clientId, bool leafFound);
+            void publishRetained(const std::string& clientId);
 
-        void publish(std::string remainingTopicName,
-                     const std::string& fullTopicName,
-                     const std::string& message,
-                     uint8_t qoSLevel,
-                     bool retained,
-                     bool leafFound);
+            bool subscribe(const std::string& fullTopicName,
+                           const std::string& clientId,
+                           uint8_t clientQoSLevel,
+                           std::string remainingTopicName,
+                           bool leafFound);
 
-        std::map<std::string, uint8_t> subscribers;
-        std::map<std::string, SubscribtionTree> subscribtions;
+            void publish(const std::string& fullTopicName,
+                         const std::string& message,
+                         uint8_t qoSLevel,
+                         bool retained,
+                         std::string remainingTopicName,
+                         bool leafFound);
 
-        std::string subscribedTopicName = "";
+            bool unsubscribe(const std::string& clientId, std::string remainingTopicName, bool leafFound);
+            bool unsubscribe(const std::string& clientId);
 
-        mqtt::broker::Broker* broker;
+        private:
+            std::map<std::string, uint8_t> subscribers;
+            std::map<std::string, SubscribtionTreeNode> subscribtions;
+
+            std::string subscribedTopicName = "";
+
+            mqtt::broker::Broker* broker;
+        };
+
+        SubscribtionTreeNode head;
     };
 
 } // namespace mqtt::broker

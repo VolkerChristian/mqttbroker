@@ -38,24 +38,32 @@ namespace mqtt::broker {
         explicit RetainTree(mqtt::broker::Broker* broker);
 
         void retain(const std::string& fullTopicName, const std::string& message, uint8_t qosLevel);
-
         void publish(std::string fullTopicName, const std::string& clientId, uint8_t clientQoSLevel);
 
     private:
-        bool retain(
-            const std::string& fullTopicName, const std::string& message, uint8_t qoSLevel, std::string remainingTopicName, bool leafFound);
+        class RetainTreeNode {
+        public:
+            explicit RetainTreeNode(mqtt::broker::Broker* broker);
 
-        void publish(const std::string& clientId, uint8_t clientQoSLevel, std::string remainingTopicName, bool leafFound);
+            bool retain(const std::string& fullTopicName,
+                        const std::string& message,
+                        uint8_t qoSLevel,
+                        std::string remainingTopicName,
+                        bool leafFound);
+            void publish(const std::string& clientId, uint8_t clientQoSLevel, std::string remainingTopicName, bool leafFound);
+            void publish(const std::string& clientId, uint8_t clientQoSLevel);
 
-        void publish(const std::string& clientId, uint8_t clientQoSLevel);
+        private:
+            std::string fullTopicName = "";
+            std::string message = "";
+            uint8_t qoSLevel = 0;
 
-        std::string fullTopicName = "";
-        std::string message = "";
-        uint8_t qoSLevel = 0;
+            std::map<std::string, RetainTreeNode> topicTreeNodes;
 
-        std::map<std::string, RetainTree> topicTree;
+            mqtt::broker::Broker* broker;
+        };
 
-        mqtt::broker::Broker* broker;
+        RetainTreeNode head;
     };
 
 } // namespace mqtt::broker
