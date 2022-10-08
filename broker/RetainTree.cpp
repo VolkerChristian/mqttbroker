@@ -51,10 +51,11 @@ namespace mqtt::broker {
             this->qoSLevel = qoSLevel;
         } else {
             std::string::size_type slashPosition = remainingTopicName.find('/');
-            std::string topicName = remainingTopicName.substr(0, slashPosition);
-            remainingTopicName.erase(0, topicName.size() + 1);
 
+            std::string topicName = remainingTopicName.substr(0, slashPosition);
             bool leafFound = slashPosition == std::string::npos;
+
+            remainingTopicName.erase(0, topicName.size() + 1);
 
             if (topicTree.insert({topicName, RetainTree(broker)})
                     .first->second.retain(fullTopicName, remainingTopicName, message, qoSLevel, leafFound)) {
@@ -75,10 +76,11 @@ namespace mqtt::broker {
             LOG(TRACE) << "... completed!";
         } else {
             std::string::size_type slashPosition = remainingTopicName.find('/');
-            std::string topicName = remainingTopicName.substr(0, slashPosition);
-            remainingTopicName.erase(0, topicName.size() + 1);
 
+            std::string topicName = remainingTopicName.substr(0, slashPosition);
             bool leafFound = slashPosition == std::string::npos;
+
+            remainingTopicName.erase(0, topicName.size() + 1);
 
             if (topicTree.contains(topicName)) {
                 topicTree.find(topicName)->second.publish(remainingTopicName, clientId, clientQoSLevel, leafFound);

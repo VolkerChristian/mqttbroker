@@ -76,10 +76,11 @@ namespace mqtt::broker {
             subscribers.erase(clientId);
         } else {
             std::string::size_type slashPosition = remainingTopicName.find('/');
-            std::string topicName = remainingTopicName.substr(0, slashPosition);
-            remainingTopicName.erase(0, topicName.size() + 1);
 
+            std::string topicName = remainingTopicName.substr(0, slashPosition);
             bool leafFound = slashPosition == std::string::npos;
+
+            remainingTopicName.erase(0, topicName.size() + 1);
 
             if (subscribtions.contains(topicName) &&
                 subscribtions.find(topicName)->second.unsubscribe(remainingTopicName, clientId, leafFound)) {
@@ -102,13 +103,15 @@ namespace mqtt::broker {
             subscribers[clientId] = clientQoSLevel;
         } else {
             std::string::size_type slashPosition = remainingTopicName.find('/');
+
             std::string topicName = remainingTopicName.substr(0, slashPosition);
+            bool leafFound = slashPosition == std::string::npos;
 
             if (topicName == "#" && !remainingTopicName.ends_with("#")) {
                 success = false;
             } else {
                 remainingTopicName.erase(0, topicName.size() + 1);
-                bool leafFound = slashPosition == std::string::npos;
+
                 success = subscribtions.insert({topicName, mqtt::broker::SubscribtionTree(broker)})
                               .first->second.subscribe(remainingTopicName, fullTopicName, clientId, clientQoSLevel, leafFound);
             }
@@ -133,10 +136,11 @@ namespace mqtt::broker {
             LOG(TRACE) << "... completed!";
         } else {
             std::string::size_type slashPosition = remainingTopicName.find('/');
-            std::string topicName = remainingTopicName.substr(0, slashPosition);
-            remainingTopicName.erase(0, topicName.size() + 1);
 
+            std::string topicName = remainingTopicName.substr(0, slashPosition);
             bool leafFound = slashPosition == std::string::npos;
+
+            remainingTopicName.erase(0, topicName.size() + 1);
 
             if (subscribtions.contains(topicName)) {
                 subscribtions.find(topicName)->second.publish(remainingTopicName, fullTopicName, message, qoSLevel, retained, leafFound);
