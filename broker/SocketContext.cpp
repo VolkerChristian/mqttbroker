@@ -191,7 +191,8 @@ namespace mqtt::broker {
 
         for (iot::mqtt::Topic& topic : subscribe.getTopics()) {
             LOG(DEBUG) << "  Topic: " << topic.getName() << ", requestedQoS: " << static_cast<uint16_t>(topic.getRequestedQoS());
-            topic.setAcceptedQoS(broker->subscribe(topic.getName(), clientId, topic.getRequestedQoS()));
+            uint8_t ret = broker->subscribe(topic.getName(), clientId, topic.getRequestedQoS());
+            topic.setAcceptedQoS(ret);
         }
     }
 

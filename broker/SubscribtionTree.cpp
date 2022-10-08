@@ -45,8 +45,8 @@ namespace mqtt::broker {
         }
     }
 
-    void SubscribtionTree::subscribe(const std::string& fullTopicName, const std::string& clientId, uint8_t clientQoSLevel) {
-        subscribe(fullTopicName, fullTopicName, clientId, clientQoSLevel);
+    bool SubscribtionTree::subscribe(const std::string& fullTopicName, const std::string& clientId, uint8_t clientQoSLevel) {
+        return subscribe(fullTopicName, fullTopicName, clientId, clientQoSLevel);
     }
 
     void SubscribtionTree::publish(const std::string& fullTopicName, const std::string& message, uint8_t qoSLevel, bool retained) {
@@ -73,6 +73,7 @@ namespace mqtt::broker {
         } else {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
             remainingTopicName.erase(0, topicName.size() + 1);
+            remainingTopicName.erase(0, remainingTopicName.find_first_not_of('/'));
 
             if (subscribtions.contains(topicName) && subscribtions.find(topicName)->second.unsubscribe(remainingTopicName, clientId)) {
                 subscribtions.erase(topicName);
@@ -82,20 +83,29 @@ namespace mqtt::broker {
         return subscribers.empty() && subscribtions.empty();
     }
 
-    void SubscribtionTree::subscribe(std::string remainingTopicName,
+    bool SubscribtionTree::subscribe(std::string remainingTopicName,
                                      const std::string& fullTopicName,
                                      const std::string& clientId,
                                      uint8_t clientQoSLevel) {
+        bool success = true;
         if (remainingTopicName.empty()) {
             subscribedTopicName = fullTopicName;
             subscribers[clientId] = clientQoSLevel;
         } else {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
-            remainingTopicName.erase(0, topicName.size() + 1);
 
-            subscribtions.insert({topicName, mqtt::broker::SubscribtionTree(broker)})
-                .first->second.subscribe(remainingTopicName, fullTopicName, clientId, clientQoSLevel);
+            if (topicName == "#" && !remainingTopicName.ends_with("#")) {
+                success = false;
+            } else {
+                remainingTopicName.erase(0, topicName.size() + 1);
+                remainingTopicName.erase(0, remainingTopicName.find_first_not_of('/'));
+
+                success = subscribtions.insert({topicName, mqtt::broker::SubscribtionTree(broker)})
+                              .first->second.subscribe(remainingTopicName, fullTopicName, clientId, clientQoSLevel);
+            }
         }
+
+        return success;
     }
 
     void SubscribtionTree::publish(
@@ -111,6 +121,7 @@ namespace mqtt::broker {
         } else {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
             remainingTopicName.erase(0, topicName.size() + 1);
+            remainingTopicName.erase(0, remainingTopicName.find_first_not_of('/'));
 
             if (subscribtions.contains(topicName)) {
                 subscribtions.find(topicName)->second.publish(remainingTopicName, fullTopicName, message, qoSLevel, retained);

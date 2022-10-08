@@ -47,12 +47,18 @@ namespace mqtt::broker {
     }
 
     uint8_t Broker::subscribe(const std::string& topic, const std::string& clientId, uint8_t suscribedQoSLevel) {
-        uint8_t selectedQoS = std::min(subscribtionMaxQoS, suscribedQoSLevel) | SUBSCRIBTION_SUCCESS;
+        uint8_t selectedQoS = std::min(subscribtionMaxQoS, suscribedQoSLevel);
+        uint8_t returnCode = 0;
 
-        subscribtionTree.subscribe(topic, clientId, selectedQoS);
-        retainTree.publish(topic, clientId, selectedQoS);
+        if (subscribtionTree.subscribe(topic, clientId, selectedQoS)) {
+            retainTree.publish(topic, clientId, selectedQoS);
 
-        return selectedQoS;
+            returnCode = SUBSCRIBTION_SUCCESS | selectedQoS;
+        } else {
+            returnCode = SUBSCRIBTION_FAILURE;
+        }
+
+        return returnCode;
     }
 
     void Broker::publish(const std::string& topic, const std::string& message, uint8_t qoSLevel, bool retain) {

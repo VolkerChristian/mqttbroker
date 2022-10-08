@@ -41,8 +41,9 @@ namespace mqtt::broker {
 #define RETAIN_TRUE true
 
 #define SUBSCRIBTION_MAX_QOS 0x02
-#define SUBSCRIBTION_FAILURE 0x80
+
 #define SUBSCRIBTION_SUCCESS 0x00
+#define SUBSCRIBTION_FAILURE 0x80
 
 namespace mqtt::broker {
 

@@ -39,7 +39,7 @@ namespace mqtt::broker {
 
         void publishRetained(const std::string& clientId);
 
-        void subscribe(const std::string& fullTopicName, const std::string& clientId, uint8_t clientQoSLevel);
+        bool subscribe(const std::string& fullTopicName, const std::string& clientId, uint8_t clientQoSLevel);
 
         void publish(const std::string& fullTopicName, const std::string& message, uint8_t qoSLevel, bool retained);
 
@@ -48,7 +48,7 @@ namespace mqtt::broker {
         bool unsubscribe(std::string remainingTopicName, const std::string& clientId);
 
     private:
-        void
+        bool
         subscribe(std::string remainingTopicName, const std::string& fullTopicName, const std::string& clientId, uint8_t clientQoSLevel);
 
         void publish(
