@@ -35,22 +35,29 @@ namespace mqtt::broker {
     }
 
     void RetainTree::retain(const std::string& fullTopicName, const std::string& message, uint8_t qoSLevel) {
-        retain(fullTopicName, fullTopicName, message, qoSLevel);
+        retain(fullTopicName, fullTopicName, message, qoSLevel, false);
     }
 
-    bool
-    RetainTree::retain(const std::string& fullTopicName, std::string remainingTopicName, const std::string& message, uint8_t qoSLevel) {
-        if (remainingTopicName.empty()) {
+    void RetainTree::publish(std::string remainingTopicName, const std::string& clientId, uint8_t clientQoSLevel) {
+        publish(remainingTopicName, clientId, clientQoSLevel, false);
+    }
+
+    bool RetainTree::retain(
+        const std::string& fullTopicName, std::string remainingTopicName, const std::string& message, uint8_t qoSLevel, bool leafFound) {
+        if (remainingTopicName.empty() && leafFound) {
             LOG(TRACE) << "Retaining: " << fullTopicName << " - " << message;
             this->fullTopicName = fullTopicName;
             this->message = message;
             this->qoSLevel = qoSLevel;
         } else {
-            std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
+            std::string::size_type slashPosition = remainingTopicName.find('/');
+            std::string topicName = remainingTopicName.substr(0, slashPosition);
             remainingTopicName.erase(0, topicName.size() + 1);
 
+            bool leafFound = slashPosition == std::string::npos;
+
             if (topicTree.insert({topicName, RetainTree(broker)})
-                    .first->second.retain(fullTopicName, remainingTopicName, message, qoSLevel)) {
+                    .first->second.retain(fullTopicName, remainingTopicName, message, qoSLevel, leafFound)) {
                 topicTree.erase(topicName);
             }
         }
@@ -58,21 +65,26 @@ namespace mqtt::broker {
         return this->message.empty() && topicTree.empty();
     }
 
-    void RetainTree::publish(std::string remainingTopicName, const std::string& clientId, uint8_t clientQoSLevel) {
-        if (remainingTopicName.empty() && !message.empty()) {
+    void RetainTree::publish(std::string remainingTopicName, const std::string& clientId, uint8_t clientQoSLevel, bool leafFound) {
+        if (remainingTopicName.empty() && !message.empty() && leafFound /* && expandedTopicName == fullTopicName */) {
             LOG(TRACE) << "Found retained message: " << fullTopicName << " - " << message << " - " << static_cast<uint16_t>(qoSLevel);
             LOG(TRACE) << "Distribute message ...";
             broker->sendPublish(clientId, fullTopicName, message, DUP_FALSE, qoSLevel, RETAIN_TRUE, clientQoSLevel);
             LOG(TRACE) << "... completed!";
         } else {
-            std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
+            std::string::size_type slashPosition = remainingTopicName.find('/');
+            std::string topicName = remainingTopicName.substr(0, slashPosition);
             remainingTopicName.erase(0, topicName.size() + 1);
 
+            bool leafFound = slashPosition == std::string::npos;
+
             if (topicTree.contains(topicName)) {
-                topicTree.find(topicName)->second.publish(remainingTopicName, clientId, clientQoSLevel);
+                // Expand expandedTopicName
+                topicTree.find(topicName)->second.publish(remainingTopicName, clientId, clientQoSLevel, leafFound);
             } else if (topicName == "+") {
                 for (auto& topicTreeEntry : topicTree) {
-                    topicTreeEntry.second.publish(remainingTopicName, clientId, clientQoSLevel);
+                    // Expand expandedTopicName
+                    topicTreeEntry.second.publish(remainingTopicName, clientId, clientQoSLevel, leafFound);
                 }
             } else if (topicName == "#") {
                 publish(clientId, clientQoSLevel);
