@@ -91,8 +91,9 @@ namespace mqtt::broker {
 
             remainingSubscribedTopicName.erase(0, topicName.size() + 1);
 
-            if (topicTreeNodes.contains(topicName)) {
-                topicTreeNodes.find(topicName)->second.publish(clientId, clientQoSLevel, remainingSubscribedTopicName, leafFound);
+            auto foundNode = topicTreeNodes.find(topicName);
+            if (foundNode != topicTreeNodes.end()) {
+                foundNode->second.publish(clientId, clientQoSLevel, remainingSubscribedTopicName, leafFound);
             } else if (topicName == "+") {
                 for (auto& [notUsed, topicTree] : topicTreeNodes) {
                     topicTree.publish(clientId, clientQoSLevel, remainingSubscribedTopicName, leafFound);

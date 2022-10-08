@@ -105,13 +105,26 @@ namespace mqtt::broker {
                                                          std::string remainingTopicName,
                                                          bool leafFound) {
         if (leafFound) {
-            LOG(TRACE) << "Found Match: Subscribed Topic: '" << subscribedTopicName << "', Matched Topic: '" << fullTopicName
-                       << "', Message: '" << message << "'";
-            LOG(TRACE) << "Distribute Publish ...";
-            for (auto& [clientId, clientQoSLevel] : subscribers) {
-                broker->sendPublish(clientId, fullTopicName, message, DUP_FALSE, qoSLevel, retained, clientQoSLevel);
+            if (!subscribedTopicName.empty()) {
+                LOG(TRACE) << "Found Match: Subscribed Topic: '" << subscribedTopicName << "', Matched Topic: '" << fullTopicName
+                           << "', Message: '" << message << "'";
+                LOG(TRACE) << "Distribute Publish ...";
+                for (auto& [clientId, clientQoSLevel] : subscribers) {
+                    broker->sendPublish(clientId, fullTopicName, message, DUP_FALSE, qoSLevel, retained, clientQoSLevel);
+                }
+                LOG(TRACE) << "... completed!";
             }
-            LOG(TRACE) << "... completed!";
+
+            auto nextHashNode = subscribtions.find("#");
+            if (nextHashNode != subscribtions.end()) {
+                LOG(TRACE) << "Found Parent Match: Subscribed Child-Topic: '" << fullTopicName << "/#', Matched Topic: '" << fullTopicName
+                           << "', Message: '" << message << "'";
+                LOG(TRACE) << "Distribute Publish ...";
+                for (auto& [clientId, clientQoSLevel] : nextHashNode->second.subscribers) {
+                    broker->sendPublish(clientId, fullTopicName, message, DUP_FALSE, qoSLevel, retained, clientQoSLevel);
+                }
+                LOG(TRACE) << "... completed!";
+            }
         } else {
             std::string::size_type slashPosition = remainingTopicName.find('/');
 
@@ -120,19 +133,22 @@ namespace mqtt::broker {
 
             remainingTopicName.erase(0, topicName.size() + 1);
 
-            if (subscribtions.contains(topicName)) {
-                subscribtions.find(topicName)->second.publish(fullTopicName, message, qoSLevel, retained, remainingTopicName, leafFound);
+            auto foundNode = subscribtions.find(topicName);
+            if (foundNode != subscribtions.end()) {
+                foundNode->second.publish(fullTopicName, message, qoSLevel, retained, remainingTopicName, leafFound);
             }
-            if (subscribtions.contains("+")) {
-                subscribtions.find("+")->second.publish(fullTopicName, message, qoSLevel, retained, remainingTopicName, leafFound);
-            }
-            if (subscribtions.contains("#")) {
-                const SubscribtionTreeNode& foundSubscription = subscribtions.find("#")->second;
 
-                LOG(TRACE) << "Found Match: Subscribed Topic: '" << foundSubscription.subscribedTopicName << "', Matched Topic: '"
+            foundNode = subscribtions.find("+");
+            if (foundNode != subscribtions.end()) {
+                foundNode->second.publish(fullTopicName, message, qoSLevel, retained, remainingTopicName, leafFound);
+            }
+
+            foundNode = subscribtions.find("#");
+            if (foundNode != subscribtions.end()) {
+                LOG(TRACE) << "Found Match: Subscribed Topic: '" << foundNode->second.subscribedTopicName << "', Matched Topic: '"
                            << fullTopicName << "', Message: '" << message << "'";
                 LOG(TRACE) << "Distribute Publish ...";
-                for (auto& [clientId, clientQoSLevel] : foundSubscription.subscribers) {
+                for (auto& [clientId, clientQoSLevel] : foundNode->second.subscribers) {
                     broker->sendPublish(clientId, fullTopicName, message, DUP_FALSE, qoSLevel, retained, clientQoSLevel);
                 }
                 LOG(TRACE) << "... completed!";
