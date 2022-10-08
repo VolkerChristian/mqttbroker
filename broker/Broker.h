@@ -40,15 +40,19 @@ namespace mqtt::broker {
 #define RETAIN_FALSE false
 #define RETAIN_TRUE true
 
+#define SUBSCRIBTION_MAX_QOS 0x02
+#define SUBSCRIBTION_FAILURE 0x80
+#define SUBSCRIBTION_SUCCESS 0x00
+
 namespace mqtt::broker {
 
     class Broker {
     public:
-        Broker();
+        explicit Broker(uint8_t subscribtionMaxQoS);
 
-        static std::shared_ptr<Broker> instance();
+        static std::shared_ptr<Broker> instance(uint8_t subscribtionMaxQoS);
 
-        void subscribe(const std::string& topic, const std::string& clientId, uint8_t suscribedQoSLevel);
+        uint8_t subscribe(const std::string& topic, const std::string& clientId, uint8_t suscribedQoSLevel);
         void publish(const std::string& topic, const std::string& message, uint8_t qoSLevel, bool retain = false);
         void retain(const std::string& topic, const std::string& message, uint8_t qoSLevel);
         void unsubscribe(const std::string& topic, const std::string& clientId);
@@ -74,6 +78,8 @@ namespace mqtt::broker {
         mqtt::broker::SocketContext* getSocketContext(const std::string& clientId);
 
     private:
+        uint8_t subscribtionMaxQoS;
+
         mqtt::broker::SubscribtionTree subscribtionTree;
         mqtt::broker::RetainTree retainTree;
 

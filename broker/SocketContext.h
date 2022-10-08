@@ -47,20 +47,20 @@ namespace mqtt::broker {
         void initSession();
         void releaseSession();
 
-        void onConnect(const iot::mqtt::packets::Connect& connect) override;
-        void onConnack(const iot::mqtt::packets::Connack& connack) override;
-        void onPublish(const iot::mqtt::packets::Publish& publish) override;
-        void onPuback(const iot::mqtt::packets::Puback& puback) override;
-        void onPubrec(const iot::mqtt::packets::Pubrec& pubrec) override;
-        void onPubrel(const iot::mqtt::packets::Pubrel& pubrel) override;
-        void onPubcomp(const iot::mqtt::packets::Pubcomp& pubcomp) override;
-        void onSubscribe(const iot::mqtt::packets::Subscribe& subscribe) override;
-        void onSuback(const iot::mqtt::packets::Suback& suback) override;
-        void onUnsubscribe(const iot::mqtt::packets::Unsubscribe& unsubscribe) override;
-        void onUnsuback(const iot::mqtt::packets::Unsuback& unsuback) override;
-        void onPingreq(const iot::mqtt::packets::Pingreq& pingreq) override;
-        void onPingresp(const iot::mqtt::packets::Pingresp& pingresp) override;
-        void onDisconnect(const iot::mqtt::packets::Disconnect& disconnect) override;
+        void onConnect(iot::mqtt::packets::Connect& connect) override;
+        void onConnack(iot::mqtt::packets::Connack& connack) override;
+        void onPublish(iot::mqtt::packets::Publish& publish) override;
+        void onPuback(iot::mqtt::packets::Puback& puback) override;
+        void onPubrec(iot::mqtt::packets::Pubrec& pubrec) override;
+        void onPubrel(iot::mqtt::packets::Pubrel& pubrel) override;
+        void onPubcomp(iot::mqtt::packets::Pubcomp& pubcomp) override;
+        void onSubscribe(iot::mqtt::packets::Subscribe& subscribe) override;
+        void onSuback(iot::mqtt::packets::Suback& suback) override;
+        void onUnsubscribe(iot::mqtt::packets::Unsubscribe& unsubscribe) override;
+        void onUnsuback(iot::mqtt::packets::Unsuback& unsuback) override;
+        void onPingreq(iot::mqtt::packets::Pingreq& pingreq) override;
+        void onPingresp(iot::mqtt::packets::Pingresp& pingresp) override;
+        void onDisconnect(iot::mqtt::packets::Disconnect& disconnect) override;
 
         void printStandardHeader(const iot::mqtt::ControlPacket& packet);
 

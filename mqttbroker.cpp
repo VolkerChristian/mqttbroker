@@ -18,15 +18,14 @@
 
 #include "broker/SharedSocketContextFactory.h" // IWYU pragma: keep
 #include "broker/SocketContextFactory.h"       // IWYU pragma: keep
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-#include "config.h" // just for this example app
+#include "config.h"                            // just for this example app
 #include "core/SNodeC.h"
 #include "log/Logger.h"
 #include "net/in/stream/legacy/SocketServer.h"
 #include "net/in/stream/tls/SocketServer.h"
 #include "net/un/stream/legacy/SocketServer.h"
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 #include <openssl/asn1.h>
 #include <openssl/crypto.h>

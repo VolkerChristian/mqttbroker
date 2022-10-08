@@ -29,7 +29,7 @@
 namespace mqtt::broker {
 
     core::socket::SocketContext* SharedSocketContextFactory::create(core::socket::SocketConnection* socketConnection) {
-        return new mqtt::broker::SocketContext(socketConnection, mqtt::broker::Broker::instance());
+        return new mqtt::broker::SocketContext(socketConnection, mqtt::broker::Broker::instance(SUBSCRIBTION_MAX_QOS));
     }
 
 } // namespace mqtt::broker

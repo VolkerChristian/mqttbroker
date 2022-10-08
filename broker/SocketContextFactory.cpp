@@ -29,7 +29,7 @@
 namespace mqtt::broker {
 
     SocketContextFactory::SocketContextFactory()
-        : broker(std::make_shared<mqtt::broker::Broker>()) {
+        : broker(std::make_shared<mqtt::broker::Broker>(SUBSCRIBTION_MAX_QOS)) {
     }
 
     core::socket::SocketContext* SocketContextFactory::create(core::socket::SocketConnection* socketConnection) {

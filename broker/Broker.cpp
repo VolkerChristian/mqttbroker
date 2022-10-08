@@ -32,23 +32,27 @@ namespace mqtt::broker {
 
     std::shared_ptr<Broker> Broker::broker;
 
-    Broker::Broker()
-        : subscribtionTree(this)
+    Broker::Broker(uint8_t subscribtionMaxQoS)
+        : subscribtionMaxQoS(subscribtionMaxQoS)
+        , subscribtionTree(this)
         , retainTree(this) {
     }
 
-    std::shared_ptr<Broker> Broker::instance() {
+    std::shared_ptr<Broker> Broker::instance(uint8_t subscribtionMaxQoS) {
         if (!broker) {
-            broker = std::make_shared<Broker>();
+            broker = std::make_shared<Broker>(subscribtionMaxQoS);
         }
 
         return broker;
     }
 
-    void Broker::subscribe(const std::string& topic, const std::string& clientId, uint8_t suscribedQoSLevel) {
-        subscribtionTree.subscribe(topic, clientId, suscribedQoSLevel);
+    uint8_t Broker::subscribe(const std::string& topic, const std::string& clientId, uint8_t suscribedQoSLevel) {
+        uint8_t selectedQoS = std::min(subscribtionMaxQoS, suscribedQoSLevel) | SUBSCRIBTION_SUCCESS;
 
-        retainTree.publish(topic, clientId, suscribedQoSLevel);
+        subscribtionTree.subscribe(topic, clientId, selectedQoS);
+        retainTree.publish(topic, clientId, selectedQoS);
+
+        return selectedQoS;
     }
 
     void Broker::publish(const std::string& topic, const std::string& message, uint8_t qoSLevel, bool retain) {

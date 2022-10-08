@@ -77,7 +77,7 @@ namespace mqtt::broker {
         }
     }
 
-    void SocketContext::onConnect(const iot::mqtt::packets::Connect& connect) {
+    void SocketContext::onConnect(iot::mqtt::packets::Connect& connect) {
         // V-Header
         protocol = connect.getProtocol();
         level = connect.getLevel();
@@ -129,7 +129,7 @@ namespace mqtt::broker {
         initSession();
     }
 
-    void SocketContext::onConnack(const iot::mqtt::packets::Connack& connack) {
+    void SocketContext::onConnack(iot::mqtt::packets::Connack& connack) {
         LOG(DEBUG) << "CONNACK";
         LOG(DEBUG) << "=======";
         printStandardHeader(connack);
@@ -137,7 +137,7 @@ namespace mqtt::broker {
         LOG(DEBUG) << "Reason: " << connack.getReturnCode();
     }
 
-    void SocketContext::onPublish(const iot::mqtt::packets::Publish& publish) {
+    void SocketContext::onPublish(iot::mqtt::packets::Publish& publish) {
         LOG(DEBUG) << "PUBLISH";
         LOG(DEBUG) << "=======";
         printStandardHeader(publish);
@@ -154,47 +154,47 @@ namespace mqtt::broker {
         }
     }
 
-    void SocketContext::onPuback(const iot::mqtt::packets::Puback& puback) {
+    void SocketContext::onPuback(iot::mqtt::packets::Puback& puback) {
         LOG(DEBUG) << "PUBACK";
         LOG(DEBUG) << "======";
         printStandardHeader(puback);
         LOG(DEBUG) << "PacketIdentifier: " << puback.getPacketIdentifier();
     }
 
-    void SocketContext::onPubrec(const iot::mqtt::packets::Pubrec& pubrec) {
+    void SocketContext::onPubrec(iot::mqtt::packets::Pubrec& pubrec) {
         LOG(DEBUG) << "PUBREC";
         LOG(DEBUG) << "======";
         printStandardHeader(pubrec);
         LOG(DEBUG) << "PacketIdentifier: " << pubrec.getPacketIdentifier();
     }
 
-    void SocketContext::onPubrel(const iot::mqtt::packets::Pubrel& pubrel) {
+    void SocketContext::onPubrel(iot::mqtt::packets::Pubrel& pubrel) {
         LOG(DEBUG) << "PUBREL";
         LOG(DEBUG) << "======";
         printStandardHeader(pubrel);
         LOG(DEBUG) << "PacketIdentifier: " << pubrel.getPacketIdentifier();
     }
 
-    void SocketContext::onPubcomp(const iot::mqtt::packets::Pubcomp& pubcomp) {
+    void SocketContext::onPubcomp(iot::mqtt::packets::Pubcomp& pubcomp) {
         LOG(DEBUG) << "PUBCOMP";
         LOG(DEBUG) << "=======";
         printStandardHeader(pubcomp);
         LOG(DEBUG) << "PacketIdentifier: " << pubcomp.getPacketIdentifier();
     }
 
-    void SocketContext::onSubscribe(const iot::mqtt::packets::Subscribe& subscribe) {
+    void SocketContext::onSubscribe(iot::mqtt::packets::Subscribe& subscribe) {
         LOG(DEBUG) << "SUBSCRIBE";
         LOG(DEBUG) << "=========";
         printStandardHeader(subscribe);
         LOG(DEBUG) << "PacketIdentifier: " << subscribe.getPacketIdentifier();
 
-        for (const iot::mqtt::Topic& topic : subscribe.getTopics()) {
+        for (iot::mqtt::Topic& topic : subscribe.getTopics()) {
             LOG(DEBUG) << "  Topic: " << topic.getName() << ", requestedQoS: " << static_cast<uint16_t>(topic.getRequestedQoS());
-            broker->subscribe(topic.getName(), clientId, topic.getRequestedQoS());
+            topic.setAcceptedQoS(broker->subscribe(topic.getName(), clientId, topic.getRequestedQoS()));
         }
     }
 
-    void SocketContext::onSuback(const iot::mqtt::packets::Suback& suback) {
+    void SocketContext::onSuback(iot::mqtt::packets::Suback& suback) {
         LOG(DEBUG) << "SUBACK";
         LOG(DEBUG) << "======";
         printStandardHeader(suback);
@@ -205,7 +205,7 @@ namespace mqtt::broker {
         }
     }
 
-    void SocketContext::onUnsubscribe(const iot::mqtt::packets::Unsubscribe& unsubscribe) {
+    void SocketContext::onUnsubscribe(iot::mqtt::packets::Unsubscribe& unsubscribe) {
         LOG(DEBUG) << "UNSUBSCRIBE";
         LOG(DEBUG) << "===========";
         printStandardHeader(unsubscribe);
@@ -217,26 +217,26 @@ namespace mqtt::broker {
         }
     }
 
-    void SocketContext::onUnsuback(const iot::mqtt::packets::Unsuback& unsuback) {
+    void SocketContext::onUnsuback(iot::mqtt::packets::Unsuback& unsuback) {
         LOG(DEBUG) << "UNSUBACK";
         LOG(DEBUG) << "========";
         printStandardHeader(unsuback);
         LOG(DEBUG) << "PacketIdentifier: " << unsuback.getPacketIdentifier();
     }
 
-    void SocketContext::onPingreq(const iot::mqtt::packets::Pingreq& pingreq) {
+    void SocketContext::onPingreq(iot::mqtt::packets::Pingreq& pingreq) {
         LOG(DEBUG) << "PINGREQ";
         LOG(DEBUG) << "=======";
         printStandardHeader(pingreq);
     }
 
-    void SocketContext::onPingresp(const iot::mqtt::packets::Pingresp& pingresp) {
+    void SocketContext::onPingresp(iot::mqtt::packets::Pingresp& pingresp) {
         LOG(DEBUG) << "PINGRESP";
         LOG(DEBUG) << "========";
         printStandardHeader(pingresp);
     }
 
-    void SocketContext::onDisconnect(const iot::mqtt::packets::Disconnect& disconnect) {
+    void SocketContext::onDisconnect(iot::mqtt::packets::Disconnect& disconnect) {
         LOG(DEBUG) << "DISCONNECT";
         LOG(DEBUG) << "==========";
         printStandardHeader(disconnect);
