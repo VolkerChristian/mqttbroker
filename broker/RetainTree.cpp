@@ -68,12 +68,12 @@ namespace mqtt::broker {
 
     void RetainTree::publish(std::string remainingTopicName, const std::string& clientId, uint8_t clientQoSLevel, bool leafFound) {
         if (leafFound) {
-            LOG(TRACE) << "Found retained message: " << fullTopicName << " - " << message << " - " << static_cast<uint16_t>(qoSLevel);
-            LOG(TRACE) << "Distribute message ...";
             if (!fullTopicName.empty()) {
+                LOG(TRACE) << "Found retained message: " << fullTopicName << " - " << message << " - " << static_cast<uint16_t>(qoSLevel);
+                LOG(TRACE) << "Distribute message ...";
                 broker->sendPublish(clientId, fullTopicName, message, DUP_FALSE, qoSLevel, RETAIN_TRUE, clientQoSLevel);
+                LOG(TRACE) << "... completed!";
             }
-            LOG(TRACE) << "... completed!";
         } else {
             std::string::size_type slashPosition = remainingTopicName.find('/');
 
@@ -95,7 +95,7 @@ namespace mqtt::broker {
     }
 
     void RetainTree::publish(const std::string& clientId, uint8_t clientQoSLevel) {
-        if (!message.empty()) {
+        if (!fullTopicName.empty()) {
             LOG(TRACE) << "Found retained message: " << fullTopicName << " - " << message << " - " << static_cast<uint16_t>(qoSLevel);
             LOG(TRACE) << "Distribute message ...";
             broker->sendPublish(clientId, fullTopicName, message, DUP_FALSE, qoSLevel, RETAIN_TRUE, clientQoSLevel);
