@@ -73,7 +73,6 @@ namespace mqtt::broker {
         } else {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
             remainingTopicName.erase(0, topicName.size() + 1);
-            remainingTopicName.erase(0, remainingTopicName.find_first_not_of('/'));
 
             if (subscribtions.contains(topicName) && subscribtions.find(topicName)->second.unsubscribe(remainingTopicName, clientId)) {
                 subscribtions.erase(topicName);
@@ -88,6 +87,7 @@ namespace mqtt::broker {
                                      const std::string& clientId,
                                      uint8_t clientQoSLevel) {
         bool success = true;
+
         if (remainingTopicName.empty()) {
             subscribedTopicName = fullTopicName;
             subscribers[clientId] = clientQoSLevel;
@@ -98,7 +98,6 @@ namespace mqtt::broker {
                 success = false;
             } else {
                 remainingTopicName.erase(0, topicName.size() + 1);
-                remainingTopicName.erase(0, remainingTopicName.find_first_not_of('/'));
 
                 success = subscribtions.insert({topicName, mqtt::broker::SubscribtionTree(broker)})
                               .first->second.subscribe(remainingTopicName, fullTopicName, clientId, clientQoSLevel);
@@ -121,7 +120,6 @@ namespace mqtt::broker {
         } else {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
             remainingTopicName.erase(0, topicName.size() + 1);
-            remainingTopicName.erase(0, remainingTopicName.find_first_not_of('/'));
 
             if (subscribtions.contains(topicName)) {
                 subscribtions.find(topicName)->second.publish(remainingTopicName, fullTopicName, message, qoSLevel, retained);

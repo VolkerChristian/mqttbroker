@@ -48,7 +48,6 @@ namespace mqtt::broker {
         } else {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
             remainingTopicName.erase(0, topicName.size() + 1);
-            remainingTopicName.erase(0, remainingTopicName.find_first_not_of('/'));
 
             if (topicTree.insert({topicName, RetainTree(broker)})
                     .first->second.retain(fullTopicName, remainingTopicName, message, qoSLevel)) {
@@ -68,7 +67,6 @@ namespace mqtt::broker {
         } else {
             std::string topicName = remainingTopicName.substr(0, remainingTopicName.find("/"));
             remainingTopicName.erase(0, topicName.size() + 1);
-            remainingTopicName.erase(0, remainingTopicName.find_first_not_of('/'));
 
             if (topicTree.contains(topicName)) {
                 topicTree.find(topicName)->second.publish(remainingTopicName, clientId, clientQoSLevel);
