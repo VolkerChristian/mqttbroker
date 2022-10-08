@@ -19,7 +19,7 @@
 #include "broker/SocketContext.h"
 
 #include "broker/Broker.h"
-#include "core/DescriptorEventReceiver.h"
+// #include "core/DescriptorEventReceiver.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -110,7 +110,7 @@ namespace mqtt::broker {
         if (keepAlive != 0) {
             setTimeout(1.5 * keepAlive);
         } else {
-            setTimeout(core::DescriptorEventReceiver::TIMEOUT::DISABLE);
+            // setTimeout(core::DescriptorEventReceiver::TIMEOUT::DISABLE); // Leaf at framework default (default 60 sec)
         }
         LOG(DEBUG) << "ClientID: " << clientId;
         LOG(DEBUG) << "CleanSession: " << cleanSession;

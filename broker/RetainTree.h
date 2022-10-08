@@ -39,13 +39,13 @@ namespace mqtt::broker {
 
         void retain(const std::string& fullTopicName, const std::string& message, uint8_t qosLevel);
 
-        void publish(std::string remainingTopicName, const std::string& clientId, uint8_t clientQoSLevel);
+        void publish(std::string fullTopicName, const std::string& clientId, uint8_t clientQoSLevel);
 
     private:
         bool retain(
-            const std::string& fullTopicName, std::string remainingTopicName, const std::string& message, uint8_t qoSLevel, bool leafFound);
+            const std::string& fullTopicName, const std::string& message, uint8_t qoSLevel, std::string remainingTopicName, bool leafFound);
 
-        void publish(std::string remainingTopicName, const std::string& clientId, uint8_t clientQoSLevel, bool leafFound);
+        void publish(const std::string& clientId, uint8_t clientQoSLevel, std::string remainingTopicName, bool leafFound);
 
         void publish(const std::string& clientId, uint8_t clientQoSLevel);
 

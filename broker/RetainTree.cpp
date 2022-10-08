@@ -35,20 +35,22 @@ namespace mqtt::broker {
     }
 
     void RetainTree::retain(const std::string& fullTopicName, const std::string& message, uint8_t qoSLevel) {
-        retain(fullTopicName, fullTopicName, message, qoSLevel, false);
+        retain(fullTopicName, message, qoSLevel, fullTopicName, false);
     }
 
-    void RetainTree::publish(std::string remainingTopicName, const std::string& clientId, uint8_t clientQoSLevel) {
-        publish(remainingTopicName, clientId, clientQoSLevel, false);
+    void RetainTree::publish(std::string fullTopicName, const std::string& clientId, uint8_t clientQoSLevel) {
+        publish(clientId, clientQoSLevel, fullTopicName, false);
     }
 
     bool RetainTree::retain(
-        const std::string& fullTopicName, std::string remainingTopicName, const std::string& message, uint8_t qoSLevel, bool leafFound) {
+        const std::string& fullTopicName, const std::string& message, uint8_t qoSLevel, std::string remainingTopicName, bool leafFound) {
         if (leafFound) {
-            LOG(TRACE) << "Retaining: " << fullTopicName << " - " << message;
-            this->fullTopicName = fullTopicName;
-            this->message = message;
-            this->qoSLevel = qoSLevel;
+            if (!fullTopicName.empty()) {
+                LOG(TRACE) << "Retaining: " << fullTopicName << " - " << message;
+                this->fullTopicName = fullTopicName;
+                this->message = message;
+                this->qoSLevel = qoSLevel;
+            }
         } else {
             std::string::size_type slashPosition = remainingTopicName.find('/');
 
@@ -58,7 +60,7 @@ namespace mqtt::broker {
             remainingTopicName.erase(0, topicName.size() + 1);
 
             if (topicTree.insert({topicName, RetainTree(broker)})
-                    .first->second.retain(fullTopicName, remainingTopicName, message, qoSLevel, leafFound)) {
+                    .first->second.retain(fullTopicName, message, qoSLevel, remainingTopicName, leafFound)) {
                 topicTree.erase(topicName);
             }
         }
@@ -66,7 +68,7 @@ namespace mqtt::broker {
         return this->message.empty() && topicTree.empty();
     }
 
-    void RetainTree::publish(std::string remainingTopicName, const std::string& clientId, uint8_t clientQoSLevel, bool leafFound) {
+    void RetainTree::publish(const std::string& clientId, uint8_t clientQoSLevel, std::string remainingTopicName, bool leafFound) {
         if (leafFound) {
             if (!fullTopicName.empty()) {
                 LOG(TRACE) << "Found retained message: " << fullTopicName << " - " << message << " - " << static_cast<uint16_t>(qoSLevel);
@@ -83,10 +85,10 @@ namespace mqtt::broker {
             remainingTopicName.erase(0, topicName.size() + 1);
 
             if (topicTree.contains(topicName)) {
-                topicTree.find(topicName)->second.publish(remainingTopicName, clientId, clientQoSLevel, leafFound);
+                topicTree.find(topicName)->second.publish(clientId, clientQoSLevel, remainingTopicName, leafFound);
             } else if (topicName == "+") {
                 for (auto& topicTreeEntry : topicTree) {
-                    topicTreeEntry.second.publish(remainingTopicName, clientId, clientQoSLevel, leafFound);
+                    topicTreeEntry.second.publish(clientId, clientQoSLevel, remainingTopicName, leafFound);
                 }
             } else if (topicName == "#") {
                 publish(clientId, clientQoSLevel);
