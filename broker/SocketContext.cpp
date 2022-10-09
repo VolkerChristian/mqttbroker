@@ -19,7 +19,6 @@
 #include "broker/SocketContext.h"
 
 #include "broker/Broker.h"
-// #include "core/DescriptorEventReceiver.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
