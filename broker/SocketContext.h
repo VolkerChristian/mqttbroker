@@ -19,7 +19,7 @@
 #ifndef APPS_MQTT_SERVER_SOCKETCONTEXT_H
 #define APPS_MQTT_SERVER_SOCKETCONTEXT_H
 
-#include "iot/mqtt/SocketContext.h"
+#include "iot/mqtt/server/SocketContext.h"
 
 namespace core::socket {
     class SocketConnection;
@@ -37,7 +37,7 @@ namespace mqtt::broker {
 
 namespace mqtt::broker {
 
-    class SocketContext : public iot::mqtt::SocketContext {
+    class SocketContext : public iot::mqtt::server::SocketContext {
     public:
         explicit SocketContext(core::socket::SocketConnection* socketConnection, std::shared_ptr<mqtt::broker::Broker> broker);
 
@@ -47,22 +47,18 @@ namespace mqtt::broker {
         void initSession();
         void releaseSession();
 
-        void onConnect(iot::mqtt::packets::Connect& connect) override;
-        void onConnack(iot::mqtt::packets::Connack& connack) override;
+        void onConnect(iot::mqtt::server::packets::Connect& connect) override;
         void onPublish(iot::mqtt::packets::Publish& publish) override;
         void onPuback(iot::mqtt::packets::Puback& puback) override;
         void onPubrec(iot::mqtt::packets::Pubrec& pubrec) override;
         void onPubrel(iot::mqtt::packets::Pubrel& pubrel) override;
         void onPubcomp(iot::mqtt::packets::Pubcomp& pubcomp) override;
-        void onSubscribe(iot::mqtt::packets::Subscribe& subscribe) override;
-        void onSuback(iot::mqtt::packets::Suback& suback) override;
-        void onUnsubscribe(iot::mqtt::packets::Unsubscribe& unsubscribe) override;
-        void onUnsuback(iot::mqtt::packets::Unsuback& unsuback) override;
-        void onPingreq(iot::mqtt::packets::Pingreq& pingreq) override;
-        void onPingresp(iot::mqtt::packets::Pingresp& pingresp) override;
-        void onDisconnect(iot::mqtt::packets::Disconnect& disconnect) override;
+        void onSubscribe(iot::mqtt::server::packets::Subscribe& subscribe) override;
+        void onUnsubscribe(iot::mqtt::server::packets::Unsubscribe& unsubscribe) override;
+        void onPingreq(iot::mqtt::server::packets::Pingreq& pingreq) override;
+        void onDisconnect(iot::mqtt::server::packets::Disconnect& disconnect) override;
 
-        void printStandardHeader(const iot::mqtt::ControlPacket& packet);
+        void printStandardHeader(const iot::mqtt::ControlPacketReceiver& packet);
 
         std::shared_ptr<mqtt::broker::Broker> broker;
 

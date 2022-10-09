@@ -33,7 +33,7 @@
 namespace mqtt::broker {
 
     SocketContext::SocketContext(core::socket::SocketConnection* socketConnection, std::shared_ptr<Broker> broker)
-        : iot::mqtt::SocketContext(socketConnection)
+        : iot::mqtt::server::SocketContext(socketConnection)
         , broker(broker) {
     }
 
@@ -78,7 +78,7 @@ namespace mqtt::broker {
         }
     }
 
-    void SocketContext::onConnect(iot::mqtt::packets::Connect& connect) {
+    void SocketContext::onConnect(iot::mqtt::server::packets::Connect& connect) {
         // V-Header
         protocol = connect.getProtocol();
         level = connect.getLevel();
@@ -130,14 +130,6 @@ namespace mqtt::broker {
         initSession();
     }
 
-    void SocketContext::onConnack(iot::mqtt::packets::Connack& connack) {
-        LOG(DEBUG) << "CONNACK";
-        LOG(DEBUG) << "=======";
-        printStandardHeader(connack);
-        LOG(DEBUG) << "Flags: " << static_cast<uint16_t>(connack.getFlags());
-        LOG(DEBUG) << "Reason: " << connack.getReturnCode();
-    }
-
     void SocketContext::onPublish(iot::mqtt::packets::Publish& publish) {
         LOG(DEBUG) << "PUBLISH";
         LOG(DEBUG) << "=======";
@@ -183,7 +175,7 @@ namespace mqtt::broker {
         LOG(DEBUG) << "PacketIdentifier: " << pubcomp.getPacketIdentifier();
     }
 
-    void SocketContext::onSubscribe(iot::mqtt::packets::Subscribe& subscribe) {
+    void SocketContext::onSubscribe(iot::mqtt::server::packets::Subscribe& subscribe) {
         LOG(DEBUG) << "SUBSCRIBE";
         LOG(DEBUG) << "=========";
         printStandardHeader(subscribe);
@@ -196,18 +188,7 @@ namespace mqtt::broker {
         }
     }
 
-    void SocketContext::onSuback(iot::mqtt::packets::Suback& suback) {
-        LOG(DEBUG) << "SUBACK";
-        LOG(DEBUG) << "======";
-        printStandardHeader(suback);
-        LOG(DEBUG) << "PacketIdentifier: " << suback.getPacketIdentifier();
-
-        for (uint8_t returnCode : suback.getReturnCodes()) {
-            LOG(DEBUG) << "  Return Code: " << static_cast<uint16_t>(returnCode);
-        }
-    }
-
-    void SocketContext::onUnsubscribe(iot::mqtt::packets::Unsubscribe& unsubscribe) {
+    void SocketContext::onUnsubscribe(iot::mqtt::server::packets::Unsubscribe& unsubscribe) {
         LOG(DEBUG) << "UNSUBSCRIBE";
         LOG(DEBUG) << "===========";
         printStandardHeader(unsubscribe);
@@ -219,26 +200,13 @@ namespace mqtt::broker {
         }
     }
 
-    void SocketContext::onUnsuback(iot::mqtt::packets::Unsuback& unsuback) {
-        LOG(DEBUG) << "UNSUBACK";
-        LOG(DEBUG) << "========";
-        printStandardHeader(unsuback);
-        LOG(DEBUG) << "PacketIdentifier: " << unsuback.getPacketIdentifier();
-    }
-
-    void SocketContext::onPingreq(iot::mqtt::packets::Pingreq& pingreq) {
+    void SocketContext::onPingreq(iot::mqtt::server::packets::Pingreq& pingreq) {
         LOG(DEBUG) << "PINGREQ";
         LOG(DEBUG) << "=======";
         printStandardHeader(pingreq);
     }
 
-    void SocketContext::onPingresp(iot::mqtt::packets::Pingresp& pingresp) {
-        LOG(DEBUG) << "PINGRESP";
-        LOG(DEBUG) << "========";
-        printStandardHeader(pingresp);
-    }
-
-    void SocketContext::onDisconnect(iot::mqtt::packets::Disconnect& disconnect) {
+    void SocketContext::onDisconnect(iot::mqtt::server::packets::Disconnect& disconnect) {
         LOG(DEBUG) << "DISCONNECT";
         LOG(DEBUG) << "==========";
         printStandardHeader(disconnect);
@@ -248,7 +216,7 @@ namespace mqtt::broker {
         releaseSession();
     }
 
-    void SocketContext::printStandardHeader(const iot::mqtt::ControlPacket& packet) {
+    void SocketContext::printStandardHeader(const iot::mqtt::ControlPacketReceiver& packet) {
         LOG(DEBUG) << "Error: " << packet.isError();
         LOG(DEBUG) << "Type: 0x" << std::hex << std::setfill('0') << std::setw(2) << static_cast<uint16_t>(packet.getType());
         LOG(DEBUG) << "Flags: 0x" << std::hex << std::setfill('0') << std::setw(2) << static_cast<uint16_t>(packet.getFlags());
