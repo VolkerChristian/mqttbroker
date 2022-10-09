@@ -10,7 +10,7 @@ configure_file(config.h.in config.h @ONLY)
 if(NOT SNODEC_INTREE_BUILD)
     find_package(
         snodec COMPONENTS net-in-stream-legacy net-in-stream-tls
-                          net-un-stream-legacy mqtt
+                          net-un-stream-legacy mqtt-server
     )
 endif(NOT SNODEC_INTREE_BUILD)
 
