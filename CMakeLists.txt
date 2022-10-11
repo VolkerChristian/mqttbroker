@@ -50,16 +50,8 @@ add_compile_options(
 
 set(MQTTBROKER_CPP
     mqttbroker.cpp
-    broker/Broker.cpp
-    broker/SharedSocketContextFactory.cpp
-    broker/SocketContext.cpp
-    broker/SocketContextFactory.cpp
-    broker/SubscribtionTree.cpp
-    broker/RetainTree.cpp
 )
 set(MQTTBROKER_H
-    broker/Broker.h broker/SharedSocketContextFactory.h broker/SocketContext.h
-    broker/SocketContextFactory.h broker/SubscribtionTree.h broker/RetainTree.h
 )
 
 add_executable(mqttbroker ${MQTTBROKER_CPP} ${MQTTBROKER_H})

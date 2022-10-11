@@ -16,10 +16,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "broker/SharedSocketContextFactory.h" // IWYU pragma: keep
-#include "broker/SocketContextFactory.h"       // IWYU pragma: keep
-#include "config.h"                            // just for this example app
+#include "config.h" // just for this example app
 #include "core/SNodeC.h"
+#include "iot/mqtt/server/SharedSocketContextFactory.h" // IWYU pragma: keep
+#include "iot/mqtt/server/SocketContextFactory.h"       // IWYU pragma: keep
 #include "log/Logger.h"
 #include "net/in/stream/legacy/SocketServer.h"
 #include "net/in/stream/tls/SocketServer.h"
@@ -45,7 +45,7 @@
 int main(int argc, char* argv[]) {
     core::SNodeC::init(argc, argv);
 
-    using MQTTLegacyInServer = net::in::stream::legacy::SocketServer<mqtt::broker::SharedSocketContextFactory>;
+    using MQTTLegacyInServer = net::in::stream::legacy::SocketServer<iot::mqtt::server::SharedSocketContextFactory>;
     using LegacyInSocketConnection = MQTTLegacyInServer::SocketConnection;
 
     MQTTLegacyInServer mqttLegacyInServer(
@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
         }
     });
 
-    using MQTTTLSInServer = net::in::stream::tls::SocketServer<mqtt::broker::SharedSocketContextFactory>;
+    using MQTTTLSInServer = net::in::stream::tls::SocketServer<iot::mqtt::server::SharedSocketContextFactory>;
     using TLSInSocketConnection = MQTTTLSInServer::SocketConnection;
 
     std::map<std::string, std::any> options{{"CertChain", SERVERCERTF}, {"CertChainKey", SERVERKEYF}, {"Password", KEYFPASS}};
@@ -171,7 +171,7 @@ int main(int argc, char* argv[]) {
         }
     });
 
-    using MQTTLegacyUnServer = net::un::stream::legacy::SocketServer<mqtt::broker::SharedSocketContextFactory>;
+    using MQTTLegacyUnServer = net::un::stream::legacy::SocketServer<iot::mqtt::server::SharedSocketContextFactory>;
     using LegacyUnSocketConnection = MQTTLegacyUnServer::SocketConnection;
 
     MQTTLegacyUnServer mqttLegacyUnServer(
