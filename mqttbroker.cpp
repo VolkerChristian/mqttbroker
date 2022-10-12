@@ -56,7 +56,6 @@ int main(int argc, char* argv[]) {
             VLOG(0) << "\tLocal: (" + socketConnection->getLocalAddress().address() + ") " + socketConnection->getLocalAddress().toString();
             VLOG(0) << "\tPeer:  (" + socketConnection->getRemoteAddress().address() + ") " +
                            socketConnection->getRemoteAddress().toString();
-
         },
         []([[maybe_unused]] LegacyInSocketConnection* socketConnection) -> void { // OnConnected
             VLOG(0) << "OnConnected";
