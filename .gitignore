@@ -1,2 +1,5 @@
 /build/
 /CMakeLists.txt.user
+/build-kdevelop/
+/.kdev4/
+*.kdev4
