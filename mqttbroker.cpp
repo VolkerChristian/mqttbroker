@@ -50,14 +50,14 @@ int main(int argc, char* argv[]) {
 
     MQTTLegacyInServer mqttLegacyInServer(
         "legacyin",
-        []([[maybe_unused]] LegacyInSocketConnection* socketConnection) -> void { // OnConnect
+        [](LegacyInSocketConnection* socketConnection) -> void { // OnConnect
             VLOG(0) << "OnConnect";
 
             VLOG(0) << "\tLocal: (" + socketConnection->getLocalAddress().address() + ") " + socketConnection->getLocalAddress().toString();
             VLOG(0) << "\tPeer:  (" + socketConnection->getRemoteAddress().address() + ") " +
                            socketConnection->getRemoteAddress().toString();
         },
-        []([[maybe_unused]] LegacyInSocketConnection* socketConnection) -> void { // OnConnected
+        [](LegacyInSocketConnection* socketConnection) -> void { // OnConnected
             VLOG(0) << "OnConnected";
 
             VLOG(0) << "\tLocal: (" + socketConnection->getLocalAddress().address() + ") " + socketConnection->getLocalAddress().toString();
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
                            socketConnection->getRemoteAddress().toString();
 
         },
-        []([[maybe_unused]] LegacyInSocketConnection* socketConnection) -> void { // OnDisconnected
+        [](LegacyInSocketConnection* socketConnection) -> void { // OnDisconnected
             VLOG(0) << "OnDisconnected";
 
             VLOG(0) << "\tLocal: (" + socketConnection->getLocalAddress().address() + ") " + socketConnection->getLocalAddress().toString();
@@ -94,14 +94,14 @@ int main(int argc, char* argv[]) {
 
     MQTTTLSInServer mqttTLSInServer(
         "tlsin",
-        []([[maybe_unused]] TLSInSocketConnection* socketConnection) -> void { // OnConnect
+        [](TLSInSocketConnection* socketConnection) -> void { // OnConnect
             VLOG(0) << "OnConnect";
             VLOG(0) << "\tLocal: (" + socketConnection->getLocalAddress().address() + ") " + socketConnection->getLocalAddress().toString();
             VLOG(0) << "\tPeer:  (" + socketConnection->getRemoteAddress().address() + ") " +
                            socketConnection->getRemoteAddress().toString();
 
         },
-        []([[maybe_unused]] TLSInSocketConnection* socketConnection) -> void { // OnConnected
+        [](TLSInSocketConnection* socketConnection) -> void { // OnConnected
             VLOG(0) << "OnConnected";
             X509* server_cert = SSL_get_peer_certificate(socketConnection->getSSL());
             if (server_cert != nullptr) {
@@ -148,7 +148,7 @@ int main(int argc, char* argv[]) {
                 // Here we can close the connection in case client didn't send a certificate
             }
         },
-        []([[maybe_unused]] TLSInSocketConnection* socketConnection) -> void { // OnDisconnected
+        [](TLSInSocketConnection* socketConnection) -> void { // OnDisconnected
             VLOG(0) << "OnDisconnected";
 
             VLOG(0) << "\tLocal: (" + socketConnection->getLocalAddress().address() + ") " + socketConnection->getLocalAddress().toString();
@@ -175,7 +175,7 @@ int main(int argc, char* argv[]) {
 
     MQTTLegacyUnServer mqttLegacyUnServer(
         "legacyun",
-        []([[maybe_unused]] LegacyUnSocketConnection* socketConnection) -> void { // OnConnect
+        [](LegacyUnSocketConnection* socketConnection) -> void { // OnConnect
             VLOG(0) << "OnConnect";
 
             VLOG(0) << "\tLocal: (" + socketConnection->getLocalAddress().address() + ") " + socketConnection->getLocalAddress().toString();
@@ -183,7 +183,7 @@ int main(int argc, char* argv[]) {
                            socketConnection->getRemoteAddress().toString();
 
         },
-        []([[maybe_unused]] LegacyUnSocketConnection* socketConnection) -> void { // OnConnected
+        [](LegacyUnSocketConnection* socketConnection) -> void { // OnConnected
             VLOG(0) << "OnConnected";
 
             VLOG(0) << "\tLocal: (" + socketConnection->getLocalAddress().address() + ") " + socketConnection->getLocalAddress().toString();
@@ -191,7 +191,7 @@ int main(int argc, char* argv[]) {
                            socketConnection->getRemoteAddress().toString();
 
         },
-        []([[maybe_unused]] LegacyUnSocketConnection* socketConnection) -> void { // OnDisconnected
+        [](LegacyUnSocketConnection* socketConnection) -> void { // OnDisconnected
             VLOG(0) << "OnDisconnected";
 
             VLOG(0) << "\tLocal: (" + socketConnection->getLocalAddress().address() + ") " + socketConnection->getLocalAddress().toString();
