@@ -58,6 +58,12 @@ target_include_directories(
     mqttbroker PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 )
 
+if(SNODEC_INTREE_BUILD)
+    set_target_properties(
+        mqttbroker PROPERTIES INSTALL_RPATH "${SNODEC_IOT_MQTT_RPATH}"
+    )
+endif(SNODEC_INTREE_BUILD)
+
 target_link_libraries(
     mqttbroker PUBLIC snodec::mqtt-server snodec::net-in-stream-legacy
                       snodec::net-in-stream-tls snodec::net-un-stream-legacy
