@@ -69,6 +69,4 @@ target_link_libraries(
                       snodec::net-in-stream-tls snodec::net-un-stream-legacy
 )
 
-set_target_properties(mqttbroker PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
-
 install(TARGETS mqttbroker RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
