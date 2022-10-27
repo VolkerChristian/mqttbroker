@@ -48,9 +48,9 @@ add_compile_options(
     ${ADDITIONAL_OPTIONS}
 )
 
-set(MQTTBROKER_CPP mqttbroker.cpp)
+set(MQTTBROKER_CPP mqttbroker.cpp SocketContext.cpp)
 
-set(MQTTBROKER_H)
+set(MQTTBROKER_H SocketContext.h)
 
 add_executable(mqttbroker ${MQTTBROKER_CPP} ${MQTTBROKER_H})
 
