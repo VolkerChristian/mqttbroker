@@ -16,8 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "apps/mqttbroker/SocketContext.h" // IWYU pragma: keep
-#include "config.h"                        // just for this example app
+#include "SocketContext.h" // IWYU pragma: keep
+#include "config.h"        // just for this example app
 #include "core/SNodeC.h"
 #include "iot/mqtt/server/SharedSocketContextFactory.hpp" // IWYU pragma: keep
 #include "log/Logger.h"
