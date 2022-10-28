@@ -47,7 +47,16 @@ namespace apps::mqttbroker {
         LOG(DEBUG) << "PacketIdentifier: " << publish.getPacketIdentifier();
         LOG(DEBUG) << "Message: " << publish.getMessage();
 
-        this->publish(publish.getTopic(), publish.getMessage(), publish.getQoS());
+        if (publish.getTopic() == "test01/button1") {
+            VLOG(0) << "Found correct topic";
+            if (publish.getMessage() == "pressed") {
+                VLOG(0) << "Found message 'pressed'";
+                this->publish("test02/onboard/set", "on", publish.getQoS());
+            } else if (publish.getMessage() == "released") {
+                VLOG(0) << "Found message 'released'";
+                this->publish("test02/onboard/set", "off", publish.getQoS());
+            }
+        }
     }
 
 } // namespace apps::mqttbroker
