@@ -34,9 +34,7 @@ namespace apps::mqttbroker {
     SocketContext::~SocketContext() {
     }
 
-    void SocketContext::onPublish([[maybe_unused]] iot::mqtt::packets::Publish& publish) {
-        VLOG(0) << "############################################################";
-
+    void SocketContext::onPublish(iot::mqtt::packets::Publish& publish) {
         LOG(DEBUG) << "Received PUBLISH: " << clientId;
         LOG(DEBUG) << "=================";
         printStandardHeader(publish);
