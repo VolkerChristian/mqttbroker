@@ -59,6 +59,7 @@ namespace apps::mqttbroker {
 
         do {
             std::string::size_type slashPosition = remainingFullTopic.find("/");
+
             currentTopic = remainingFullTopic.substr(0, slashPosition);
             remainingFullTopic.erase(0, currentTopic.size() + 1);
 
@@ -121,7 +122,6 @@ namespace apps::mqttbroker {
     /*
         iotempower/cfg/test01/ip 192.168.12.183
         iotempower/cfg/test02/ip 192.168.12.132
-
         iotempower/binary_sensor/test01/button1/config
         {
             "name": "test01 button1",
@@ -156,6 +156,26 @@ namespace apps::mqttbroker {
             "payload_on": "on",
             "payload_off": "off"
         }]
+    }
+
+    {
+        "iotempower" : {
+            "test01" : {
+                "button1" : {
+                    "payload" : {
+                        "type" : "string",
+                        "pressed" : {
+                            "command_topic" : "test02/onboard/set",
+                            "state" : "on"
+                        },
+                        "released" : {
+                            "command_topic" : "test02/onboard/set",
+                            "state" : "off"
+                        }
+                    }
+                }
+            }
+        }
     }
 
     */
