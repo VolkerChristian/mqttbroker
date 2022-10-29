@@ -16,41 +16,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef APPS_MQTTBROKER_SOCKETCONTEXT_H
-#define APPS_MQTTBROKER_SOCKETCONTEXT_H
-
-#include "JsonMappingReader.h"
-#include "iot/mqtt/server/SocketContext.h"
-
-namespace core::socket {
-    class SocketConnection;
-}
-
-namespace iot::mqtt::server::broker {
-    class Broker;
-}
+#ifndef APPS_MQTTBROKER_JSONMAPPINGREADER_H
+#define APPS_MQTTBROKER_JSONMAPPINGREADER_H
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-#include <memory>
+#include <nlohmann/json_fwd.hpp> // IWYU pragma: export
+#include <string>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
 namespace apps::mqttbroker {
 
-    class SocketContext : public iot::mqtt::server::SocketContext {
-    public:
-        explicit SocketContext(core::socket::SocketConnection* socketConnection,
-                               const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker);
-
-        ~SocketContext() override;
-
+    class JsonMappingReader {
     private:
-        void onPublish(iot::mqtt::packets::Publish& publish) override;
+        JsonMappingReader() = delete;
 
-        nlohmann::json& json;
+    public:
+        static nlohmann::json& getMapping(const std::string& discoveryPrefix);
     };
 
 } // namespace apps::mqttbroker
 
-#endif // APPS_MQTTBROKER_SOCKETCONTEXT_H
+#endif // APPS_MQTTBROKER_JSONMAPPINGREADER_H

@@ -16,41 +16,46 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef APPS_MQTTBROKER_SOCKETCONTEXT_H
-#define APPS_MQTTBROKER_SOCKETCONTEXT_H
-
 #include "JsonMappingReader.h"
-#include "iot/mqtt/server/SocketContext.h"
-
-namespace core::socket {
-    class SocketConnection;
-}
-
-namespace iot::mqtt::server::broker {
-    class Broker;
-}
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-#include <memory>
+#include <initializer_list>
+#include <map>
+#include <nlohmann/json.hpp>
+#include <vector>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
 namespace apps::mqttbroker {
 
-    class SocketContext : public iot::mqtt::server::SocketContext {
-    public:
-        explicit SocketContext(core::socket::SocketConnection* socketConnection,
-                               const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker);
+    nlohmann::json& JsonMappingReader::getMapping(const std::string& discoveryPrefix) {
+        static nlohmann::json json;
+        if (json.empty()) {
+            json = nlohmann::json::parse(R"(
+{
+    "iotempower" : {
+        "test01" : {
+            "button1" : {
+                "payload" : {
+                    "type" : "string",
+                    "pressed" : {
+                        "command_topic" : "test02/onboard/set",
+                        "state" : "off"
+                    },
+                    "released" : {
+                        "command_topic" : "test02/onboard/set",
+                        "state" : "on"
+                    }
+                }
+            }
+        }
+    }
+}
+)");
+        }
 
-        ~SocketContext() override;
-
-    private:
-        void onPublish(iot::mqtt::packets::Publish& publish) override;
-
-        nlohmann::json& json;
-    };
+        return json[discoveryPrefix];
+    }
 
 } // namespace apps::mqttbroker
-
-#endif // APPS_MQTTBROKER_SOCKETCONTEXT_H

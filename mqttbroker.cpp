@@ -40,10 +40,43 @@
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 
+//
+
+#include <initializer_list>
+#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
+#include <vector>
+
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
 int main(int argc, char* argv[]) {
     core::SNodeC::init(argc, argv);
+
+    nlohmann::json j = nlohmann::json::parse(R"(
+{
+    "iotempower" : {
+        "test01" : {
+            "button1" : {
+                "payload" : {
+                    "pressed" : {
+                        "command_topic" : "test02/onboard/set",
+                        "state" : "on"
+                    },
+                    "released" : {
+                        "command_topic" : "test02/onboard/set",
+                        "state" : "off"
+                    }
+                }
+            },
+            "payload" : {
+                "test" : "hihi"
+            }
+        }
+    }
+}
+)");
+
+    VLOG(0) << j["iotempower"]["test01"]["button1"]["payload"]["pressed"];
 
     using MQTTLegacyInServer =
         net::in::stream::legacy::SocketServer<iot::mqtt::server::SharedSocketContextFactory<apps::mqttbroker::SocketContext>>;

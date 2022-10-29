@@ -22,13 +22,18 @@
 
 #include "log/Logger.h"
 
+#include <map>
+#include <nlohmann/json.hpp>
+
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
 namespace apps::mqttbroker {
 
     SocketContext::SocketContext(core::socket::SocketConnection* socketConnection,
                                  const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker)
-        : iot::mqtt::server::SocketContext(socketConnection, broker) {
+        : iot::mqtt::server::SocketContext(socketConnection, broker)
+        , json(apps::mqttbroker::JsonMappingReader::getMapping("iotempower")) {
+        VLOG(0) << "Json: " << json;
     }
 
     SocketContext::~SocketContext() {
@@ -45,16 +50,114 @@ namespace apps::mqttbroker {
         LOG(DEBUG) << "PacketIdentifier: " << publish.getPacketIdentifier();
         LOG(DEBUG) << "Message: " << publish.getMessage();
 
-        if (publish.getTopic() == "test01/button1") {
-            VLOG(0) << "Found correct topic";
-            if (publish.getMessage() == "pressed") {
-                VLOG(0) << "Found message 'pressed'";
-                this->publish("test02/onboard/set", "on", publish.getQoS());
-            } else if (publish.getMessage() == "released") {
-                VLOG(0) << "Found message 'released'";
-                this->publish("test02/onboard/set", "off", publish.getQoS());
+        nlohmann::json tmpJson = json;
+
+        std::string remainingFullTopic = publish.getTopic();
+        std::string currentTopic;
+
+        bool currentTopicExists = false;
+
+        do {
+            std::string::size_type slashPosition = remainingFullTopic.find("/");
+            currentTopic = remainingFullTopic.substr(0, slashPosition);
+            remainingFullTopic.erase(0, currentTopic.size() + 1);
+
+            currentTopicExists = tmpJson.contains(currentTopic);
+
+            if (!currentTopic.empty() && tmpJson.is_object() && currentTopicExists) {
+                tmpJson = tmpJson[currentTopic];
             }
+        } while (!currentTopic.empty() && tmpJson.is_object() && currentTopicExists);
+
+        if (currentTopic.empty() && tmpJson.is_object() && tmpJson.contains("payload")) {
+            tmpJson = tmpJson["payload"];
+            /*
+                        enum TopicTypes { STRING, INT, FLOAT, JSON };
+
+                        TopicTypes topicType = TopicTypes::STRING;
+
+                        if (tmpJson.contains("type")) {
+                            if (tmpJson["type"] == "string") {
+                                topicType = TopicTypes::STRING;
+                            } else if (tmpJson["type"] == "int") {
+                                topicType = TopicTypes::INT;
+                            } else if (tmpJson["type"] == "float") {
+                                topicType = TopicTypes::FLOAT;
+                            } else if (tmpJson["topic"] == "json") {
+                                topicType = TopicTypes::JSON;
+                            }
+                        }
+            */
+            if (tmpJson.contains(publish.getMessage())) {
+                tmpJson = tmpJson[publish.getMessage()];
+                if (tmpJson.contains("command_topic") && tmpJson.contains("state")) {
+                    this->publish(tmpJson["command_topic"], tmpJson["state"], publish.getQoS());
+                }
+            }
+            /*
+              else {
+                switch (topicType) {
+                    case TopicTypes::STRING:
+                        break;
+                    case TopicTypes::INT:
+                        break;
+                    case TopicTypes::FLOAT:
+                        break;
+                    case TopicTypes::JSON:
+                        break;
+                }
+
+                if (tmpJson.contains("*")) {
+                    tmpJson = tmpJson["*"];
+                    if (tmpJson.contains("command_topic")) {
+                        this->publish(tmpJson["command_topic"], publish.getMessage(), publish.getQoS());
+                    }
+                }
+            }
+            */
         }
     }
+
+    /*
+        iotempower/cfg/test01/ip 192.168.12.183
+        iotempower/cfg/test02/ip 192.168.12.132
+
+        iotempower/binary_sensor/test01/button1/config
+        {
+            "name": "test01 button1",
+            "state_topic": "test01/button1",
+            "payload_on": "released",
+            "payload_off": "pressed"
+        },
+        iotempower/switch/test02/onboard/config
+        {
+            "name": "test02 onboard",
+            "state_topic": "test02/onboard",
+            "state_on": "on",
+            "state_off": "off",
+            "command_topic": "test02/onboard/set",
+            "payload_on": "on",
+            "payload_off": "off"
+        }
+
+    {
+       "binary_sensor" : [{
+            "name": "test01 button1",
+            "state_topic": "test01/button1",
+            "payload_on": "released",
+            "payload_off": "pressed"
+        }],
+        "switch" : [{
+            "name": "test02 onboard",
+            "state_topic": "test02/onboard",
+            "state_on": "on",
+            "state_off": "off",
+            "command_topic": "test02/onboard/set",
+            "payload_on": "on",
+            "payload_off": "off"
+        }]
+    }
+
+    */
 
 } // namespace apps::mqttbroker
