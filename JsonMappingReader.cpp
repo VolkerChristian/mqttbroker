@@ -41,11 +41,11 @@ namespace apps::mqttbroker {
                     "type" : "string",
                     "pressed" : {
                         "command_topic" : "test02/onboard/set",
-                        "state" : "off"
+                        "state" : "on"
                     },
                     "released" : {
                         "command_topic" : "test02/onboard/set",
-                        "state" : "on"
+                        "state" : "off"
                     }
                 }
             }
