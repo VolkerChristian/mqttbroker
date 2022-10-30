@@ -48,7 +48,7 @@ namespace apps::mqttbroker {
     private:
         void onPublish(iot::mqtt::packets::Publish& publish) override;
 
-        nlohmann::json& json;
+        nlohmann::json& jsonMapping;
     };
 
 } // namespace apps::mqttbroker

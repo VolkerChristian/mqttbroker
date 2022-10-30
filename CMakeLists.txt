@@ -42,7 +42,8 @@ add_compile_options(
     -Wconversion
     -Wuninitialized
     -Wunreachable-code
-    -Wfloat-equal
+    -Wno-float-equal
+    -Wno-implicit-int-float-conversion
     -pedantic-errors
     -fexec-charset=UTF-8
     ${ADDITIONAL_OPTIONS}

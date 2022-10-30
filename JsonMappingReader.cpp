@@ -20,6 +20,9 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
+#include "log/Logger.h"
+
+#include <fstream>
 #include <initializer_list>
 #include <map>
 #include <nlohmann/json.hpp>
@@ -29,33 +32,31 @@
 
 namespace apps::mqttbroker {
 
-    nlohmann::json& JsonMappingReader::getMapping(const std::string& discoveryPrefix) {
-        static nlohmann::json json;
-        if (json.empty()) {
-            json = nlohmann::json::parse(R"(
-{
-    "iotempower" : {
-        "test01" : {
-            "button1" : {
-                "payload" : {
-                    "type" : "string",
-                    "pressed" : {
-                        "command_topic" : "test02/onboard/set",
-                        "state" : "on"
-                    },
-                    "released" : {
-                        "command_topic" : "test02/onboard/set",
-                        "state" : "off"
-                    }
-                }
+    nlohmann::json JsonMappingReader::jsonMapping;
+
+    bool JsonMappingReader::readMappingFromFile(const std::string& mappingFilePath) {
+        bool success = true;
+
+        if (jsonMapping.empty()) {
+            std::ifstream mappingFile(mappingFilePath);
+            if (mappingFile) {
+                VLOG(0) << "MappingFilePath: '" << mappingFilePath << "'";
+
+                jsonMapping = nlohmann::json::parse(mappingFile);
+            } else {
+                VLOG(0) << "MappingFilePath: '" << mappingFilePath << "' not found";
+                success = false;
             }
-        }
-    }
-}
-)");
+            mappingFile.close();
+        } else {
+            VLOG(0) << "MappingFilePath: '" << mappingFilePath << "' already loaded";
         }
 
-        return json[discoveryPrefix];
+        return success;
+    }
+
+    nlohmann::json& JsonMappingReader::getMapping(const std::string& discoveryPrefix) {
+        return jsonMapping[discoveryPrefix];
     }
 
 } // namespace apps::mqttbroker

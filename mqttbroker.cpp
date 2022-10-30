@@ -16,6 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "JsonMappingReader.h"
 #include "SocketContext.h" // IWYU pragma: keep
 #include "config.h"        // just for this example app
 #include "core/SNodeC.h"
@@ -24,6 +25,8 @@
 #include "net/in/stream/legacy/SocketServer.h"
 #include "net/in/stream/tls/SocketServer.h"
 #include "net/un/stream/legacy/SocketServer.h"
+#include "utils/CLI11.hpp"
+#include "utils/Config.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -42,8 +45,24 @@
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
+static int test = 0;
+
 int main(int argc, char* argv[]) {
+    std::string mappingFilePath;
+
+    utils::Config::add_option("--mqtt-mapping-file", mappingFilePath, "MQTT-mapping file for integrateion")
+        ->required()
+        ->type_name("path")
+        ->group("Application Options");
+
     core::SNodeC::init(argc, argv);
+
+    bool success = apps::mqttbroker::JsonMappingReader::readMappingFromFile(mappingFilePath);
+
+    if (!success) {
+        VLOG(0) << "Error in or not existing: Mapping file '" << mappingFilePath << "'";
+        core::SNodeC::stop();
+    }
 
     using MQTTLegacyInServer =
         net::in::stream::legacy::SocketServer<iot::mqtt::server::SharedSocketContextFactory<apps::mqttbroker::SocketContext>>;
@@ -57,6 +76,7 @@ int main(int argc, char* argv[]) {
             VLOG(0) << "\tLocal: (" + socketConnection->getLocalAddress().address() + ") " + socketConnection->getLocalAddress().toString();
             VLOG(0) << "\tPeer:  (" + socketConnection->getRemoteAddress().address() + ") " +
                            socketConnection->getRemoteAddress().toString();
+            VLOG(0) << "Test: " << test;
         },
         [](LegacyInSocketConnection* socketConnection) -> void { // OnConnected
             VLOG(0) << "OnConnected";

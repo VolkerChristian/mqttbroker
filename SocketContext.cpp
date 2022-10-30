@@ -32,8 +32,7 @@ namespace apps::mqttbroker {
     SocketContext::SocketContext(core::socket::SocketConnection* socketConnection,
                                  const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker)
         : iot::mqtt::server::SocketContext(socketConnection, broker)
-        , json(apps::mqttbroker::JsonMappingReader::getMapping("iotempower")) {
-        VLOG(0) << "Json: " << json;
+        , jsonMapping(apps::mqttbroker::JsonMappingReader::getMapping("iotempower")) {
     }
 
     SocketContext::~SocketContext() {
@@ -50,12 +49,12 @@ namespace apps::mqttbroker {
         LOG(DEBUG) << "PacketIdentifier: " << publish.getPacketIdentifier();
         LOG(DEBUG) << "Message: " << publish.getMessage();
 
-        nlohmann::json tmpJson = json;
+        nlohmann::json subJson = jsonMapping;
 
         std::string remainingFullTopic = publish.getTopic();
         std::string currentTopic;
 
-        bool currentTopicExists = false;
+        bool currentTopicExistsInMapping = false;
 
         do {
             std::string::size_type slashPosition = remainingFullTopic.find("/");
@@ -63,15 +62,15 @@ namespace apps::mqttbroker {
             currentTopic = remainingFullTopic.substr(0, slashPosition);
             remainingFullTopic.erase(0, currentTopic.size() + 1);
 
-            currentTopicExists = tmpJson.contains(currentTopic);
+            currentTopicExistsInMapping = subJson.contains(currentTopic);
 
-            if (!currentTopic.empty() && tmpJson.is_object() && currentTopicExists) {
-                tmpJson = tmpJson[currentTopic];
+            if (!currentTopic.empty() && subJson.is_object() && currentTopicExistsInMapping) {
+                subJson = subJson[currentTopic];
             }
-        } while (!currentTopic.empty() && tmpJson.is_object() && currentTopicExists);
+        } while (!currentTopic.empty() && subJson.is_object() && currentTopicExistsInMapping);
 
-        if (currentTopic.empty() && tmpJson.is_object() && tmpJson.contains("payload")) {
-            tmpJson = tmpJson["payload"];
+        if (currentTopic.empty() && subJson.is_object() && subJson.contains("payload")) {
+            subJson = subJson["payload"];
             /*
                         enum TopicTypes { STRING, INT, FLOAT, JSON };
 
@@ -89,10 +88,10 @@ namespace apps::mqttbroker {
                             }
                         }
             */
-            if (tmpJson.contains(publish.getMessage())) {
-                tmpJson = tmpJson[publish.getMessage()];
-                if (tmpJson.contains("command_topic") && tmpJson.contains("state")) {
-                    this->publish(tmpJson["command_topic"], tmpJson["state"], publish.getQoS());
+            if (subJson.contains(publish.getMessage())) {
+                subJson = subJson[publish.getMessage()];
+                if (subJson.contains("command_topic") && subJson.contains("state")) {
+                    this->publish(subJson["command_topic"], subJson["state"], publish.getQoS());
                 }
             }
             /*

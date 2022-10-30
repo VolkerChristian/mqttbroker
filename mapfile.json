@@ -1,0 +1,19 @@
+{
+    "iotempower" : {
+        "test01" : {
+            "button1" : {
+                "payload" : {
+                    "type" : "binary_sensor",
+                    "pressed" : {
+                        "command_topic" : "test02/onboard/set",
+                        "state" : "on"
+                    },
+                    "released" : {
+                        "command_topic" : "test02/onboard/set",
+                        "state" : "off"
+                    }
+                }
+            }
+        }
+    }
+}
