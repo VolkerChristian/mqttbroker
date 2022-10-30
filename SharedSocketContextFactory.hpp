@@ -25,15 +25,15 @@
 
 namespace apps::mqttbroker {
 
-    template <const nlohmann::json& jsonMappingT, typename SocketContext>
-    SharedSocketContextFactory<jsonMappingT, SocketContext>::SharedSocketContextFactory()
+    template <typename SocketContextT, const nlohmann::json& jsonMappingT>
+    SharedSocketContextFactory<SocketContextT, jsonMappingT>::SharedSocketContextFactory()
         : jsonMapping(jsonMappingT) {
     }
 
-    template <const nlohmann::json& jsonMappingT, typename SocketContext>
+    template <typename SocketContextT, const nlohmann::json& jsonMappingT>
     core::socket::SocketContext*
-    SharedSocketContextFactory<jsonMappingT, SocketContext>::create(core::socket::SocketConnection* socketConnection,
-                                                                    std::shared_ptr<iot::mqtt::server::broker::Broker>& broker) {
+    SharedSocketContextFactory<SocketContextT, jsonMappingT>::create(core::socket::SocketConnection* socketConnection,
+                                                                     std::shared_ptr<iot::mqtt::server::broker::Broker>& broker) {
         return new SocketContext(socketConnection, broker, jsonMapping);
     }
 

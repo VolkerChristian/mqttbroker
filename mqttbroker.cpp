@@ -47,8 +47,6 @@
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
-static int test = 0;
-
 int main(int argc, char* argv[]) {
     std::string mappingFilePath;
 
@@ -62,7 +60,7 @@ int main(int argc, char* argv[]) {
     static nlohmann::json sharedJsonMapping = apps::mqttbroker::JsonMappingReader::readMappingFromFile(mappingFilePath)["iotempower"];
 
     using MQTTLegacyInServer = net::in::stream::legacy::SocketServer<
-        apps::mqttbroker::SharedSocketContextFactory<sharedJsonMapping, apps::mqttbroker::SocketContext>>;
+        apps::mqttbroker::SharedSocketContextFactory<apps::mqttbroker::SocketContext, sharedJsonMapping>>;
 
     using LegacyInSocketConnection = MQTTLegacyInServer::SocketConnection;
 
@@ -74,7 +72,6 @@ int main(int argc, char* argv[]) {
             VLOG(0) << "\tLocal: (" + socketConnection->getLocalAddress().address() + ") " + socketConnection->getLocalAddress().toString();
             VLOG(0) << "\tPeer:  (" + socketConnection->getRemoteAddress().address() + ") " +
                            socketConnection->getRemoteAddress().toString();
-            VLOG(0) << "Test: " << test;
         },
         [](LegacyInSocketConnection* socketConnection) -> void { // OnConnected
             VLOG(0) << "OnConnected";
@@ -104,7 +101,7 @@ int main(int argc, char* argv[]) {
     });
 
     using MQTTTLSInServer = net::in::stream::tls::SocketServer<
-        apps::mqttbroker::SharedSocketContextFactory<sharedJsonMapping, apps::mqttbroker::SocketContext>>;
+        apps::mqttbroker::SharedSocketContextFactory<apps::mqttbroker::SocketContext, sharedJsonMapping>>;
     using TLSInSocketConnection = MQTTTLSInServer::SocketConnection;
 
     std::map<std::string, std::any> options{{"CertChain", SERVERCERTF}, {"CertChainKey", SERVERKEYF}, {"Password", KEYFPASS}};
@@ -191,7 +188,7 @@ int main(int argc, char* argv[]) {
     });
 
     using MQTTLegacyUnServer = net::un::stream::legacy::SocketServer<
-        apps::mqttbroker::SharedSocketContextFactory<sharedJsonMapping, apps::mqttbroker::SocketContext>>;
+        apps::mqttbroker::SharedSocketContextFactory<apps::mqttbroker::SocketContext, sharedJsonMapping>>;
     using LegacyUnSocketConnection = MQTTLegacyUnServer::SocketConnection;
 
     MQTTLegacyUnServer mqttLegacyUnServer(
