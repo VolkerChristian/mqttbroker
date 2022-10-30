@@ -40,16 +40,6 @@ namespace apps::mqttbroker {
     }
 
     void SocketContext::onPublish(iot::mqtt::packets::Publish& publish) {
-        LOG(DEBUG) << "Received PUBLISH+++++++++++++++++++++++: " << clientId;
-        LOG(DEBUG) << "=================";
-        printStandardHeader(publish);
-        LOG(DEBUG) << "DUP: " << publish.getDup();
-        LOG(DEBUG) << "QoS: " << static_cast<uint16_t>(publish.getQoS());
-        LOG(DEBUG) << "Retain: " << publish.getRetain();
-        LOG(DEBUG) << "Topic: " << publish.getTopic();
-        LOG(DEBUG) << "PacketIdentifier: " << publish.getPacketIdentifier();
-        LOG(DEBUG) << "Message: " << publish.getMessage();
-
         nlohmann::json subJson = jsonMapping;
 
         std::string remainingFullTopic = publish.getTopic();

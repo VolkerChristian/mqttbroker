@@ -49,15 +49,26 @@
 
 int main(int argc, char* argv[]) {
     std::string mappingFilePath;
-
     utils::Config::add_option("--mqtt-mapping-file", mappingFilePath, "MQTT-mapping file for integrateion")
         ->required()
-        ->type_name("path")
+        ->type_name("[path]")
+        ->group("Application Options");
+
+    std::string discoverPrefix;
+    utils::Config::add_option("--mqtt-discover-prefix", discoverPrefix, "MQTT-discover prefix in the json-mapping")
+        ->type_name("[utf8]")
+        ->default_val("iotempower")
         ->group("Application Options");
 
     core::SNodeC::init(argc, argv);
 
-    static nlohmann::json sharedJsonMapping = apps::mqttbroker::JsonMappingReader::readMappingFromFile(mappingFilePath)["iotempower"];
+    static const nlohmann::json& jsonMapping = apps::mqttbroker::JsonMappingReader::readMappingFromFile(mappingFilePath);
+
+    static nlohmann::json sharedJsonMapping;
+
+    if (jsonMapping.contains(discoverPrefix)) {
+        sharedJsonMapping = jsonMapping[discoverPrefix];
+    }
 
     using MQTTLegacyInServer = net::in::stream::legacy::SocketServer<
         apps::mqttbroker::SharedSocketContextFactory<apps::mqttbroker::SocketContext, sharedJsonMapping>>;
