@@ -16,7 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "SocketContext.h"
+#include "SocketContext.h" // IWYU pragma: export
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -30,16 +30,17 @@
 namespace apps::mqttbroker {
 
     SocketContext::SocketContext(core::socket::SocketConnection* socketConnection,
-                                 const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker)
+                                 const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
+                                 const nlohmann::json& jsonMapping)
         : iot::mqtt::server::SocketContext(socketConnection, broker)
-        , jsonMapping(apps::mqttbroker::JsonMappingReader::getMapping("iotempower")) {
+        , jsonMapping(jsonMapping) {
     }
 
     SocketContext::~SocketContext() {
     }
 
     void SocketContext::onPublish(iot::mqtt::packets::Publish& publish) {
-        LOG(DEBUG) << "Received PUBLISH: " << clientId;
+        LOG(DEBUG) << "Received PUBLISH+++++++++++++++++++++++: " << clientId;
         LOG(DEBUG) << "=================";
         printStandardHeader(publish);
         LOG(DEBUG) << "DUP: " << publish.getDup();
@@ -91,7 +92,13 @@ namespace apps::mqttbroker {
             if (subJson.contains(publish.getMessage())) {
                 subJson = subJson[publish.getMessage()];
                 if (subJson.contains("command_topic") && subJson.contains("state")) {
-                    this->publish(subJson["command_topic"], subJson["state"], publish.getQoS());
+                    const std::string& topic = subJson["command_topic"];
+                    const std::string& message = subJson["state"];
+
+                    LOG(INFO) << "Topic mapping found:";
+                    LOG(INFO) << "  " << publish.getTopic() << ":" << publish.getMessage() << " -> " << topic << ":" << message;
+
+                    this->publish(topic, message, publish.getQoS());
                 }
             }
             /*

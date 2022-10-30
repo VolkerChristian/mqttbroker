@@ -16,42 +16,30 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef APPS_MQTTBROKER_SOCKETCONTEXT_H
-#define APPS_MQTTBROKER_SOCKETCONTEXT_H
+#ifndef APPS_MQTTBROKER_SOCKETCONTEXTFACTORY_H
+#define APPS_MQTTBROKER_SOCKETCONTEXTFACTORY_H
 
-#include "iot/mqtt/server/SocketContext.h"
-
-namespace core::socket {
-    class SocketConnection;
-}
-
-namespace iot::mqtt::server::broker {
-    class Broker;
-}
+#include "SocketContext.h"
+#include "iot/mqtt/server/SharedSocketContextFactory.h" // IWYU pragma: export
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-#include <memory>
-#include <nlohmann/json_fwd.hpp>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
 namespace apps::mqttbroker {
 
-    class SocketContext : public iot::mqtt::server::SocketContext {
+    template <const nlohmann::json& jsonMappingT, typename SocketContextT>
+    class SharedSocketContextFactory : public iot::mqtt::server::SharedSocketContextFactory<SocketContextT> {
     public:
-        explicit SocketContext(core::socket::SocketConnection* socketConnection,
-                               const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
-                               const nlohmann::json& jsonMapping);
+        SharedSocketContextFactory();
 
-        ~SocketContext() override;
+        core::socket::SocketContext* create(core::socket::SocketConnection* socketConnection,
+                                            std::shared_ptr<iot::mqtt::server::broker::Broker>& broker) override;
 
     private:
-        void onPublish(iot::mqtt::packets::Publish& publish) override;
-
         const nlohmann::json& jsonMapping;
     };
 
 } // namespace apps::mqttbroker
 
-#endif // APPS_MQTTBROKER_SOCKETCONTEXT_H
+#endif // APPS_MQTTBROKER_SOCKETCONTEXTFACTORY_H

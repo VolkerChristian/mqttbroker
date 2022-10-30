@@ -34,9 +34,7 @@ namespace apps::mqttbroker {
 
     nlohmann::json JsonMappingReader::jsonMapping;
 
-    bool JsonMappingReader::readMappingFromFile(const std::string& mappingFilePath) {
-        bool success = true;
-
+    const nlohmann::json& JsonMappingReader::readMappingFromFile(const std::string& mappingFilePath) {
         if (jsonMapping.empty()) {
             std::ifstream mappingFile(mappingFilePath);
             if (mappingFile) {
@@ -45,18 +43,13 @@ namespace apps::mqttbroker {
                 jsonMapping = nlohmann::json::parse(mappingFile);
             } else {
                 VLOG(0) << "MappingFilePath: '" << mappingFilePath << "' not found";
-                success = false;
             }
             mappingFile.close();
         } else {
             VLOG(0) << "MappingFilePath: '" << mappingFilePath << "' already loaded";
         }
 
-        return success;
-    }
-
-    nlohmann::json& JsonMappingReader::getMapping(const std::string& discoveryPrefix) {
-        return jsonMapping[discoveryPrefix];
+        return jsonMapping;
     }
 
 } // namespace apps::mqttbroker

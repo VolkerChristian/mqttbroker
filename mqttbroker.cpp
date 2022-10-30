@@ -17,16 +17,18 @@
  */
 
 #include "JsonMappingReader.h"
-#include "SocketContext.h" // IWYU pragma: keep
-#include "config.h"        // just for this example app
+#include "SharedSocketContextFactory.hpp" // IWYU pragma: keep
+#include "SocketContext.h"                // IWYU pragma: keep
+#include "config.h"                       // just for this example app
 #include "core/SNodeC.h"
-#include "iot/mqtt/server/SharedSocketContextFactory.hpp" // IWYU pragma: keep
 #include "log/Logger.h"
 #include "net/in/stream/legacy/SocketServer.h"
 #include "net/in/stream/tls/SocketServer.h"
 #include "net/un/stream/legacy/SocketServer.h"
 #include "utils/CLI11.hpp"
 #include "utils/Config.h"
+
+#include <nlohmann/json.hpp>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -57,15 +59,11 @@ int main(int argc, char* argv[]) {
 
     core::SNodeC::init(argc, argv);
 
-    bool success = apps::mqttbroker::JsonMappingReader::readMappingFromFile(mappingFilePath);
+    static nlohmann::json sharedJsonMapping = apps::mqttbroker::JsonMappingReader::readMappingFromFile(mappingFilePath)["iotempower"];
 
-    if (!success) {
-        VLOG(0) << "Error in or not existing: Mapping file '" << mappingFilePath << "'";
-        core::SNodeC::stop();
-    }
+    using MQTTLegacyInServer = net::in::stream::legacy::SocketServer<
+        apps::mqttbroker::SharedSocketContextFactory<sharedJsonMapping, apps::mqttbroker::SocketContext>>;
 
-    using MQTTLegacyInServer =
-        net::in::stream::legacy::SocketServer<iot::mqtt::server::SharedSocketContextFactory<apps::mqttbroker::SocketContext>>;
     using LegacyInSocketConnection = MQTTLegacyInServer::SocketConnection;
 
     MQTTLegacyInServer mqttLegacyInServer(
@@ -105,8 +103,8 @@ int main(int argc, char* argv[]) {
         }
     });
 
-    using MQTTTLSInServer =
-        net::in::stream::tls::SocketServer<iot::mqtt::server::SharedSocketContextFactory<apps::mqttbroker::SocketContext>>;
+    using MQTTTLSInServer = net::in::stream::tls::SocketServer<
+        apps::mqttbroker::SharedSocketContextFactory<sharedJsonMapping, apps::mqttbroker::SocketContext>>;
     using TLSInSocketConnection = MQTTTLSInServer::SocketConnection;
 
     std::map<std::string, std::any> options{{"CertChain", SERVERCERTF}, {"CertChainKey", SERVERKEYF}, {"Password", KEYFPASS}};
@@ -192,8 +190,8 @@ int main(int argc, char* argv[]) {
         }
     });
 
-    using MQTTLegacyUnServer =
-        net::un::stream::legacy::SocketServer<iot::mqtt::server::SharedSocketContextFactory<apps::mqttbroker::SocketContext>>;
+    using MQTTLegacyUnServer = net::un::stream::legacy::SocketServer<
+        apps::mqttbroker::SharedSocketContextFactory<sharedJsonMapping, apps::mqttbroker::SocketContext>>;
     using LegacyUnSocketConnection = MQTTLegacyUnServer::SocketConnection;
 
     MQTTLegacyUnServer mqttLegacyUnServer(
