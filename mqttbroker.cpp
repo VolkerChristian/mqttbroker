@@ -49,7 +49,6 @@
 int main(int argc, char* argv[]) {
     std::string mappingFilePath;
     utils::Config::add_option("--mqtt-mapping-file", mappingFilePath, "MQTT-mapping file for integration", true, "[path]");
-    ;
 
     std::string discoverPrefix;
     utils::Config::add_option(
