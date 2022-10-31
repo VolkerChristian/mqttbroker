@@ -52,13 +52,15 @@ int main(int argc, char* argv[]) {
     utils::Config::add_option("--mqtt-mapping-file", mappingFilePath, "MQTT-mapping file for integrateion")
         ->required()
         ->type_name("[path]")
-        ->group("Application Options");
+        ->group("Application Options")
+        ->configurable();
 
     std::string discoverPrefix;
     utils::Config::add_option("--mqtt-discover-prefix", discoverPrefix, "MQTT-discover prefix in the json-mapping")
         ->type_name("[utf8]")
         ->default_val("iotempower")
-        ->group("Application Options");
+        ->group("Application Options")
+        ->configurable();
 
     core::SNodeC::init(argc, argv);
 
