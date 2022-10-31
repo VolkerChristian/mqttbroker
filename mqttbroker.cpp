@@ -25,7 +25,6 @@
 #include "net/in/stream/legacy/SocketServer.h"
 #include "net/in/stream/tls/SocketServer.h"
 #include "net/un/stream/legacy/SocketServer.h"
-#include "utils/CLI11.hpp"
 #include "utils/Config.h"
 
 #include <nlohmann/json.hpp>
@@ -49,18 +48,12 @@
 
 int main(int argc, char* argv[]) {
     std::string mappingFilePath;
-    utils::Config::add_option("--mqtt-mapping-file", mappingFilePath, "MQTT-mapping file for integrateion")
-        ->required()
-        ->type_name("[path]")
-        ->group("Application Options")
-        ->configurable();
+    utils::Config::add_option("--mqtt-mapping-file", mappingFilePath, "MQTT-mapping file for integration", true, "[path]");
+    ;
 
     std::string discoverPrefix;
-    utils::Config::add_option("--mqtt-discover-prefix", discoverPrefix, "MQTT-discover prefix in the json-mapping")
-        ->type_name("[utf8]")
-        ->default_val("iotempower")
-        ->group("Application Options")
-        ->configurable();
+    utils::Config::add_option(
+        "--mqtt-discover-prefix", discoverPrefix, "MQTT-discover prefix in the json-mapping", false, "[utf8]", "iotempower");
 
     core::SNodeC::init(argc, argv);
 
