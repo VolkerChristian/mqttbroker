@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
         if (errnum < 0) {
             PLOG(ERROR) << "OnError";
         } else if (errnum > 0) {
-            PLOG(ERROR) << "OnError: " << socketAddress.toString();
+            PLOG(ERROR) << "OnError";
         } else {
             VLOG(0) << mqttLegacyInServer.getConfig().getName() << " listening on " << socketAddress.toString();
         }
@@ -186,7 +186,7 @@ int main(int argc, char* argv[]) {
         if (errnum < 0) {
             PLOG(ERROR) << "OnError";
         } else if (errnum > 0) {
-            PLOG(ERROR) << "OnError: " << socketAddress.toString();
+            PLOG(ERROR) << "OnError";
         } else {
             VLOG(0) << mqttTLSInServer.getConfig().getName() << " listening on " << socketAddress.toString();
         }
@@ -228,7 +228,7 @@ int main(int argc, char* argv[]) {
             if (errnum < 0) {
                 PLOG(ERROR) << "OnError";
             } else if (errnum > 0) {
-                PLOG(ERROR) << "OnError: " << socketAddress.toString();
+                PLOG(ERROR) << "OnError";
             } else {
                 VLOG(0) << mqttLegacyUnServer.getConfig().getName() << " listening on " << socketAddress.toString();
             }
