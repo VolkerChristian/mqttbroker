@@ -51,7 +51,9 @@ add_compile_options(
 
 set(MQTTBROKER_CPP mqttbroker.cpp JsonMappingReader.cpp SocketContext.cpp)
 
-set(MQTTBROKER_H JsonMappingReader.h SharedSocketContextFactory.h SharedSocketContextFactory.hpp SocketContext.h)
+set(MQTTBROKER_H JsonMappingReader.h SharedSocketContextFactory.h
+                 SharedSocketContextFactory.hpp SocketContext.h
+)
 
 add_executable(mqttbroker ${MQTTBROKER_CPP} ${MQTTBROKER_H})
 
