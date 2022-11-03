@@ -38,15 +38,15 @@ namespace apps::mqttbroker {
         if (jsonMapping.empty()) {
             std::ifstream mappingFile(mappingFilePath);
             if (mappingFile) {
-                VLOG(0) << "MappingFilePath: '" << mappingFilePath << "'";
+                VLOG(0) << "MappingFilePath: " << mappingFilePath;
 
                 jsonMapping = nlohmann::json::parse(mappingFile);
             } else {
-                VLOG(0) << "MappingFilePath: '" << mappingFilePath << "' not found";
+                VLOG(0) << "MappingFilePath: " << mappingFilePath << " not found";
             }
             mappingFile.close();
         } else {
-            VLOG(0) << "MappingFilePath: '" << mappingFilePath << "' already loaded";
+            VLOG(0) << "MappingFilePath: " << mappingFilePath << " already loaded";
         }
 
         return jsonMapping;

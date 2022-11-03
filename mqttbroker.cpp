@@ -48,11 +48,12 @@
 
 int main(int argc, char* argv[]) {
     std::string mappingFilePath;
-    utils::Config::add_option("--mqtt-mapping-file", mappingFilePath, "MQTT-mapping file for integration", true, "[path]");
+    utils::Config::add_option(
+        "--mqtt-mapping-file", mappingFilePath, "MQTT mapping file (json format) for integration", true, "[path to json file]");
 
     std::string discoverPrefix;
     utils::Config::add_option(
-        "--mqtt-discover-prefix", discoverPrefix, "MQTT-discover prefix in the json-mapping", false, "[utf8]", "iotempower");
+        "--mqtt-discover-prefix", discoverPrefix, "MQTT discover prefix in the json mapping file", false, "[utf8]", "iotempower");
 
     core::SNodeC::init(argc, argv);
 
