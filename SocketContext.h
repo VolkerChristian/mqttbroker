@@ -25,9 +25,14 @@ namespace core::socket {
     class SocketConnection;
 }
 
-namespace iot::mqtt::server::broker {
-    class Broker;
-}
+namespace iot::mqtt {
+    namespace packets {
+        class Publish;
+    }
+    namespace server::broker {
+        class Broker;
+    }
+} // namespace iot::mqtt
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 

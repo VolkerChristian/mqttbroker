@@ -18,6 +18,8 @@
 
 #include "SocketContext.h" // IWYU pragma: export
 
+#include "iot/mqtt/packets/Publish.h"
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 #include "log/Logger.h"
