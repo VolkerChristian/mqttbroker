@@ -1,16 +1,14 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(MQTTBroker LANGUAGES CXX)
-
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-configure_file(config.h.in config.h @ONLY)
+#configure_file(config.h.in config.h @ONLY)
 
 if(NOT SNODEC_INTREE_BUILD)
     find_package(
         snodec COMPONENTS net-in-stream-legacy net-in-stream-tls
-                          net-un-stream-legacy mqtt-server
+                          net-un-stream-legacy mqtt-client
     )
 endif(NOT SNODEC_INTREE_BUILD)
 
@@ -49,30 +47,25 @@ add_compile_options(
     ${ADDITIONAL_OPTIONS}
 )
 
-set(MQTTBROKER_CPP mqttbroker.cpp JsonMappingReader.cpp SocketContext.cpp)
+set(CLIENTBROKER_CPP clientbroker.cpp SocketContext.cpp ../JsonMappingReader.cpp)
 
-set(MQTTBROKER_H JsonMappingReader.h SharedSocketContextFactory.h
-                 SharedSocketContextFactory.hpp SocketContext.h
-)
+set(CLIENTBROKER_H SocketContextFactory.h SocketContextFactory.hpp ../JsonMappingReader.h)
 
-add_executable(mqttbroker ${MQTTBROKER_CPP} ${MQTTBROKER_H})
+add_executable(clientbroker ${CLIENTBROKER_CPP} ${CLIENTBROKER_H})
 
 target_include_directories(
-    mqttbroker PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
+    clientbroker PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 if(SNODEC_INTREE_BUILD)
     set_target_properties(
-        mqttbroker PROPERTIES INSTALL_RPATH "${SNODEC_IOT_MQTT_RPATH}"
+        clientbroker PROPERTIES INSTALL_RPATH "${SNODEC_IOT_MQTT_RPATH}"
     )
 endif(SNODEC_INTREE_BUILD)
 
 target_link_libraries(
-    mqttbroker PUBLIC snodec::mqtt-server snodec::net-in-stream-legacy
-                      snodec::net-in-stream-tls snodec::net-un-stream-legacy
+    clientbroker PUBLIC snodec::mqtt-client snodec::net-in-stream-legacy
+                        snodec::net-in-stream-tls snodec::net-un-stream-legacy
 )
 
-install(TARGETS mqttbroker RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
-add_subdirectory(clientbroker)
-
+install(TARGETS clientbroker RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

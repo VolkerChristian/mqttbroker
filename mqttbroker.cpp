@@ -27,10 +27,9 @@
 #include "net/un/stream/legacy/SocketServer.h"
 #include "utils/Config.h"
 
-#include <nlohmann/json.hpp>
-
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
+#include <nlohmann/json.hpp>
 #include <openssl/asn1.h>
 #include <openssl/crypto.h>
 #include <openssl/obj_mac.h>
@@ -64,6 +63,9 @@ int main(int argc, char* argv[]) {
     if (jsonMapping.contains(discoverPrefix)) {
         sharedJsonMapping = jsonMapping[discoverPrefix];
     }
+
+    sharedJsonMapping.clear();
+    sharedJsonMapping = "";
 
     using MQTTLegacyInServer = net::in::stream::legacy::SocketServer<
         apps::mqttbroker::SharedSocketContextFactory<apps::mqttbroker::SocketContext, sharedJsonMapping>>;
