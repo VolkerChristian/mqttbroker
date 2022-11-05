@@ -16,17 +16,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h" // just for this example app
+#include "JsonMappingReader.h"
+#include "SharedSocketContextFactory.hpp" // IWYU pragma: keep
+#include "SocketContext.h"                // IWYU pragma: keep
+#include "config.h"                       // just for this example app
 #include "core/SNodeC.h"
-#include "iot/mqtt/server/SharedSocketContextFactory.h" // IWYU pragma: keep
-#include "iot/mqtt/server/SocketContextFactory.h"       // IWYU pragma: keep
 #include "log/Logger.h"
 #include "net/in/stream/legacy/SocketServer.h"
 #include "net/in/stream/tls/SocketServer.h"
 #include "net/un/stream/legacy/SocketServer.h"
+#include "utils/Config.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
+#include <nlohmann/json.hpp>
 #include <openssl/asn1.h>
 #include <openssl/crypto.h>
 #include <openssl/obj_mac.h>
@@ -43,9 +46,30 @@
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
 int main(int argc, char* argv[]) {
+    std::string mappingFilePath;
+    utils::Config::add_option(
+        "--mqtt-mapping-file", mappingFilePath, "MQTT mapping file (json format) for integration", false, "[path to json file]");
+
+    std::string discoverPrefix;
+    utils::Config::add_option(
+        "--mqtt-discover-prefix", discoverPrefix, "MQTT discover prefix in the json mapping file", false, "[utf8]", "iotempower");
+
     core::SNodeC::init(argc, argv);
 
-    using MQTTLegacyInServer = net::in::stream::legacy::SocketServer<iot::mqtt::server::SharedSocketContextFactory>;
+    static nlohmann::json sharedJsonMapping;
+
+    if (!mappingFilePath.empty()) {
+        static const nlohmann::json& jsonMapping = apps::mqttbroker::JsonMappingReader::readMappingFromFile(mappingFilePath);
+
+        if (jsonMapping.contains(discoverPrefix)) {
+            sharedJsonMapping = jsonMapping[discoverPrefix];
+        }
+        VLOG(0) << "Mapping File " << mappingFilePath;
+    }
+
+    using MQTTLegacyInServer = net::in::stream::legacy::SocketServer<
+        apps::mqttbroker::SharedSocketContextFactory<apps::mqttbroker::SocketContext, sharedJsonMapping>>;
+
     using LegacyInSocketConnection = MQTTLegacyInServer::SocketConnection;
 
     MQTTLegacyInServer mqttLegacyInServer(
@@ -78,13 +102,14 @@ int main(int argc, char* argv[]) {
         if (errnum < 0) {
             PLOG(ERROR) << "OnError";
         } else if (errnum > 0) {
-            PLOG(ERROR) << "OnError: " << socketAddress.toString();
+            PLOG(ERROR) << "OnError";
         } else {
             VLOG(0) << mqttLegacyInServer.getConfig().getName() << " listening on " << socketAddress.toString();
         }
     });
 
-    using MQTTTLSInServer = net::in::stream::tls::SocketServer<iot::mqtt::server::SharedSocketContextFactory>;
+    using MQTTTLSInServer = net::in::stream::tls::SocketServer<
+        apps::mqttbroker::SharedSocketContextFactory<apps::mqttbroker::SocketContext, sharedJsonMapping>>;
     using TLSInSocketConnection = MQTTTLSInServer::SocketConnection;
 
     std::map<std::string, std::any> options{{"CertChain", SERVERCERTF}, {"CertChainKey", SERVERKEYF}, {"Password", KEYFPASS}};
@@ -164,13 +189,14 @@ int main(int argc, char* argv[]) {
         if (errnum < 0) {
             PLOG(ERROR) << "OnError";
         } else if (errnum > 0) {
-            PLOG(ERROR) << "OnError: " << socketAddress.toString();
+            PLOG(ERROR) << "OnError";
         } else {
             VLOG(0) << mqttTLSInServer.getConfig().getName() << " listening on " << socketAddress.toString();
         }
     });
 
-    using MQTTLegacyUnServer = net::un::stream::legacy::SocketServer<iot::mqtt::server::SharedSocketContextFactory>;
+    using MQTTLegacyUnServer = net::un::stream::legacy::SocketServer<
+        apps::mqttbroker::SharedSocketContextFactory<apps::mqttbroker::SocketContext, sharedJsonMapping>>;
     using LegacyUnSocketConnection = MQTTLegacyUnServer::SocketConnection;
 
     MQTTLegacyUnServer mqttLegacyUnServer(
@@ -205,7 +231,7 @@ int main(int argc, char* argv[]) {
             if (errnum < 0) {
                 PLOG(ERROR) << "OnError";
             } else if (errnum > 0) {
-                PLOG(ERROR) << "OnError: " << socketAddress.toString();
+                PLOG(ERROR) << "OnError";
             } else {
                 VLOG(0) << mqttLegacyUnServer.getConfig().getName() << " listening on " << socketAddress.toString();
             }
