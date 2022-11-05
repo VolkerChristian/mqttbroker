@@ -48,7 +48,7 @@
 int main(int argc, char* argv[]) {
     std::string mappingFilePath;
     utils::Config::add_option(
-        "--mqtt-mapping-file", mappingFilePath, "MQTT mapping file (json format) for integration", true, "[path to json file]");
+        "--mqtt-mapping-file", mappingFilePath, "MQTT mapping file (json format) for integration", false, "[path to json file]");
 
     std::string discoverPrefix;
     utils::Config::add_option(
@@ -56,16 +56,16 @@ int main(int argc, char* argv[]) {
 
     core::SNodeC::init(argc, argv);
 
-    static const nlohmann::json& jsonMapping = apps::mqttbroker::JsonMappingReader::readMappingFromFile(mappingFilePath);
-
     static nlohmann::json sharedJsonMapping;
 
-    if (jsonMapping.contains(discoverPrefix)) {
-        sharedJsonMapping = jsonMapping[discoverPrefix];
-    }
+    if (!mappingFilePath.empty()) {
+        static const nlohmann::json& jsonMapping = apps::mqttbroker::JsonMappingReader::readMappingFromFile(mappingFilePath);
 
-    sharedJsonMapping.clear();
-    sharedJsonMapping = "";
+        if (jsonMapping.contains(discoverPrefix)) {
+            sharedJsonMapping = jsonMapping[discoverPrefix];
+        }
+        VLOG(0) << "Mapping File " << mappingFilePath;
+    }
 
     using MQTTLegacyInServer = net::in::stream::legacy::SocketServer<
         apps::mqttbroker::SharedSocketContextFactory<apps::mqttbroker::SocketContext, sharedJsonMapping>>;
