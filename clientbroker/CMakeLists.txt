@@ -16,6 +16,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(ADDITIONAL_OPTIONS
         -Weverything
         -Wno-c++98-compat
+        -Wno-c++98-compat-bind-to-temporary-copy
         -Wno-exit-time-destructors
         -Wno-global-constructors
         -Wno-padded
