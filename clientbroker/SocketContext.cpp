@@ -84,11 +84,6 @@ namespace apps::mqttbroker {
     }
 
     void SocketContext::onConnack([[maybe_unused]] iot::mqtt::packets::Connack& connack) {
-        VLOG(0) << "Acknowledge Flags: " << static_cast<uint16_t>(connack.getAcknowledgeFlags());
-        VLOG(0) << "Return Code: " << static_cast<uint16_t>(connack.getReturnCode());
-        VLOG(0) << "Session present: " << connack.getSessionPresent();
-        VLOG(0) << "On Connack: " << connack.getReturnCode();
-
         if (connack.getReturnCode() == 0) {
             if (!connack.getSessionPresent()) {
                 std::list<iot::mqtt::Topic> topicList;
@@ -96,7 +91,7 @@ namespace apps::mqttbroker {
                 SocketContext::extractTopics(jsonMapping, "", topicList);
 
                 for (const iot::mqtt::Topic& topic : topicList) {
-                    VLOG(0) << "Subscribe Topic: " << topic.getName() << ", qoS: " << static_cast<uint16_t>(topic.getQoS());
+                    LOG(INFO) << "Subscribe Topic: " << topic.getName() << ", qoS: " << static_cast<uint16_t>(topic.getQoS());
                 }
 
                 this->sendSubscribe(++packetIdentifier, topicList);
