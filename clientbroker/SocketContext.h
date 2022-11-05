@@ -49,6 +49,7 @@ namespace apps::mqttbroker {
 
     private:
         void onConnected() override;
+        void onExit() override;
         void onDisconnected() override;
 
         void onConnack(iot::mqtt::packets::Connack& connack) override;

@@ -58,9 +58,13 @@ namespace apps::mqttbroker {
             keepAlive);
     }
 
+    void SocketContext::onExit() {
+        VLOG(0) << "--------- On Exit";
+        this->sendDisconnect();
+    }
+
     void SocketContext::onDisconnected() {
         VLOG(0) << "--------- On Disconnected";
-        this->sendDisconnect();
     }
 
     void SocketContext::onConnack([[maybe_unused]] iot::mqtt::packets::Connack& connack) {
