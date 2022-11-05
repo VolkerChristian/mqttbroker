@@ -47,7 +47,15 @@ namespace apps::mqttbroker {
         VLOG(0) << "On Connected";
         uint16_t keepAlive = 60;
 
-        this->sendConnect(keepAlive, "voc", true, "", "", 0, false, "", "");
+        this->sendConnect(keepAlive /* keepAlive */,
+                          "voc" /* clientId */,
+                          true /* cleanSession */,
+                          "" /* willTopic */,
+                          "" /* willMessage */,
+                          0 /* willQoS */,
+                          false /* willRetain */,
+                          "" /* username */,
+                          "" /* password */);
 
         this->setTimeout(keepAlive * 1.5);
 
