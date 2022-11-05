@@ -20,6 +20,7 @@
 #define APPS_MQTTBROKER_SOCKETCONTEXT_H
 
 #include "core/timer/Timer.h"
+#include "iot/mqtt/Topic.h" // IWYU pragma: export
 #include "iot/mqtt/client/SocketContext.h"
 
 namespace core::socket {
@@ -35,7 +36,9 @@ namespace iot::mqtt {
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
+#include <list>
 #include <nlohmann/json_fwd.hpp>
+#include <string>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
@@ -48,6 +51,8 @@ namespace apps::mqttbroker {
         ~SocketContext() override;
 
     private:
+        static void extractTopics(nlohmann::json json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList);
+
         void onConnected() override;
         void onExit() override;
         void onDisconnected() override;

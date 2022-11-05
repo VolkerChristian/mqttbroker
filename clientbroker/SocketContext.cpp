@@ -18,7 +18,6 @@
 
 #include "SocketContext.h" // IWYU pragma: export
 
-#include "iot/mqtt/Topic.h"
 #include "iot/mqtt/packets/Connack.h"
 #include "iot/mqtt/packets/Publish.h"
 
@@ -26,9 +25,10 @@
 
 #include "log/Logger.h"
 
-#include <list>
 #include <map>
 #include <nlohmann/json.hpp>
+
+// IWYU pragma: no_include <nlohmann/detail/iterators/iteration_proxy.hpp>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
@@ -44,10 +44,10 @@ namespace apps::mqttbroker {
     }
 
     void SocketContext::onConnected() {
-        VLOG(0) << "--------- On Connected";
+        VLOG(0) << "On Connected";
         uint16_t keepAlive = 60;
 
-        this->sendConnect(keepAlive, "", true, "", "", 0, false, "", "");
+        this->sendConnect(keepAlive, "voc", true, "", "", 0, false, "", "");
 
         this->setTimeout(keepAlive * 1.5);
 
@@ -59,20 +59,49 @@ namespace apps::mqttbroker {
     }
 
     void SocketContext::onExit() {
-        VLOG(0) << "--------- On Exit";
+        VLOG(0) << "On Exit";
         this->sendDisconnect();
     }
 
     void SocketContext::onDisconnected() {
-        VLOG(0) << "--------- On Disconnected";
+        VLOG(0) << "On Disconnected";
+    }
+
+    void SocketContext::extractTopics(nlohmann::json json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList) {
+        for (auto& [key, value] : json.items()) {
+            if (value.contains("payload")) {
+                uint8_t qoS = 0;
+                if (value.contains("qos")) {
+                    qoS = value["qos"];
+                }
+
+                topicList.push_back(iot::mqtt::Topic(topic + (topic.empty() || topic == "/" ? "" : "/") + key, qoS));
+            }
+            if (key != "payload" && key != "qos" && value.is_object()) {
+                extractTopics(value, topic + (topic.empty() || topic == "/" ? "" : "/") + key, topicList);
+            }
+        }
     }
 
     void SocketContext::onConnack([[maybe_unused]] iot::mqtt::packets::Connack& connack) {
+        VLOG(0) << "Acknowledge Flags: " << static_cast<uint16_t>(connack.getAcknowledgeFlags());
+        VLOG(0) << "Return Code: " << static_cast<uint16_t>(connack.getReturnCode());
+        VLOG(0) << "Session present: " << connack.getSessionPresent();
         VLOG(0) << "On Connack: " << connack.getReturnCode();
-        std::list<iot::mqtt::Topic> topicList;
-        topicList.push_back(iot::mqtt::Topic("test", 0));
-        topicList.push_back(iot::mqtt::Topic("test01/button1", 2));
-        this->sendSubscribe(++packetIdentifier, topicList);
+
+        if (connack.getReturnCode() == 0) {
+            if (!connack.getSessionPresent()) {
+                std::list<iot::mqtt::Topic> topicList;
+
+                SocketContext::extractTopics(jsonMapping, "", topicList);
+
+                for (const iot::mqtt::Topic& topic : topicList) {
+                    VLOG(0) << "Subscribe Topic: " << topic.getName() << ", qoS: " << static_cast<uint16_t>(topic.getQoS());
+                }
+
+                this->sendSubscribe(++packetIdentifier, topicList);
+            }
+        }
     }
 
     void SocketContext::onPublish(iot::mqtt::packets::Publish& publish) {
