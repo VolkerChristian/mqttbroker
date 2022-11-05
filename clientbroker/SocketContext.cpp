@@ -40,11 +40,22 @@ namespace apps::mqttbroker {
     }
 
     SocketContext::~SocketContext() {
+        pingTimer.cancel();
     }
 
     void SocketContext::onConnected() {
         VLOG(0) << "--------- On Connected";
-        this->sendConnect("Voc");
+        uint16_t keepAlive = 60;
+
+        this->sendConnect(keepAlive, "", true, "", "", 0, false, "", "");
+
+        this->setTimeout(keepAlive * 1.5);
+
+        pingTimer = core::timer::Timer::intervalTimer(
+            [this](void) -> void {
+                this->sendPingreq();
+            },
+            keepAlive);
     }
 
     void SocketContext::onDisconnected() {
@@ -93,7 +104,7 @@ namespace apps::mqttbroker {
                     LOG(INFO) << "Topic mapping found:";
                     LOG(INFO) << "  " << publish.getTopic() << ":" << publish.getMessage() << " -> " << topic << ":" << message;
 
-                    this->sendPublish(++packetIdentifier, topic, message, false, publish.getQoS(), false);
+                    this->sendPublish(++packetIdentifier, topic, message, publish.getQoS());
                 }
             }
         }

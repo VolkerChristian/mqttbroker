@@ -19,6 +19,7 @@
 #ifndef APPS_MQTTBROKER_SOCKETCONTEXT_H
 #define APPS_MQTTBROKER_SOCKETCONTEXT_H
 
+#include "core/timer/Timer.h"
 #include "iot/mqtt/client/SocketContext.h"
 
 namespace core::socket {
@@ -54,6 +55,8 @@ namespace apps::mqttbroker {
         void onPublish(iot::mqtt::packets::Publish& publish) override;
 
         const nlohmann::json& jsonMapping;
+
+        core::timer::Timer pingTimer;
 
         uint16_t packetIdentifier = 0;
     };
