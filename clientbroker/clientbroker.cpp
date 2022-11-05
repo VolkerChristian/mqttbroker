@@ -20,6 +20,7 @@
 #include "SocketContext.h"          // IWYU pragma: keep
 #include "SocketContextFactory.hpp" // IWYU pragma: keep
 #include "core/SNodeC.h"
+#include "core/timer/Timer.h"
 #include "net/in/stream/legacy/SocketClient.h"
 #include "utils/Config.h"
 
@@ -50,11 +51,27 @@ int main(int argc, char* argv[]) {
         sharedJsonMapping = jsonMapping[discoverPrefix];
     }
 
-    using ClientBrokerInServer = net::in::stream::legacy::SocketClient<apps::mqttbroker::SocketContextFactory<sharedJsonMapping>>;
+    using InMQTTIntegratorClient = net::in::stream::legacy::SocketClient<apps::mqttbroker::SocketContextFactory<sharedJsonMapping>>;
 
-    using LegacyInSocketConnection = ClientBrokerInServer::SocketConnection;
+    using LegacyInSocketConnection = InMQTTIntegratorClient::SocketConnection;
 
-    ClientBrokerInServer clientBrokerInServer(
+    decltype([](InMQTTIntegratorClient& clientBrokerInServer, const std::function<void()>& stopTimer = nullptr) {
+        clientBrokerInServer.connect([stopTimer](const InMQTTIntegratorClient::SocketAddress& socketAddress, int errnum) -> void {
+            if (errnum < 0) {
+                PLOG(ERROR) << "OnError";
+            } else if (errnum > 0) {
+                PLOG(ERROR) << "OnError: " << socketAddress.toString();
+            } else {
+                VLOG(0) << "snode.c connecting to " << socketAddress.toString();
+
+                if (stopTimer) {
+                    stopTimer();
+                }
+            }
+        });
+    }) connect{};
+
+    InMQTTIntegratorClient clientBrokerInServer(
         "clientmapper",
         [](LegacyInSocketConnection* socketConnection) -> void {
             VLOG(0) << "OnConnect";
@@ -65,22 +82,20 @@ int main(int argc, char* argv[]) {
         []([[maybe_unused]] LegacyInSocketConnection* socketConnection) -> void {
             VLOG(0) << "OnConnected";
         },
-        [](LegacyInSocketConnection* socketConnection) -> void {
+        [&connect, &clientBrokerInServer](LegacyInSocketConnection* socketConnection) -> void {
             VLOG(0) << "OnDisconnect";
 
             VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
             VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
+
+            core::timer::Timer timer = core::timer::Timer::intervalTimer(
+                [&connect, &clientBrokerInServer]([[maybe_unused]] const std::function<void()>& stop) -> void {
+                    connect(clientBrokerInServer, stop);
+                },
+                1);
         });
 
-    clientBrokerInServer.connect([](const ClientBrokerInServer::SocketAddress& socketAddress, int errnum) -> void {
-        if (errnum < 0) {
-            PLOG(ERROR) << "OnError";
-        } else if (errnum > 0) {
-            PLOG(ERROR) << "OnError: " << socketAddress.toString();
-        } else {
-            VLOG(0) << "snode.c connecting to " << socketAddress.toString();
-        }
-    });
+    connect(clientBrokerInServer);
 
     core::SNodeC::start();
 }

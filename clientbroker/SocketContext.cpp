@@ -48,7 +48,7 @@ namespace apps::mqttbroker {
         uint16_t keepAlive = 60;
 
         this->sendConnect(keepAlive /* keepAlive */,
-                          "voc" /* clientId */,
+                          "" /* clientId */,
                           true /* cleanSession */,
                           "" /* willTopic */,
                           "" /* willMessage */,
