@@ -19,6 +19,7 @@
 #include "SocketContext.h" // IWYU pragma: export
 
 #include "iot/mqtt/packets/Publish.h"
+#include "iot/mqtt/server/broker/Broker.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -74,7 +75,7 @@ namespace apps::mqttbroker {
                     LOG(INFO) << "Topic mapping found:";
                     LOG(INFO) << "  " << publish.getTopic() << ":" << publish.getMessage() << " -> " << topic << ":" << message;
 
-                    this->publish(topic, message, publish.getQoS());
+                    broker->publish(topic, message, publish.getQoS());
                 }
             }
         }

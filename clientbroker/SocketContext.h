@@ -51,6 +51,7 @@ namespace apps::mqttbroker {
         ~SocketContext() override;
 
     private:
+        static std::list<iot::mqtt::Topic> extractTopics(nlohmann::json json, const std::string& topic);
         static void extractTopics(nlohmann::json json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList);
 
         void onConnected() override;

@@ -91,12 +91,18 @@ namespace apps::mqttbroker {
         }
     }
 
-    void SocketContext::onConnack([[maybe_unused]] iot::mqtt::packets::Connack& connack) {
+    std::list<iot::mqtt::Topic> SocketContext::extractTopics(nlohmann::json json, const std::string& topic) {
+        std::list<iot::mqtt::Topic> topicList;
+
+        extractTopics(json, topic, topicList);
+
+        return topicList;
+    }
+
+    void SocketContext::onConnack(iot::mqtt::packets::Connack& connack) {
         if (connack.getReturnCode() == 0) {
             if (!connack.getSessionPresent()) {
-                std::list<iot::mqtt::Topic> topicList;
-
-                SocketContext::extractTopics(jsonMapping, "", topicList);
+                std::list<iot::mqtt::Topic> topicList = SocketContext::extractTopics(jsonMapping, "");
 
                 for (const iot::mqtt::Topic& topic : topicList) {
                     LOG(INFO) << "Subscribe Topic: " << topic.getName() << ", qoS: " << static_cast<uint16_t>(topic.getQoS());
@@ -140,7 +146,7 @@ namespace apps::mqttbroker {
                     LOG(INFO) << "Topic mapping found:";
                     LOG(INFO) << "  " << publish.getTopic() << ":" << publish.getMessage() << " -> " << topic << ":" << message;
 
-                    this->sendPublish(++packetIdentifier, topic, message, publish.getQoS());
+                    sendPublish(++packetIdentifier, topic, message, publish.getQoS());
                 }
             }
         }
