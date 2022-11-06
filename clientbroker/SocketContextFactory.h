@@ -28,7 +28,7 @@
 
 namespace apps::mqttbroker {
 
-    template <const nlohmann::json& jsonMappingT>
+    template <const nlohmann::json& connectionT, const nlohmann::json& jsonMappingT>
     class SocketContextFactory : public core::socket::SocketContextFactory {
     public:
         SocketContextFactory();
@@ -36,6 +36,7 @@ namespace apps::mqttbroker {
         core::socket::SocketContext* create(core::socket::SocketConnection* socketConnection) override;
 
     private:
+        const nlohmann::json& connection;
         const nlohmann::json& jsonMapping;
     };
 

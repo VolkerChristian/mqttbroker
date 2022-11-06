@@ -1,17 +1,30 @@
 {
-    "iotempower" : {
-        "test01" : {
-            "button1" : {
-                "qos" : 0,
-                "payload" : {
-                    "type" : "binary_sensor",
-                    "pressed" : {
-                        "command_topic" : "test02/onboard/set",
-                        "state" : "on"
-                    },
-                    "released" : {
-                        "command_topic" : "test02/onboard/set",
-                        "state" : "off"
+    "connection" : {
+        "keep_alive" : 60,
+        "client_id" : "Client",
+        "clean_session" : true,
+        "will_topic" : "will/topic",
+        "will_message" : "Last Will",
+        "will_qos": 0,
+        "will_retain" : false,
+        "username" : "Username",
+        "password" : "Password"
+    },
+    "mapping" : {
+        "iotempower" : {
+            "test01" : {
+                "button1" : {
+                    "qos" : 0,
+                    "payload" : {
+                        "type" : "binary_sensor",
+                        "pressed" : {
+                            "command_topic" : "test02/onboard/set",
+                            "state" : "on"
+                        },
+                        "released" : {
+                            "command_topic" : "test02/onboard/set",
+                            "state" : "off"
+                        }
                     }
                 }
             }

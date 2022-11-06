@@ -46,7 +46,9 @@ namespace apps::mqttbroker {
 
     class SocketContext : public iot::mqtt::client::SocketContext {
     public:
-        explicit SocketContext(core::socket::SocketConnection* socketConnection, const nlohmann::json& jsonMapping);
+        explicit SocketContext(core::socket::SocketConnection* socketConnection,
+                               const nlohmann::json& connection,
+                               const nlohmann::json& jsonMapping);
 
         ~SocketContext() override;
 
@@ -61,11 +63,22 @@ namespace apps::mqttbroker {
         void onConnack(iot::mqtt::packets::Connack& connack) override;
         void onPublish(iot::mqtt::packets::Publish& publish) override;
 
+        const nlohmann::json& connection;
         const nlohmann::json& jsonMapping;
 
         core::timer::Timer pingTimer;
 
         uint16_t packetIdentifier = 0;
+
+        uint16_t keepAlive;
+        std::string clientId;
+        bool cleanSession;
+        std::string willTopic;
+        std::string willMessage;
+        uint8_t willQoS;
+        bool willRetain;
+        std::string username;
+        std::string password;
     };
 
 } // namespace apps::mqttbroker

@@ -34,9 +34,31 @@
 
 namespace apps::mqttbroker {
 
-    SocketContext::SocketContext(core::socket::SocketConnection* socketConnection, const nlohmann::json& jsonMapping)
+    SocketContext::SocketContext(core::socket::SocketConnection* socketConnection,
+                                 const nlohmann::json& connection,
+                                 const nlohmann::json& jsonMapping)
         : iot::mqtt::client::SocketContext(socketConnection)
+        , connection(connection)
         , jsonMapping(jsonMapping) {
+        keepAlive = connection.contains("keep_alive") ? static_cast<uint16_t>(connection["keep_alive"]) : 60;
+        clientId = connection.contains("client_id") ? static_cast<std::string>(connection["client_id"]) : "";
+        cleanSession = connection.contains("clean_session") ? static_cast<bool>(connection["clean_session"]) : true;
+        willTopic = connection.contains("will_topic") ? static_cast<std::string>(connection["will_topic"]) : "";
+        willMessage = connection.contains("will_message") ? static_cast<std::string>(connection["will_message"]) : "";
+        willQoS = connection.contains("will_qos") ? static_cast<uint8_t>(connection["will_qos"]) : 60;
+        willRetain = connection.contains("will_retain") ? static_cast<bool>(connection["will_retain"]) : true;
+        username = connection.contains("username") ? static_cast<std::string>(connection["username"]) : "";
+        password = connection.contains("password") ? static_cast<std::string>(connection["password"]) : "";
+
+        LOG(TRACE) << "Keep Alive: " << keepAlive;
+        LOG(TRACE) << "Client Id: " << clientId;
+        LOG(TRACE) << "Clean Session: " << cleanSession;
+        LOG(TRACE) << "Will Topic: " << willTopic;
+        LOG(TRACE) << "Will Message: " << willMessage;
+        LOG(TRACE) << "Will QoS: " << static_cast<uint16_t>(willQoS);
+        LOG(TRACE) << "Will Retain " << willRetain;
+        LOG(TRACE) << "Username: " << username;
+        LOG(TRACE) << "Password: " << password;
     }
 
     SocketContext::~SocketContext() {
@@ -45,17 +67,10 @@ namespace apps::mqttbroker {
 
     void SocketContext::onConnected() {
         VLOG(0) << "On Connected";
-        uint16_t keepAlive = 60;
 
-        this->sendConnect(keepAlive /* keepAlive */,
-                          "" /* clientId */,
-                          true /* cleanSession */,
-                          "" /* willTopic */,
-                          "" /* willMessage */,
-                          0 /* willQoS */,
-                          false /* willRetain */,
-                          "" /* username */,
-                          "" /* password */);
+        if (connection.contains("keep_alive"))
+
+            this->sendConnect(keepAlive, clientId, cleanSession, willTopic, willMessage, willQoS, willRetain, username, password);
 
         this->setTimeout(keepAlive * 1.5);
 
@@ -195,8 +210,9 @@ namespace apps::mqttbroker {
         "iotempower" : {
             "test01" : {
                 "button1" : {
+                    "qos" : 0,
                     "payload" : {
-                        "type" : "string",
+                        "type" : "binary_sensor",
                         "pressed" : {
                             "command_topic" : "test02/onboard/set",
                             "state" : "on"

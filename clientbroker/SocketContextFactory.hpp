@@ -24,14 +24,15 @@
 
 namespace apps::mqttbroker {
 
-    template <const nlohmann::json& jsonMappingT>
-    SocketContextFactory<jsonMappingT>::SocketContextFactory()
-        : jsonMapping(jsonMappingT) {
+    template <const nlohmann::json& connectionT, const nlohmann::json& jsonMappingT>
+    SocketContextFactory<connectionT, jsonMappingT>::SocketContextFactory()
+        : connection(connectionT)
+        , jsonMapping(jsonMappingT) {
     }
 
-    template <const nlohmann::json& jsonMappingT>
-    core::socket::SocketContext* SocketContextFactory<jsonMappingT>::create(core::socket::SocketConnection* socketConnection) {
-        return new SocketContext(socketConnection, jsonMapping);
+    template <const nlohmann::json& connectionT, const nlohmann::json& jsonMappingT>
+    core::socket::SocketContext* SocketContextFactory<connectionT, jsonMappingT>::create(core::socket::SocketConnection* socketConnection) {
+        return new SocketContext(socketConnection, connection, jsonMapping);
     }
 
 } // namespace apps::mqttbroker

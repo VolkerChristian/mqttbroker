@@ -124,8 +124,9 @@ namespace apps::mqttbroker {
         "iotempower" : {
             "test01" : {
                 "button1" : {
+                    "qos" : 0,
                     "payload" : {
-                        "type" : "string",
+                        "type" : "binary_sensor",
                         "pressed" : {
                             "command_topic" : "test02/onboard/set",
                             "state" : "on"

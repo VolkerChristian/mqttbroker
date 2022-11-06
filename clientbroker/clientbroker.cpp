@@ -33,6 +33,8 @@
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
 int main(int argc, char* argv[]) {
+    int ret = 0;
+
     std::string mappingFilePath;
     utils::Config::add_option(
         "--mqtt-mapping-file", mappingFilePath, "MQTT mapping file (json format) for integration", true, "[path to json file]");
@@ -45,57 +47,77 @@ int main(int argc, char* argv[]) {
 
     static const nlohmann::json& jsonMapping = apps::mqttbroker::JsonMappingReader::readMappingFromFile(mappingFilePath);
 
+    static nlohmann::json connection;
     static nlohmann::json sharedJsonMapping;
 
-    if (jsonMapping.contains(discoverPrefix)) {
-        sharedJsonMapping = jsonMapping[discoverPrefix];
+    if (jsonMapping.contains("connection")) {
+        connection = jsonMapping["connection"];
     }
 
-    using InMQTTIntegratorClient = net::in::stream::legacy::SocketClient<apps::mqttbroker::SocketContextFactory<sharedJsonMapping>>;
+    if (jsonMapping.contains("mapping")) {
+        sharedJsonMapping = jsonMapping["mapping"];
 
-    using LegacyInSocketConnection = InMQTTIntegratorClient::SocketConnection;
+        if (sharedJsonMapping.contains(discoverPrefix)) {
+            sharedJsonMapping = sharedJsonMapping[discoverPrefix];
 
-    decltype([](InMQTTIntegratorClient& clientBrokerInServer, const std::function<void()>& stopTimer = nullptr) {
-        clientBrokerInServer.connect([stopTimer](const InMQTTIntegratorClient::SocketAddress& socketAddress, int errnum) -> void {
-            if (errnum < 0) {
-                PLOG(ERROR) << "OnError";
-            } else if (errnum > 0) {
-                PLOG(ERROR) << "OnError: " << socketAddress.toString();
-            } else {
-                VLOG(0) << "snode.c connecting to " << socketAddress.toString();
+            using InMQTTIntegratorClient =
+                net::in::stream::legacy::SocketClient<apps::mqttbroker::SocketContextFactory<connection, sharedJsonMapping>>;
 
-                if (stopTimer) {
-                    stopTimer();
-                }
-            }
-        });
-    }) connect{};
+            using LegacyInSocketConnection = InMQTTIntegratorClient::SocketConnection;
 
-    InMQTTIntegratorClient clientBrokerInServer(
-        "clientmapper",
-        [](LegacyInSocketConnection* socketConnection) -> void {
-            VLOG(0) << "OnConnect";
+            decltype([](InMQTTIntegratorClient& clientBrokerInServer, const std::function<void()>& stopTimer = nullptr) {
+                clientBrokerInServer.connect([stopTimer](const InMQTTIntegratorClient::SocketAddress& socketAddress, int errnum) -> void {
+                    if (errnum < 0) {
+                        PLOG(ERROR) << "OnError";
+                    } else if (errnum > 0) {
+                        PLOG(ERROR) << "OnError: " << socketAddress.toString();
+                    } else {
+                        VLOG(0) << "snode.c connecting to " << socketAddress.toString();
 
-            VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
-            VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
-        },
-        []([[maybe_unused]] LegacyInSocketConnection* socketConnection) -> void {
-            VLOG(0) << "OnConnected";
-        },
-        [&connect, &clientBrokerInServer](LegacyInSocketConnection* socketConnection) -> void {
-            VLOG(0) << "OnDisconnect";
+                        if (stopTimer) {
+                            stopTimer();
+                        }
+                    }
+                });
+            }) connect{};
 
-            VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
-            VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
+            InMQTTIntegratorClient clientBrokerInServer(
+                "clientmapper",
+                [](LegacyInSocketConnection* socketConnection) -> void {
+                    VLOG(0) << "OnConnect";
 
-            core::timer::Timer timer = core::timer::Timer::intervalTimer(
-                [&connect, &clientBrokerInServer]([[maybe_unused]] const std::function<void()>& stop) -> void {
-                    connect(clientBrokerInServer, stop);
+                    VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
+                    VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
                 },
-                1);
-        });
+                []([[maybe_unused]] LegacyInSocketConnection* socketConnection) -> void {
+                    VLOG(0) << "OnConnected";
+                },
+                [&connect, &clientBrokerInServer](LegacyInSocketConnection* socketConnection) -> void {
+                    VLOG(0) << "OnDisconnect";
 
-    connect(clientBrokerInServer);
+                    VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
+                    VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
 
-    core::SNodeC::start();
+                    core::timer::Timer timer = core::timer::Timer::intervalTimer(
+                        [&connect, &clientBrokerInServer]([[maybe_unused]] const std::function<void()>& stop) -> void {
+                            connect(clientBrokerInServer, stop);
+                        },
+                        1);
+                });
+
+            connect(clientBrokerInServer);
+
+            ret = core::SNodeC::start();
+        } else {
+            LOG(ERROR) << "Discover prefix object \"" << discoverPrefix << "\" not found in" << mappingFilePath;
+
+            ret = 2;
+        }
+    } else {
+        LOG(ERROR) << "Mapping object \"mapping\" not found in " << mappingFilePath;
+
+        ret = 1;
+    }
+
+    return ret;
 }
