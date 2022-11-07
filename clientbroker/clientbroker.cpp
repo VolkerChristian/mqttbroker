@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
                         }
                     }
                 });
-            }) connect{};
+            }) doConnect{};
 
             InMQTTIntegratorClient clientBrokerInServer(
                 "clientmapper",
@@ -92,20 +92,20 @@ int main(int argc, char* argv[]) {
                 []([[maybe_unused]] LegacyInSocketConnection* socketConnection) -> void {
                     VLOG(0) << "OnConnected";
                 },
-                [&connect, &clientBrokerInServer](LegacyInSocketConnection* socketConnection) -> void {
+                [&doConnect, &clientBrokerInServer](LegacyInSocketConnection* socketConnection) -> void {
                     VLOG(0) << "OnDisconnect";
 
                     VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
                     VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
 
                     core::timer::Timer timer = core::timer::Timer::intervalTimer(
-                        [&connect, &clientBrokerInServer]([[maybe_unused]] const std::function<void()>& stop) -> void {
-                            connect(clientBrokerInServer, stop);
+                        [&doConnect, &clientBrokerInServer]([[maybe_unused]] const std::function<void()>& stop) -> void {
+                            doConnect(clientBrokerInServer, stop);
                         },
                         1);
                 });
 
-            connect(clientBrokerInServer);
+            doConnect(clientBrokerInServer);
 
             ret = core::SNodeC::start();
         } else {

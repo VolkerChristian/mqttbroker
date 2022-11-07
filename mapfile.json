@@ -14,7 +14,9 @@
         "iotempower" : {
             "test01" : {
                 "button1" : {
-                    "qos" : 0,
+                    "subscribtion" : {
+                        "qos" : 2
+                    },
                     "payload" : {
                         "type" : "binary_sensor",
                         "pressed" : {

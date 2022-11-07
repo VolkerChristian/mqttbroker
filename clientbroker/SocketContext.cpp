@@ -92,10 +92,13 @@ namespace apps::mqttbroker {
 
     void SocketContext::extractTopics(nlohmann::json json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList) {
         for (auto& [key, value] : json.items()) {
-            if (value.contains("payload")) {
+            if (value.is_object(), value.contains("payload")) {
                 uint8_t qoS = 0;
-                if (value.contains("qos")) {
-                    qoS = value["qos"];
+                if (value.contains("subscribtion")) {
+                    nlohmann::json subscribtion = value["subscribtion"];
+                    if (subscribtion.is_object() && subscribtion.contains("qos")) {
+                        qoS = subscribtion["qos"];
+                    }
                 }
 
                 topicList.push_back(iot::mqtt::Topic(topic + (topic.empty() || topic == "/" ? "" : "/") + key, qoS));
@@ -117,6 +120,22 @@ namespace apps::mqttbroker {
     void SocketContext::onConnack(iot::mqtt::packets::Connack& connack) {
         if (connack.getReturnCode() == 0) {
             if (!connack.getSessionPresent()) {
+                nlohmann::json retainedConnect;
+                retainedConnect["keep_alive"] = keepAlive;
+                retainedConnect["client_id"] = clientId;
+                retainedConnect["clean_session"] = cleanSession;
+                retainedConnect["will_topic"] = willTopic;
+                retainedConnect["will_message"] = willMessage;
+                retainedConnect["will_qos"] = willQoS;
+                retainedConnect["will_retain"] = willRetain;
+                retainedConnect["username"] = username;
+                retainedConnect["password"] = password;
+
+                VLOG(0) << retainedConnect.dump();
+
+                this->sendPublish(++packetIdentifier, "snode.c/_cfg_/connection", retainedConnect.dump(), 0, true);
+                this->sendPublish(++packetIdentifier, "snode.c/_cfg_/mapping", jsonMapping.dump(), 0, true);
+
                 std::list<iot::mqtt::Topic> topicList = SocketContext::extractTopics(jsonMapping, "");
 
                 for (const iot::mqtt::Topic& topic : topicList) {
