@@ -61,8 +61,11 @@ int main(int argc, char* argv[]) {
     if (!mappingFilePath.empty()) {
         static const nlohmann::json& jsonMapping = apps::mqttbroker::JsonMappingReader::readMappingFromFile(mappingFilePath);
 
-        if (jsonMapping.contains(discoverPrefix)) {
-            sharedJsonMapping = jsonMapping[discoverPrefix];
+        if (jsonMapping.contains("mapping")) {
+            sharedJsonMapping = jsonMapping["mapping"];
+            if (sharedJsonMapping.contains(discoverPrefix)) {
+                sharedJsonMapping = sharedJsonMapping[discoverPrefix];
+            }
         }
         VLOG(0) << "Mapping File " << mappingFilePath;
     }
