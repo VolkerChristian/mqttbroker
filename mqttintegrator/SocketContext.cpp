@@ -29,6 +29,7 @@
 #include <nlohmann/json.hpp>
 
 // IWYU pragma: no_include <nlohmann/detail/iterators/iteration_proxy.hpp>
+// IWYU pragma: no_include <nlohmann/detail/json_pointer.hpp>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 

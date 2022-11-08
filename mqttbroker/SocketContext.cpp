@@ -39,9 +39,6 @@ namespace apps::mqttbroker {
         , jsonMapping(jsonMapping) {
     }
 
-    SocketContext::~SocketContext() {
-    }
-
     void SocketContext::onPublish(iot::mqtt::packets::Publish& publish) {
         nlohmann::json subJson = jsonMapping;
 
