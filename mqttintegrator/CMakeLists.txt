@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#configure_file(config.h.in config.h @ONLY)
+# configure_file(config.h.in config.h @ONLY)
 
 if(NOT SNODEC_INTREE_BUILD)
     find_package(
@@ -48,25 +48,31 @@ add_compile_options(
     ${ADDITIONAL_OPTIONS}
 )
 
-set(CLIENTBROKER_CPP clientbroker.cpp SocketContext.cpp ../JsonMappingReader.cpp)
+set(MQTTINTEGRATOR_CPP mqttintegrator.cpp JsonMappingReader.cpp
+                       SocketContext.cpp
+)
 
-set(CLIENTBROKER_H SocketContextFactory.h SocketContextFactory.hpp ../JsonMappingReader.h)
+set(MQTTINTEGRATOR_H JsonMappingReader.h SocketContextFactory.h
+                     SocketContextFactory.hpp
+)
 
-add_executable(clientbroker ${CLIENTBROKER_CPP} ${CLIENTBROKER_H})
+add_executable(mqttintegrator ${MQTTINTEGRATOR_CPP} ${MQTTINTEGRATOR_H})
 
 target_include_directories(
-    clientbroker PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
+    mqttintegrator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+                          ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 if(SNODEC_INTREE_BUILD)
     set_target_properties(
-        clientbroker PROPERTIES INSTALL_RPATH "${SNODEC_IOT_MQTT_RPATH}"
+        mqttintegrator PROPERTIES INSTALL_RPATH "${SNODEC_IOT_MQTT_RPATH}"
     )
 endif(SNODEC_INTREE_BUILD)
 
 target_link_libraries(
-    clientbroker PUBLIC snodec::mqtt-client snodec::net-in-stream-legacy
-                        snodec::net-in-stream-tls snodec::net-un-stream-legacy
+    mqttintegrator
+    PUBLIC snodec::mqtt-client snodec::net-in-stream-legacy
+           snodec::net-in-stream-tls snodec::net-un-stream-legacy
 )
 
-install(TARGETS clientbroker RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS mqttintegrator RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

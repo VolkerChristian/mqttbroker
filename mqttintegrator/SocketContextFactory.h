@@ -16,8 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef APPS_MQTTBROKER_SOCKETCONTEXTFACTORY_H
-#define APPS_MQTTBROKER_SOCKETCONTEXTFACTORY_H
+#ifndef APPS_MQTTBROKER_MQTTINTEGRATOR_SOCKETCONTEXTFACTORY_H
+#define APPS_MQTTBROKER_MQTTINTEGRATOR_SOCKETCONTEXTFACTORY_H
 
 #include "SocketContext.h"
 #include "core/socket/SocketContextFactory.h" // IWYU pragma: export
@@ -42,4 +42,4 @@ namespace apps::mqttbroker {
 
 } // namespace apps::mqttbroker
 
-#endif // APPS_MQTTBROKER_SOCKETCONTEXTFACTORY_H
+#endif // APPS_MQTTBROKER_MQTTINTEGRATOR_SOCKETCONTEXTFACTORY_H

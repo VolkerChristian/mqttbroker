@@ -16,47 +16,39 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef APPS_MQTTBROKER_SOCKETCONTEXT_H
-#define APPS_MQTTBROKER_SOCKETCONTEXT_H
-
-#include "iot/mqtt/server/SocketContext.h"
-
-namespace core::socket {
-    class SocketConnection;
-}
-
-namespace iot::mqtt {
-    namespace packets {
-        class Publish;
-    }
-    namespace server::broker {
-        class Broker;
-    }
-} // namespace iot::mqtt
+#include "JsonMappingReader.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-#include <memory>
-#include <nlohmann/json_fwd.hpp>
+#include "log/Logger.h"
+
+#include <fstream>
+#include <initializer_list>
+#include <map>
+#include <nlohmann/json.hpp>
+#include <vector>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
 namespace apps::mqttbroker {
 
-    class SocketContext : public iot::mqtt::server::SocketContext {
-    public:
-        explicit SocketContext(core::socket::SocketConnection* socketConnection,
-                               const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
-                               const nlohmann::json& jsonMapping);
+    nlohmann::json JsonMappingReader::jsonMapping;
 
-        ~SocketContext() override;
+    const nlohmann::json& JsonMappingReader::readMappingFromFile(const std::string& mappingFilePath) {
+        if (jsonMapping.empty()) {
+            std::ifstream mappingFile(mappingFilePath);
+            if (mappingFile) {
+                VLOG(0) << "MappingFilePath: '" << mappingFilePath << "'";
+                jsonMapping = nlohmann::json::parse(mappingFile);
+            } else {
+                VLOG(0) << "MappingFilePath: '" << mappingFilePath << "' not found";
+            }
+            mappingFile.close();
+        } else {
+            VLOG(0) << "MappingFilePath: '" << mappingFilePath << "' already loaded";
+        }
 
-    private:
-        void onPublish(iot::mqtt::packets::Publish& publish) override;
-
-        const nlohmann::json& jsonMapping;
-    };
+        return jsonMapping;
+    }
 
 } // namespace apps::mqttbroker
-
-#endif // APPS_MQTTBROKER_SOCKETCONTEXT_H
