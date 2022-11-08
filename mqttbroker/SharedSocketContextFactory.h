@@ -26,7 +26,7 @@
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
-namespace apps::mqttbroker {
+namespace apps::mqttbroker::broker {
 
     template <typename SocketContextT, const nlohmann::json& jsonMappingT>
     class SharedSocketContextFactory : public iot::mqtt::server::SharedSocketContextFactory<SocketContextT> {
@@ -40,6 +40,6 @@ namespace apps::mqttbroker {
         const nlohmann::json& jsonMapping;
     };
 
-} // namespace apps::mqttbroker
+} // namespace apps::mqttbroker::broker
 
 #endif // APPS_MQTTBROKER_MQTTBROKER_SOCKETCONTEXTFACTORY_H

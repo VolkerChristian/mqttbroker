@@ -61,8 +61,8 @@ int main(int argc, char* argv[]) {
             if (sharedJsonMapping.contains(discoverPrefix)) {
                 sharedJsonMapping = sharedJsonMapping[discoverPrefix];
 
-                using InMQTTIntegratorClient =
-                    net::in::stream::legacy::SocketClient<apps::mqttbroker::SocketContextFactory<connection, sharedJsonMapping>>;
+                using InMQTTIntegratorClient = net::in::stream::legacy::SocketClient<
+                    apps::mqttbroker::integrator::SocketContextFactory<connection, sharedJsonMapping>>;
 
                 using LegacyInSocketConnection = InMQTTIntegratorClient::SocketConnection;
 

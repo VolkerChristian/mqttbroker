@@ -42,7 +42,7 @@ namespace iot::mqtt {
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
-namespace apps::mqttbroker {
+namespace apps::mqttbroker::integrator {
 
     class SocketContext
         : public iot::mqtt::client::SocketContext
@@ -82,6 +82,6 @@ namespace apps::mqttbroker {
         std::string password;
     };
 
-} // namespace apps::mqttbroker
+} // namespace apps::mqttbroker::integrator
 
 #endif // APPS_MQTTBROKER_MQTTINTEGRATOR_SOCKETCONTEXT_H

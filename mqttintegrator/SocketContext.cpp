@@ -32,7 +32,7 @@
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
-namespace apps::mqttbroker {
+namespace apps::mqttbroker::integrator {
 
     SocketContext::SocketContext(core::socket::SocketConnection* socketConnection,
                                  const nlohmann::json& connection,
@@ -105,12 +105,9 @@ namespace apps::mqttbroker {
                 retainedConnect["username"] = username;
                 retainedConnect["password"] = password;
 
-                VLOG(0) << retainedConnect.dump();
-
                 this->sendPublish(++packetIdentifier, "snode.c/_cfg_/connection", retainedConnect.dump(), 0, true);
                 this->sendPublish(++packetIdentifier, "snode.c/_cfg_/mapping", jsonMapping.dump(), 0, true);
 
-                //                std::list<iot::mqtt::Topic> topicList = SocketContext::extractTopics(jsonMapping, "");
                 std::list<iot::mqtt::Topic> topicList = MqttMapper::extractTopics();
 
                 for (const iot::mqtt::Topic& topic : topicList) {
@@ -130,4 +127,4 @@ namespace apps::mqttbroker {
         sendPublish(++packetIdentifier, topic, message, qoS);
     }
 
-} // namespace apps::mqttbroker
+} // namespace apps::mqttbroker::integrator

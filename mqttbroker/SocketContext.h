@@ -43,7 +43,7 @@ namespace iot::mqtt {
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
-namespace apps::mqttbroker {
+namespace apps::mqttbroker::broker {
 
     class SocketContext
         : public iot::mqtt::server::SocketContext
@@ -59,6 +59,6 @@ namespace apps::mqttbroker {
         void publishMappingMatch(const std::string& topic, const std::string& message, uint8_t qoS) override;
     };
 
-} // namespace apps::mqttbroker
+} // namespace apps::mqttbroker::broker
 
 #endif // APPS_MQTTBROKER_MQTTBROKER_SOCKETCONTEXT_H

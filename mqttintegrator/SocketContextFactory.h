@@ -26,7 +26,7 @@
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
-namespace apps::mqttbroker {
+namespace apps::mqttbroker::integrator {
 
     template <const nlohmann::json& connectionT, const nlohmann::json& jsonMappingT>
     class SocketContextFactory : public core::socket::SocketContextFactory {
@@ -40,6 +40,6 @@ namespace apps::mqttbroker {
         const nlohmann::json& jsonMapping;
     };
 
-} // namespace apps::mqttbroker
+} // namespace apps::mqttbroker::integrator
 
 #endif // APPS_MQTTBROKER_MQTTINTEGRATOR_SOCKETCONTEXTFACTORY_H

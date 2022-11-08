@@ -24,7 +24,7 @@
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
-namespace apps::mqttbroker {
+namespace apps::mqttbroker::broker {
 
     SocketContext::SocketContext(core::socket::SocketConnection* socketConnection,
                                  const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
@@ -41,66 +41,4 @@ namespace apps::mqttbroker {
         broker->publish(topic, message, qoS);
     }
 
-    /*
-        iotempower/cfg/test01/ip 192.168.12.183
-        iotempower/cfg/test02/ip 192.168.12.132
-        iotempower/binary_sensor/test01/button1/config
-        {
-            "name": "test01 button1",
-            "state_topic": "test01/button1",
-            "payload_on": "released",
-            "payload_off": "pressed"
-        },
-        iotempower/switch/test02/onboard/config
-        {
-            "name": "test02 onboard",
-            "state_topic": "test02/onboard",
-            "state_on": "on",
-            "state_off": "off",
-            "command_topic": "test02/onboard/set",
-            "payload_on": "on",
-            "payload_off": "off"
-        }
-
-    {
-       "binary_sensor" : [{
-            "name": "test01 button1",
-            "state_topic": "test01/button1",
-            "payload_on": "released",
-            "payload_off": "pressed"
-        }],
-        "switch" : [{
-            "name": "test02 onboard",
-            "state_topic": "test02/onboard",
-            "state_on": "on",
-            "state_off": "off",
-            "command_topic": "test02/onboard/set",
-            "payload_on": "on",
-            "payload_off": "off"
-        }]
-    }
-
-    {
-        "iotempower" : {
-            "test01" : {
-                "button1" : {
-                    "qos" : 0,
-                    "payload" : {
-                        "type" : "binary_sensor",
-                        "pressed" : {
-                            "command_topic" : "test02/onboard/set",
-                            "state" : "on"
-                        },
-                        "released" : {
-                            "command_topic" : "test02/onboard/set",
-                            "state" : "off"
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    */
-
-} // namespace apps::mqttbroker
+} // namespace apps::mqttbroker::broker
