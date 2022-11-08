@@ -92,7 +92,7 @@ namespace apps::mqttbroker {
 
     void SocketContext::extractTopics(nlohmann::json json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList) {
         for (auto& [key, value] : json.items()) {
-            if (value.is_object(), value.contains("payload")) {
+            if (value.is_object() && value.contains("payload")) {
                 uint8_t qoS = 0;
                 if (value.contains("subscribtion")) {
                     nlohmann::json subscribtion = value["subscribtion"];
