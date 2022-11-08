@@ -58,6 +58,12 @@ target_include_directories(
     mqttintegrator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
                           ${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_SOURCE_DIR}
 )
+target_link_libraries(
+    mqttintegrator
+    PUBLIC snodec::mqtt-client snodec::net-in-stream-legacy
+           snodec::net-in-stream-tls snodec::net-un-stream-legacy
+    PRIVATE mqtt-mapping
+)
 
 if(SNODEC_INTREE_BUILD)
     set_target_properties(
@@ -65,11 +71,5 @@ if(SNODEC_INTREE_BUILD)
     )
 endif(SNODEC_INTREE_BUILD)
 
-target_link_libraries(
-    mqttintegrator
-    PUBLIC snodec::mqtt-client snodec::net-in-stream-legacy
-           snodec::net-in-stream-tls snodec::net-un-stream-legacy
-    PRIVATE mqtt-mapping
-)
 
 install(TARGETS mqttintegrator RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

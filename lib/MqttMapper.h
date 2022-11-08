@@ -41,6 +41,8 @@ namespace apps::mqttbroker::lib {
     public:
         MqttMapper(const nlohmann::json& jsonMapping);
 
+        virtual ~MqttMapper() = default;
+
     protected:
         std::list<iot::mqtt::Topic> extractTopics();
         void publishMappings(iot::mqtt::packets::Publish& publish);

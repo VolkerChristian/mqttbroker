@@ -61,17 +61,17 @@ target_include_directories(
                       ${PROJECT_SOURCE_DIR}
 )
 
-if(SNODEC_INTREE_BUILD)
-    set_target_properties(
-        mqttbroker PROPERTIES INSTALL_RPATH "${SNODEC_IOT_MQTT_RPATH}"
-    )
-endif(SNODEC_INTREE_BUILD)
-
 target_link_libraries(
     mqttbroker
     PUBLIC snodec::mqtt-server snodec::net-in-stream-legacy
            snodec::net-in-stream-tls snodec::net-un-stream-legacy
     PRIVATE mqtt-mapping
 )
+
+if(SNODEC_INTREE_BUILD)
+    set_target_properties(
+        mqttbroker PROPERTIES INSTALL_RPATH "${SNODEC_IOT_MQTT_RPATH}"
+    )
+endif(SNODEC_INTREE_BUILD)
 
 install(TARGETS mqttbroker RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
