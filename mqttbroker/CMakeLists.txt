@@ -20,6 +20,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         -Wno-global-constructors
         -Wno-padded
         -Wno-shadow
+        -Wno-shadow-field
         -Wno-used-but-marked-unused
     )
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
