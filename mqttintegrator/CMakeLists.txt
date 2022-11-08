@@ -48,19 +48,15 @@ add_compile_options(
     ${ADDITIONAL_OPTIONS}
 )
 
-set(MQTTINTEGRATOR_CPP mqttintegrator.cpp JsonMappingReader.cpp
-                       SocketContext.cpp
-)
+set(MQTTINTEGRATOR_CPP mqttintegrator.cpp SocketContext.cpp)
 
-set(MQTTINTEGRATOR_H JsonMappingReader.h SocketContextFactory.h
-                     SocketContextFactory.hpp
-)
+set(MQTTINTEGRATOR_H SocketContextFactory.h SocketContextFactory.hpp)
 
 add_executable(mqttintegrator ${MQTTINTEGRATOR_CPP} ${MQTTINTEGRATOR_H})
 
 target_include_directories(
     mqttintegrator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-                          ${CMAKE_CURRENT_BINARY_DIR}
+                          ${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_SOURCE_DIR}
 )
 
 if(SNODEC_INTREE_BUILD)
@@ -73,6 +69,7 @@ target_link_libraries(
     mqttintegrator
     PUBLIC snodec::mqtt-client snodec::net-in-stream-legacy
            snodec::net-in-stream-tls snodec::net-un-stream-legacy
+    PRIVATE mqtt-mapping
 )
 
 install(TARGETS mqttintegrator RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

@@ -18,15 +18,9 @@
 
 #include "SocketContext.h" // IWYU pragma: export
 
-#include "iot/mqtt/packets/Publish.h"
 #include "iot/mqtt/server/broker/Broker.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-#include "log/Logger.h"
-
-#include <map>
-#include <nlohmann/json.hpp>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
@@ -36,46 +30,15 @@ namespace apps::mqttbroker {
                                  const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
                                  const nlohmann::json& jsonMapping)
         : iot::mqtt::server::SocketContext(socketConnection, broker)
-        , jsonMapping(jsonMapping) {
+        , apps::mqttbroker::lib::MqttMapper(jsonMapping) {
     }
 
     void SocketContext::onPublish(iot::mqtt::packets::Publish& publish) {
-        nlohmann::json subJson = jsonMapping;
+        publishMappings(publish);
+    }
 
-        std::string remainingTopic = publish.getTopic();
-        std::string topicLevel;
-
-        bool currentTopicExistsInMapping = false;
-
-        do {
-            std::string::size_type slashPosition = remainingTopic.find("/");
-
-            topicLevel = remainingTopic.substr(0, slashPosition);
-            remainingTopic.erase(0, topicLevel.size() + 1);
-
-            currentTopicExistsInMapping = subJson.contains(topicLevel);
-
-            if (!topicLevel.empty() && currentTopicExistsInMapping) {
-                subJson = subJson[topicLevel];
-            }
-        } while (!topicLevel.empty() && currentTopicExistsInMapping);
-
-        if (topicLevel.empty() && subJson.contains("payload")) {
-            subJson = subJson["payload"];
-
-            if (subJson.contains(publish.getMessage())) {
-                subJson = subJson[publish.getMessage()];
-                if (subJson.contains("command_topic") && subJson.contains("state")) {
-                    const std::string& topic = subJson["command_topic"];
-                    const std::string& message = subJson["state"];
-
-                    LOG(INFO) << "Topic mapping found:";
-                    LOG(INFO) << "  " << publish.getTopic() << ":" << publish.getMessage() << " -> " << topic << ":" << message;
-
-                    broker->publish(topic, message, publish.getQoS());
-                }
-            }
-        }
+    void SocketContext::publishMappingMatch(const std::string& topic, const std::string& message, uint8_t qoS) {
+        broker->publish(topic, message, qoS);
     }
 
     /*

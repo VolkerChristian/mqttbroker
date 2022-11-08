@@ -16,29 +16,44 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef APPS_MQTTBROKER_MQTTBROKER_JSONMAPPINGREADER_H
-#define APPS_MQTTBROKER_MQTTBROKER_JSONMAPPINGREADER_H
+#ifndef APPS_MQTTBROKER_LIB_MQTTMAPPER_H
+#define APPS_MQTTBROKER_LIB_MQTTMAPPER_H
+
+namespace iot::mqtt {
+    class Topic;
+    namespace packets {
+        class Publish;
+    }
+} // namespace iot::mqtt
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
+#include <cstdint>
+#include <list>
 #include <nlohmann/json_fwd.hpp> // IWYU pragma: export
 #include <string>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
-namespace apps::mqttbroker {
+namespace apps::mqttbroker::lib {
 
-    class JsonMappingReader {
-    private:
-        JsonMappingReader() = delete;
-
+    class MqttMapper {
     public:
-        static const nlohmann::json& readMappingFromFile(const std::string& mappingFilePath);
+        MqttMapper(const nlohmann::json& jsonMapping);
+
+    protected:
+        std::list<iot::mqtt::Topic> extractTopics();
+        void publishMappings(iot::mqtt::packets::Publish& publish);
 
     private:
-        static nlohmann::json jsonMapping;
+        static void extractTopics(nlohmann::json json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList);
+
+        virtual void publishMappingMatch(const std::string& topic, const std::string& message, uint8_t qoS) = 0;
+
+    protected:
+        const nlohmann::json& jsonMapping;
     };
 
-} // namespace apps::mqttbroker
+} // namespace apps::mqttbroker::lib
 
-#endif // APPS_MQTTBROKER_MQTTBROKER_JSONMAPPINGREADER_H
+#endif // APPS_MQTTBROKER_LIB_MQTTMAPPER_H

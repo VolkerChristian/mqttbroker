@@ -22,6 +22,7 @@
 #include "core/timer/Timer.h"
 #include "iot/mqtt/Topic.h" // IWYU pragma: export
 #include "iot/mqtt/client/SocketContext.h"
+#include "lib/MqttMapper.h" // IWYU pragma: export
 
 namespace core::socket {
     class SocketConnection;
@@ -36,7 +37,6 @@ namespace iot::mqtt {
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-#include <list>
 #include <nlohmann/json_fwd.hpp>
 #include <string>
 
@@ -44,7 +44,9 @@ namespace iot::mqtt {
 
 namespace apps::mqttbroker {
 
-    class SocketContext : public iot::mqtt::client::SocketContext {
+    class SocketContext
+        : public iot::mqtt::client::SocketContext
+        , public apps::mqttbroker::lib::MqttMapper {
     public:
         explicit SocketContext(core::socket::SocketConnection* socketConnection,
                                const nlohmann::json& connection,
@@ -53,15 +55,14 @@ namespace apps::mqttbroker {
         ~SocketContext() override;
 
     private:
-        static std::list<iot::mqtt::Topic> extractTopics(nlohmann::json json, const std::string& topic);
-        static void extractTopics(nlohmann::json json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList);
-
         void onConnected() override;
         void onExit() override;
         void onDisconnected() override;
 
         void onConnack(iot::mqtt::packets::Connack& connack) override;
         void onPublish(iot::mqtt::packets::Publish& publish) override;
+
+        void publishMappingMatch(const std::string& topic, const std::string& message, uint8_t qoS) override;
 
         const nlohmann::json& connection;
         const nlohmann::json& jsonMapping;

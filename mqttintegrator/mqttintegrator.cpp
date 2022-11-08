@@ -16,11 +16,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "JsonMappingReader.h"
 #include "SocketContext.h"          // IWYU pragma: keep
 #include "SocketContextFactory.hpp" // IWYU pragma: keep
 #include "core/SNodeC.h"
 #include "core/timer/Timer.h"
+#include "lib/JsonMappingReader.h"
 #include "net/in/stream/legacy/SocketClient.h"
 #include "utils/Config.h"
 
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
     core::SNodeC::init(argc, argv);
 
     if (!mappingFilePath.empty()) {
-        static const nlohmann::json& jsonMapping = apps::mqttbroker::JsonMappingReader::readMappingFromFile(mappingFilePath);
+        static const nlohmann::json& jsonMapping = apps::mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFilePath);
 
         static nlohmann::json connection;
         static nlohmann::json sharedJsonMapping;

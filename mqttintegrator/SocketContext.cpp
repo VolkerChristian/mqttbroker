@@ -19,16 +19,15 @@
 #include "SocketContext.h" // IWYU pragma: export
 
 #include "iot/mqtt/packets/Connack.h"
-#include "iot/mqtt/packets/Publish.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 #include "log/Logger.h"
 
+#include <list>
 #include <map>
 #include <nlohmann/json.hpp>
 
-// IWYU pragma: no_include <nlohmann/detail/iterators/iteration_proxy.hpp>
 // IWYU pragma: no_include <nlohmann/detail/json_pointer.hpp>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
@@ -39,6 +38,7 @@ namespace apps::mqttbroker {
                                  const nlohmann::json& connection,
                                  const nlohmann::json& jsonMapping)
         : iot::mqtt::client::SocketContext(socketConnection)
+        , apps::mqttbroker::lib::MqttMapper(jsonMapping)
         , connection(connection)
         , jsonMapping(jsonMapping) {
         keepAlive = connection.contains("keep_alive") ? static_cast<uint16_t>(connection["keep_alive"]) : 60;
@@ -91,33 +91,6 @@ namespace apps::mqttbroker {
         VLOG(0) << "On Disconnected";
     }
 
-    void SocketContext::extractTopics(nlohmann::json json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList) {
-        for (auto& [key, value] : json.items()) {
-            if (value.is_object() && value.contains("payload")) {
-                uint8_t qoS = 0;
-                if (value.contains("subscribtion")) {
-                    nlohmann::json subscribtion = value["subscribtion"];
-                    if (subscribtion.is_object() && subscribtion.contains("qos")) {
-                        qoS = subscribtion["qos"];
-                    }
-                }
-
-                topicList.push_back(iot::mqtt::Topic(topic + (topic.empty() || topic == "/" ? "" : "/") + key, qoS));
-            }
-            if (key != "payload" && key != "qos" && value.is_object()) {
-                extractTopics(value, topic + (topic.empty() || topic == "/" ? "" : "/") + key, topicList);
-            }
-        }
-    }
-
-    std::list<iot::mqtt::Topic> SocketContext::extractTopics(nlohmann::json json, const std::string& topic) {
-        std::list<iot::mqtt::Topic> topicList;
-
-        extractTopics(json, topic, topicList);
-
-        return topicList;
-    }
-
     void SocketContext::onConnack(iot::mqtt::packets::Connack& connack) {
         if (connack.getReturnCode() == 0) {
             if (!connack.getSessionPresent()) {
@@ -137,7 +110,8 @@ namespace apps::mqttbroker {
                 this->sendPublish(++packetIdentifier, "snode.c/_cfg_/connection", retainedConnect.dump(), 0, true);
                 this->sendPublish(++packetIdentifier, "snode.c/_cfg_/mapping", jsonMapping.dump(), 0, true);
 
-                std::list<iot::mqtt::Topic> topicList = SocketContext::extractTopics(jsonMapping, "");
+                //                std::list<iot::mqtt::Topic> topicList = SocketContext::extractTopics(jsonMapping, "");
+                std::list<iot::mqtt::Topic> topicList = MqttMapper::extractTopics();
 
                 for (const iot::mqtt::Topic& topic : topicList) {
                     LOG(INFO) << "Subscribe Topic: " << topic.getName() << ", qoS: " << static_cast<uint16_t>(topic.getQoS());
@@ -149,119 +123,11 @@ namespace apps::mqttbroker {
     }
 
     void SocketContext::onPublish(iot::mqtt::packets::Publish& publish) {
-        nlohmann::json subJson = jsonMapping;
-
-        std::string remainingTopic = publish.getTopic();
-        std::string topicLevel;
-
-        bool currentTopicExistsInMapping = false;
-
-        do {
-            std::string::size_type slashPosition = remainingTopic.find("/");
-
-            topicLevel = remainingTopic.substr(0, slashPosition);
-            remainingTopic.erase(0, topicLevel.size() + 1);
-
-            currentTopicExistsInMapping = subJson.contains(topicLevel);
-
-            if (!topicLevel.empty() && currentTopicExistsInMapping) {
-                subJson = subJson[topicLevel];
-            }
-        } while (!topicLevel.empty() && currentTopicExistsInMapping);
-
-        if (topicLevel.empty() && subJson.contains("payload")) {
-            subJson = subJson["payload"];
-
-            if (subJson.contains(publish.getMessage())) {
-                subJson = subJson[publish.getMessage()];
-                if (subJson.contains("command_topic") && subJson.contains("state")) {
-                    const std::string& topic = subJson["command_topic"];
-                    const std::string& message = subJson["state"];
-
-                    LOG(INFO) << "Topic mapping found:";
-                    LOG(INFO) << "  " << publish.getTopic() << ":" << publish.getMessage() << " -> " << topic << ":" << message;
-
-                    sendPublish(++packetIdentifier, topic, message, publish.getQoS());
-                }
-            }
-        }
+        publishMappings(publish);
     }
 
-    /*
-        iotempower/cfg/test01/ip 192.168.12.183
-        iotempower/cfg/test02/ip 192.168.12.132
-        iotempower/binary_sensor/test01/button1/config
-        {
-            "name": "test01 button1",
-            "state_topic": "test01/button1",
-            "payload_on": "released",
-            "payload_off": "pressed"
-        },
-        iotempower/switch/test02/onboard/config
-        {
-            "name": "test02 onboard",
-            "state_topic": "test02/onboard",
-            "state_on": "on",
-            "state_off": "off",
-            "command_topic": "test02/onboard/set",
-            "payload_on": "on",
-            "payload_off": "off"
-        }
-
-    {
-       "binary_sensor" : [{
-            "name": "test01 button1",
-            "state_topic": "test01/button1",
-            "payload_on": "released",
-            "payload_off": "pressed"
-        }],
-        "switch" : [{
-            "name": "test02 onboard",
-            "state_topic": "test02/onboard",
-            "state_on": "on",
-            "state_off": "off",
-            "command_topic": "test02/onboard/set",
-            "payload_on": "on",
-            "payload_off": "off"
-        }]
+    void SocketContext::publishMappingMatch(const std::string& topic, const std::string& message, uint8_t qoS) {
+        sendPublish(++packetIdentifier, topic, message, qoS);
     }
-
-    {
-        "connection" : {
-            "keep_alive" : 60,
-            "client_id" : "Client",
-            "clean_session" : true,
-            "will_topic" : "will/topic",
-            "will_message" : "Last Will",
-            "will_qos": 0,
-            "will_retain" : false,
-            "username" : "Username",
-            "password" : "Password"
-        },
-        "mapping" : {
-            "iotempower" : {
-                "test01" : {
-                    "button1" : {
-                        "subscribtion" : {
-                            "qos" : 2
-                        },
-                        "payload" : {
-                            "type" : "binary_sensor",
-                            "pressed" : {
-                                "command_topic" : "test02/onboard/set",
-                                "state" : "on"
-                            },
-                            "released" : {
-                                "command_topic" : "test02/onboard/set",
-                                "state" : "off"
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    */
 
 } // namespace apps::mqttbroker

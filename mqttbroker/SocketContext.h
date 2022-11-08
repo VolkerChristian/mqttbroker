@@ -20,6 +20,7 @@
 #define APPS_MQTTBROKER_MQTTBROKER_SOCKETCONTEXT_H
 
 #include "iot/mqtt/server/SocketContext.h"
+#include "lib/MqttMapper.h" // IWYU pragma: export
 
 namespace core::socket {
     class SocketConnection;
@@ -38,12 +39,15 @@ namespace iot::mqtt {
 
 #include <memory>
 #include <nlohmann/json_fwd.hpp>
+#include <string>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
 namespace apps::mqttbroker {
 
-    class SocketContext : public iot::mqtt::server::SocketContext {
+    class SocketContext
+        : public iot::mqtt::server::SocketContext
+        , public apps::mqttbroker::lib::MqttMapper {
     public:
         explicit SocketContext(core::socket::SocketConnection* socketConnection,
                                const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
@@ -52,7 +56,7 @@ namespace apps::mqttbroker {
     private:
         void onPublish(iot::mqtt::packets::Publish& publish) override;
 
-        const nlohmann::json& jsonMapping;
+        void publishMappingMatch(const std::string& topic, const std::string& message, uint8_t qoS) override;
     };
 
 } // namespace apps::mqttbroker

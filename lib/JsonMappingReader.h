@@ -16,8 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef APPS_MQTTBROKER_JSONMAPPINGREADER_H
-#define APPS_MQTTBROKER_JSONMAPPINGREADER_H
+#ifndef APPS_MQTTBROKER_MQTTBROKER_JSONMAPPINGREADER_H
+#define APPS_MQTTBROKER_MQTTBROKER_JSONMAPPINGREADER_H
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -26,7 +26,7 @@
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
-namespace apps::mqttbroker {
+namespace apps::mqttbroker::lib {
 
     class JsonMappingReader {
     private:
@@ -39,6 +39,6 @@ namespace apps::mqttbroker {
         static nlohmann::json jsonMapping;
     };
 
-} // namespace apps::mqttbroker
+} // namespace apps::mqttbroker::lib
 
-#endif // APPS_MQTTBROKER_JSONMAPPINGREADER_H
+#endif // APPS_MQTTBROKER_MQTTBROKER_JSONMAPPINGREADER_H

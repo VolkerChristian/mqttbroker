@@ -48,16 +48,17 @@ add_compile_options(
     ${ADDITIONAL_OPTIONS}
 )
 
-set(MQTTBROKER_CPP mqttbroker.cpp JsonMappingReader.cpp SocketContext.cpp)
+set(MQTTBROKER_CPP mqttbroker.cpp SocketContext.cpp)
 
-set(MQTTBROKER_H JsonMappingReader.h SharedSocketContextFactory.h
-                 SharedSocketContextFactory.hpp SocketContext.h
+set(MQTTBROKER_H SharedSocketContextFactory.h SharedSocketContextFactory.hpp
+                 SocketContext.h
 )
 
 add_executable(mqttbroker ${MQTTBROKER_CPP} ${MQTTBROKER_H})
 
 target_include_directories(
     mqttbroker PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
+                      ${PROJECT_SOURCE_DIR}
 )
 
 if(SNODEC_INTREE_BUILD)
@@ -67,8 +68,10 @@ if(SNODEC_INTREE_BUILD)
 endif(SNODEC_INTREE_BUILD)
 
 target_link_libraries(
-    mqttbroker PUBLIC snodec::mqtt-server snodec::net-in-stream-legacy
-                      snodec::net-in-stream-tls snodec::net-un-stream-legacy
+    mqttbroker
+    PUBLIC snodec::mqtt-server snodec::net-in-stream-legacy
+           snodec::net-in-stream-tls snodec::net-un-stream-legacy
+    PRIVATE mqtt-mapping
 )
 
 install(TARGETS mqttbroker RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
