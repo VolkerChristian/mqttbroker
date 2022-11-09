@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
     core::SNodeC::init(argc, argv);
 
     if (!mappingFilePath.empty()) {
-        static const nlohmann::json& jsonMapping = apps::mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFilePath);
+        const nlohmann::json& jsonMapping = apps::mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFilePath);
 
         static nlohmann::json connection;
         static nlohmann::json sharedJsonMapping;
@@ -61,20 +61,18 @@ int main(int argc, char* argv[]) {
             if (sharedJsonMapping.contains(discoverPrefix)) {
                 sharedJsonMapping = sharedJsonMapping[discoverPrefix];
 
-                using InMQTTIntegratorClient = net::in::stream::legacy::SocketClient<
+                using InMqttIntegratorClient = net::in::stream::legacy::SocketClient<
                     apps::mqttbroker::integrator::SocketContextFactory<connection, sharedJsonMapping>>;
 
-                using LegacyInSocketConnection = InMQTTIntegratorClient::SocketConnection;
+                using LegacyInSocketConnection = InMqttIntegratorClient::SocketConnection;
 
-                decltype([](InMQTTIntegratorClient& clientBrokerInServer, const std::function<void()>& stopTimer = nullptr) {
-                    clientBrokerInServer.connect(
-                        [stopTimer](const InMQTTIntegratorClient::SocketAddress& socketAddress, int errnum) -> void {
-                            if (errnum < 0) {
-                                PLOG(ERROR) << "OnError";
-                            } else if (errnum > 0) {
+                decltype([](InMqttIntegratorClient& inMqttIntegratorClient, const std::function<void()>& stopTimer = nullptr) {
+                    inMqttIntegratorClient.connect(
+                        [stopTimer](const InMqttIntegratorClient::SocketAddress& socketAddress, int errnum) -> void {
+                            if (errnum != 0) {
                                 PLOG(ERROR) << "OnError: " << socketAddress.toString();
                             } else {
-                                VLOG(0) << "snode.c connecting to " << socketAddress.toString();
+                                VLOG(0) << "MqttIntegrator connected to " << socketAddress.toString();
 
                                 if (stopTimer) {
                                     stopTimer();
@@ -83,7 +81,7 @@ int main(int argc, char* argv[]) {
                         });
                 }) doConnect{};
 
-                InMQTTIntegratorClient clientBrokerInServer(
+                InMqttIntegratorClient inMqttIntegratorClient(
                     "clientmapper",
                     [](LegacyInSocketConnection* socketConnection) -> void {
                         VLOG(0) << "OnConnect";
@@ -94,20 +92,20 @@ int main(int argc, char* argv[]) {
                     []([[maybe_unused]] LegacyInSocketConnection* socketConnection) -> void {
                         VLOG(0) << "OnConnected";
                     },
-                    [&doConnect, &clientBrokerInServer](LegacyInSocketConnection* socketConnection) -> void {
+                    [&doConnect, &inMqttIntegratorClient](LegacyInSocketConnection* socketConnection) -> void {
                         VLOG(0) << "OnDisconnect";
 
                         VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
                         VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
 
                         core::timer::Timer timer = core::timer::Timer::intervalTimer(
-                            [&doConnect, &clientBrokerInServer]([[maybe_unused]] const std::function<void()>& stop) -> void {
-                                doConnect(clientBrokerInServer, stop);
+                            [&doConnect, &inMqttIntegratorClient]([[maybe_unused]] const std::function<void()>& stop) -> void {
+                                doConnect(inMqttIntegratorClient, stop);
                             },
                             1);
                     });
 
-                doConnect(clientBrokerInServer);
+                doConnect(inMqttIntegratorClient);
 
                 ret = core::SNodeC::start();
             } else {

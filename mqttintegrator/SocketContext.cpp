@@ -46,7 +46,7 @@ namespace apps::mqttbroker::integrator {
         cleanSession = connection.contains("clean_session") ? static_cast<bool>(connection["clean_session"]) : true;
         willTopic = connection.contains("will_topic") ? static_cast<std::string>(connection["will_topic"]) : "";
         willMessage = connection.contains("will_message") ? static_cast<std::string>(connection["will_message"]) : "";
-        willQoS = connection.contains("will_qos") ? static_cast<uint8_t>(connection["will_qos"]) : 60;
+        willQoS = connection.contains("will_qos") ? static_cast<uint8_t>(connection["will_qos"]) : 0;
         willRetain = connection.contains("will_retain") ? static_cast<bool>(connection["will_retain"]) : true;
         username = connection.contains("username") ? static_cast<std::string>(connection["username"]) : "";
         password = connection.contains("password") ? static_cast<std::string>(connection["password"]) : "";
@@ -123,7 +123,7 @@ namespace apps::mqttbroker::integrator {
         publishMappings(publish);
     }
 
-    void SocketContext::publishMappingMatch(const std::string& topic, const std::string& message, uint8_t qoS) {
+    void SocketContext::publishMapping(const std::string& topic, const std::string& message, uint8_t qoS) {
         sendPublish(++packetIdentifier, topic, message, qoS);
     }
 

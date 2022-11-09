@@ -50,7 +50,7 @@ namespace apps::mqttbroker::lib {
     private:
         static void extractTopics(nlohmann::json json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList);
 
-        virtual void publishMappingMatch(const std::string& topic, const std::string& message, uint8_t qoS) = 0;
+        virtual void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS) = 0;
 
     protected:
         const nlohmann::json& jsonMapping;

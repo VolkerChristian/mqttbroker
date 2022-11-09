@@ -40,11 +40,11 @@ namespace apps::mqttbroker::lib {
     }
 
     void MqttMapper::extractTopics(nlohmann::json json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList) {
-        for (auto& [key, value] : json.items()) {
-            if (value.is_object() && value.contains("payload")) {
+        for (auto& [key, subJson] : json.items()) {
+            if (subJson.is_object() && subJson.contains("payload")) {
                 uint8_t qoS = 0;
-                if (value.contains("subscribtion")) {
-                    nlohmann::json subscribtion = value["subscribtion"];
+                if (subJson.contains("subscribtion")) {
+                    nlohmann::json subscribtion = subJson["subscribtion"];
                     if (subscribtion.is_object() && subscribtion.contains("qos")) {
                         qoS = subscribtion["qos"];
                     }
@@ -52,8 +52,8 @@ namespace apps::mqttbroker::lib {
 
                 topicList.push_back(iot::mqtt::Topic(topic + (topic.empty() || topic == "/" ? "" : "/") + key, qoS));
             }
-            if (key != "payload" && key != "qos" && value.is_object()) {
-                extractTopics(value, topic + (topic.empty() || topic == "/" ? "" : "/") + key, topicList);
+            if (key != "payload" && key != "qos" && subJson.is_object()) {
+                extractTopics(subJson, topic + (topic.empty() || topic == "/" ? "" : "/") + key, topicList);
             }
         }
     }
@@ -81,7 +81,6 @@ namespace apps::mqttbroker::lib {
             remainingTopic.erase(0, topicLevel.size() + 1);
 
             currentTopicExistsInMapping = subJson.contains(topicLevel);
-
             if (!topicLevel.empty() && currentTopicExistsInMapping) {
                 subJson = subJson[topicLevel];
             }
@@ -92,6 +91,7 @@ namespace apps::mqttbroker::lib {
 
             if (subJson.contains(publish.getMessage())) {
                 subJson = subJson[publish.getMessage()];
+
                 if (subJson.contains("command_topic") && subJson.contains("state")) {
                     const std::string& topic = subJson["command_topic"];
                     const std::string& message = subJson["state"];
@@ -99,7 +99,7 @@ namespace apps::mqttbroker::lib {
                     LOG(INFO) << "Topic mapping found:";
                     LOG(INFO) << "  " << publish.getTopic() << ":" << publish.getMessage() << " -> " << topic << ":" << message;
 
-                    publishMappingMatch(topic, message, publish.getQoS());
+                    publishMapping(topic, message, publish.getQoS());
                 }
             }
         }

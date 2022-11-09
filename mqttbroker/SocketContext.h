@@ -56,7 +56,7 @@ namespace apps::mqttbroker::broker {
     private:
         void onPublish(iot::mqtt::packets::Publish& publish) override;
 
-        void publishMappingMatch(const std::string& topic, const std::string& message, uint8_t qoS) override;
+        void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS) override;
     };
 
 } // namespace apps::mqttbroker::broker
