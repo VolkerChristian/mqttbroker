@@ -146,15 +146,15 @@ namespace apps::mqttbroker::lib {
 
         {
             "connection" : {
-                "keep_alive" : 60,
-                "client_id" : "Client",
+                "keep_alive" :    60,
+                "client_id" :     "Client",
                 "clean_session" : true,
-                "will_topic" : "will/topic",
-                "will_message" : "Last Will",
-                "will_qos": 0,
-                "will_retain" : false,
-                "username" : "Username",
-                "password" : "Password"
+                "will_topic" :    "will/topic",
+                "will_message" :  "Last Will",
+                "will_qos":       0,
+                "will_retain" :   false,
+                "username" :      "Username",
+                "password" :      "Password"
             },
             "mapping" : {
                 "iotempower" : {
