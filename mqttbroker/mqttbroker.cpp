@@ -70,8 +70,8 @@ int main(int argc, char* argv[]) {
         VLOG(0) << "Mapping File " << mappingFilePath;
     }
 
-    using MQTTLegacyInServer = net::in::stream::legacy::SocketServer<
-        apps::mqttbroker::broker::SharedSocketContextFactory<apps::mqttbroker::broker::SocketContext, sharedJsonMapping>>;
+    using MQTTLegacyInServer =
+        net::in::stream::legacy::SocketServer<apps::mqttbroker::broker::SharedSocketContextFactory<sharedJsonMapping>>;
 
     using LegacyInSocketConnection = MQTTLegacyInServer::SocketConnection;
 
@@ -111,8 +111,7 @@ int main(int argc, char* argv[]) {
         }
     });
 
-    using MQTTTLSInServer = net::in::stream::tls::SocketServer<
-        apps::mqttbroker::broker::SharedSocketContextFactory<apps::mqttbroker::broker::SocketContext, sharedJsonMapping>>;
+    using MQTTTLSInServer = net::in::stream::tls::SocketServer<apps::mqttbroker::broker::SharedSocketContextFactory<sharedJsonMapping>>;
     using TLSInSocketConnection = MQTTTLSInServer::SocketConnection;
 
     std::map<std::string, std::any> options{{"CertChain", SERVERCERTF}, {"CertChainKey", SERVERKEYF}, {"Password", KEYFPASS}};
@@ -198,8 +197,8 @@ int main(int argc, char* argv[]) {
         }
     });
 
-    using MQTTLegacyUnServer = net::un::stream::legacy::SocketServer<
-        apps::mqttbroker::broker::SharedSocketContextFactory<apps::mqttbroker::broker::SocketContext, sharedJsonMapping>>;
+    using MQTTLegacyUnServer =
+        net::un::stream::legacy::SocketServer<apps::mqttbroker::broker::SharedSocketContextFactory<sharedJsonMapping>>;
     using LegacyUnSocketConnection = MQTTLegacyUnServer::SocketConnection;
 
     MQTTLegacyUnServer mqttLegacyUnServer(
