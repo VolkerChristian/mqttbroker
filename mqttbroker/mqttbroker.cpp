@@ -18,7 +18,6 @@
 
 #include "SharedSocketContextFactory.hpp" // IWYU pragma: keep
 #include "SocketContext.h"                // IWYU pragma: keep
-#include "config.h"                       // just for this example app
 #include "core/SNodeC.h"
 #include "lib/JsonMappingReader.h"
 #include "log/Logger.h"
