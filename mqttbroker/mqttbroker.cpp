@@ -114,11 +114,6 @@ int main(int argc, char* argv[]) {
     using MQTTTLSInServer = net::in::stream::tls::SocketServer<apps::mqttbroker::broker::SharedSocketContextFactory<sharedJsonMapping>>;
     using TLSInSocketConnection = MQTTTLSInServer::SocketConnection;
 
-    std::map<std::string, std::any> options{{"CertChain", SERVERCERTF}, {"CertChainKey", SERVERKEYF}, {"Password", KEYFPASS}};
-    std::map<std::string, std::map<std::string, std::any>> sniCerts = {
-        {"snodec.home.vchrist.at", {{"CertChain", SNODECCERTF}, {"CertChainKey", SERVERKEYF}, {"Password", KEYFPASS}}},
-        {"www.vchrist.at", {{"CertChain", SNODECCERTF}, {"CertChainKey", SERVERKEYF}, {"Password", KEYFPASS}}}};
-
     MQTTTLSInServer mqttTLSInServer(
         "tlsin",
         [](TLSInSocketConnection* socketConnection) -> void { // OnConnect
@@ -182,10 +177,13 @@ int main(int argc, char* argv[]) {
             VLOG(0) << "\tPeer:  (" + socketConnection->getRemoteAddress().address() + ") " +
                            socketConnection->getRemoteAddress().toString();
 
-        },
-        options);
+        });
 
-    mqttTLSInServer.addSniCerts(sniCerts);
+    //    std::map<std::string, std::map<std::string, std::any>> sniCerts = {
+    //        {"snodec.home.vchrist.at", {{"CertChain", SNODECCERTF}, {"CertChainKey", SERVERKEYF}, {"Password", KEYFPASS}}},
+    //        {"www.vchrist.at", {{"CertChain", SNODECCERTF}, {"CertChainKey", SERVERKEYF}, {"Password", KEYFPASS}}}};
+
+    //    mqttTLSInServer.addSniCerts(sniCerts);
 
     mqttTLSInServer.listen([mqttTLSInServer](const MQTTTLSInServer::SocketAddress& socketAddress, int errnum) mutable -> void {
         if (errnum < 0) {
