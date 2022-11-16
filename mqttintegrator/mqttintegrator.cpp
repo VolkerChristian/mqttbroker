@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
 
                 using LegacyInSocketConnection = InMqttIntegratorClient::SocketConnection;
 
-                decltype([](InMqttIntegratorClient& inMqttIntegratorClient, const std::function<void()>& stopTimer = nullptr) {
+                decltype([](InMqttIntegratorClient& inMqttIntegratorClient, const std::function<void()>& stopTimer = nullptr) -> void {
                     inMqttIntegratorClient.connect(
                         [stopTimer](const InMqttIntegratorClient::SocketAddress& socketAddress, int errnum) -> void {
                             if (errnum != 0) {
@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
                         VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
 
                         core::timer::Timer timer = core::timer::Timer::intervalTimer(
-                            [&doConnect, &inMqttIntegratorClient]([[maybe_unused]] const std::function<void()>& stop) -> void {
+                            [&doConnect, &inMqttIntegratorClient](const std::function<void()>& stop) -> void {
                                 doConnect(inMqttIntegratorClient, stop);
                             },
                             1);
