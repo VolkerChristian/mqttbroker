@@ -20,12 +20,25 @@
                     "payload" : {
                         "type" : "binary_sensor",
                         "pressed" : {
-                            "command_topic" : "test02/onboard/set",
                             "state" : "on"
                         },
                         "released" : {
                             "command_topic" : "test02/onboard/set",
                             "state" : "off"
+                        }
+                    },
+                    "value" : {
+                        "type" : "binary_sensor",
+                        "template" : {
+                            "command_topic" : "test02/onboard/set",
+                            "state" : "template for state"
+                        }
+                    },
+                    "value-json" : {
+                        "type" : "binary_sensor",
+                        "template" : {
+                            "command_topic" : "template for topic",
+                            "state" : "template for state"
                         }
                     }
                 }
