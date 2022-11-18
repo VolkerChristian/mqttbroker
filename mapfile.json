@@ -19,7 +19,8 @@
                         "qos" : 2
                     },
                     "payload": {
-                        "static" : {
+                        "Comment" : "Either a \"static\", \"value\", or \"json\" object is required! E.g. next three objects. Exclusive order of interpretation: \"static\", \"value\", \"json\"",
+                        "static1" : {
                             "command_topic" : "test02/onboard/set",
                             "pressed" : {
                                 "state" : "on"
@@ -28,17 +29,40 @@
                                 "state" : "off"
                             }
                         },
-                        "value" : {
+                        "value1" : {
                             "command_topic" : "test02/onboard/set",
                             "state_template" : "{{ value }}pm"
                         },
                         "json" : {
                             "command_topic" : "test02/onboard/set",
                             "state_template" : "{{ json.time.start }} to {{ json.time.end + 1 }}pm"
-                        }
+                        },
+                        "The next objects are ignored" : "Listed only for documentation",
+                        "value | Comment: An array of \"value\" objects is also allowed for multi-mapping. E.g.:" : [
+                            {
+                                "command_topic" : "aCommandTopic",
+                                "state_template" : "aStateTemplate"
+                            },
+                            {
+                                "command_topic" : "anOtherCommandTopic",
+                                "state_template" : "anOtherStateTemplate"
+                            }
+
+                        ],
+                        "json | Comment: An array of \"json\" objects is also allowed for multi-mapping. E.g.:" : [
+                            {
+                                "command_topic" : "aCommandTopic",
+                                "state_template" : "aStateTemplate"
+                            },
+                            {
+                                "command_topic" : "anOtherCommandTopic",
+                                "state_template" : "onOtherStateThemplate"
+                            }
+                        ]
                     }
                 }
             }
         }
     }
 }
+
