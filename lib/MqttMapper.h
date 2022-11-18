@@ -45,10 +45,13 @@ namespace apps::mqttbroker::lib {
 
     protected:
         std::list<iot::mqtt::Topic> extractTopics();
-        void publishMappings(iot::mqtt::packets::Publish& publish);
+        void publishMappings(const iot::mqtt::packets::Publish& publish);
 
     private:
-        static void extractTopics(nlohmann::json json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList);
+        static void extractTopics(const nlohmann::json& json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList);
+
+        void publishRenderedTemplate(const nlohmann::json& subJson, const nlohmann::json& json, const iot::mqtt::packets::Publish& publish);
+        void publishTemplate(const nlohmann::json& subJson, const nlohmann::json& json, const iot::mqtt::packets::Publish& publish);
 
         virtual void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS) = 0;
 

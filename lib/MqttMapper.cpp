@@ -26,11 +26,14 @@
 #include "inja.hpp"
 #include "log/Logger.h"
 
+#include <initializer_list>
 #include <map>
 #include <nlohmann/json.hpp>
+#include <stdexcept>
 
 // IWYU pragma: no_include <nlohmann/detail/iterators/iteration_proxy.hpp>
 // IWYU pragma: no_include <nlohmann/detail/json_pointer.hpp>
+// IWYU pragma: no_include <nlohmann/detail/iterators/iter_impl.hpp>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
@@ -40,7 +43,7 @@ namespace apps::mqttbroker::lib {
         : jsonMapping(jsonMapping) {
     }
 
-    void MqttMapper::extractTopics(nlohmann::json json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList) {
+    void MqttMapper::extractTopics(const nlohmann::json& json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList) {
         for (auto& [key, subJson] : json.items()) {
             if (subJson.is_object() && subJson.contains("payload")) {
                 uint8_t qoS = 0;
@@ -58,7 +61,6 @@ namespace apps::mqttbroker::lib {
             }
         }
     }
-
     std::list<iot::mqtt::Topic> MqttMapper::extractTopics() {
         std::list<iot::mqtt::Topic> topicList;
 
@@ -67,7 +69,36 @@ namespace apps::mqttbroker::lib {
         return topicList;
     }
 
-    void MqttMapper::publishMappings(iot::mqtt::packets::Publish& publish) {
+    void MqttMapper::publishRenderedTemplate(const nlohmann::json& subJson,
+                                             const nlohmann::json& json,
+                                             const iot::mqtt::packets::Publish& publish) {
+        if (subJson.contains("command_topic") && subJson.contains("state_template")) {
+            const std::string& topic = subJson["command_topic"];
+            const std::string& stateTemplate = subJson["state_template"];
+
+            try {
+                // Render
+                std::string renderedMessage = inja::render(stateTemplate, json);
+
+                publishMapping(topic, renderedMessage, publish.getQoS());
+            } catch (const inja::InjaError& e) {
+                LOG(ERROR) << e.what();
+            }
+        }
+    }
+
+    void
+    MqttMapper::publishTemplate(const nlohmann::json& subJson, const nlohmann::json& json, const iot::mqtt::packets::Publish& publish) {
+        if (subJson.is_object()) {
+            publishRenderedTemplate(subJson, json, publish);
+        } else if (subJson.is_array()) {
+            for (const nlohmann::json& elementJson : subJson) {
+                publishRenderedTemplate(elementJson, json, publish);
+            }
+        }
+    }
+
+    void MqttMapper::publishMappings(const iot::mqtt::packets::Publish& publish) {
         nlohmann::json subJson = jsonMapping;
 
         std::string remainingTopic = publish.getTopic();
@@ -109,76 +140,49 @@ namespace apps::mqttbroker::lib {
             } else if (subJson.contains("value")) {
                 subJson = subJson["value"];
 
-                if (subJson.contains("command_topic") && subJson.contains("state_template")) {
-                    const std::string& topic = subJson["command_topic"];
-                    const std::string& stateTemplate = subJson["state_template"];
+                try {
+                    nlohmann::json json;
+                    json["value"] = publish.getMessage();
 
-                    try {
-                        nlohmann::json json;
-
-                        json["value"] = publish.getMessage();
-
-                        VLOG(0) << json.dump();
-
-                        try {
-                            // Render
-                            std::string renderedMessage = inja::render(stateTemplate, json);
-
-                            publishMapping(topic, renderedMessage, publish.getQoS());
-                        } catch (const inja::InjaError& e) {
-                            LOG(ERROR) << e.what();
-                        }
-                    } catch (const nlohmann::json::exception& e) {
-                        LOG(ERROR) << e.what();
-                    }
+                    publishTemplate(subJson, json, publish);
+                } catch (const nlohmann::json::exception& e) {
+                    LOG(ERROR) << e.what();
                 }
             } else if (subJson.contains("json")) {
                 subJson = subJson["json"];
 
-                if (subJson.contains("command_topic") && subJson.contains("state_template")) {
-                    const std::string& topic = subJson["command_topic"];
-                    const std::string& stateTemplate = subJson["state_template"];
+                try {
+                    nlohmann::json json;
+                    json["json"] = nlohmann::json::parse(publish.getMessage());
 
-                    try {
-                        nlohmann::json json;
-                        json["json"] = nlohmann::json::parse(publish.getMessage());
-
-                        try {
-                            // Render
-                            std::string renderedMessage = inja::render(stateTemplate, json);
-
-                            publishMapping(topic, renderedMessage, publish.getQoS());
-                        } catch (const inja::InjaError& e) {
-                            LOG(ERROR) << e.what();
-                        }
-                    } catch (const nlohmann::json::exception& e) {
-                        LOG(ERROR) << e.what();
-                    }
+                    publishTemplate(subJson, json, publish);
+                } catch (const nlohmann::json::exception& e) {
+                    LOG(ERROR) << e.what();
                 }
             }
         }
     }
 
     /*
-        iotempower/cfg/test01/ip 192.168.12.183
-        iotempower/cfg/test02/ip 192.168.12.132
-        iotempower/binary_sensor/test01/button1/config
-        {
-            "name": "test01 button1",
-            "state_topic": "test01/button1",
-            "payload_on": "released",
-            "payload_off": "pressed"
-        },
-        iotempower/switch/test02/onboard/config
-        {
-            "name": "test02 onboard",
-            "state_topic": "test02/onboard",
-            "state_on": "on",
-            "state_off": "off",
-            "command_topic": "test02/onboard/set",
-            "payload_on": "on",
-            "payload_off": "off"
-        }
+    iotempower/cfg/test01/ip 192.168.12.183
+    iotempower/cfg/test02/ip 192.168.12.132
+    iotempower/binary_sensor/test01/button1/config
+    {
+        "name": "test01 button1",
+        "state_topic": "test01/button1",
+        "payload_on": "released",
+        "payload_off": "pressed"
+    },
+    iotempower/switch/test02/onboard/config
+    {
+        "name": "test02 onboard",
+        "state_topic": "test02/onboard",
+        "state_on": "on",
+        "state_off": "off",
+        "command_topic": "test02/onboard/set",
+        "payload_on": "on",
+        "payload_off": "off"
+    }
 
     {
         "binary_sensor" : [{
@@ -198,41 +202,50 @@ namespace apps::mqttbroker::lib {
         }]
     }
 
-        {
-            "connection" : {
-                "keep_alive" :    60,
-                "client_id" :     "Client",
-                "clean_session" : true,
-                "will_topic" :    "will/topic",
-                "will_message" :  "Last Will",
-                "will_qos":       0,
-                "will_retain" :   false,
-                "username" :      "Username",
-                "password" :      "Password"
-            },
-            "mapping" : {
-                "iotempower" : {
-                    "test01" : {
-                        "button1" : {
-                            "type" : "binary_sensor",
-                            "subscribtion" : {
-                                "qos" : 2
-                            },
-                            "payload" : {
+    {
+        "connection" : {
+            "keep_alive" : 60,
+            "client_id" : "Client",
+            "clean_session" : true,
+            "will_topic" : "will/topic",
+            "will_message" : "Last Will",
+            "will_qos": 0,
+            "will_retain" : false,
+            "username" : "Username",
+            "password" : "Password"
+        },
+        "mapping" : {
+            "iotempower" : {
+                "test01" : {
+                    "button1" : {
+                        "type" : "binary_sensor",
+                        "subscribtion" : {
+                            "qos" : 2
+                        },
+                        "payload": {
+                            "static" : {
+                                "command_topic" : "test02/onboard/set",
                                 "pressed" : {
-                                    "command_topic" : "test02/onboard/set",
                                     "state" : "on"
                                 },
-                                "released" : {
-                                    "command_topic" : "test02/onboard/set",
+                                "released": {
                                     "state" : "off"
                                 }
+                            },
+                            "value" : {
+                                "command_topic" : "test02/onboard/set",
+                                "state_template" : "{{ value }}pm"
+                            },
+                            "json" : {
+                                "command_topic" : "test02/onboard/set",
+                                "state_template" : "{{ json.time.start }} to {{ json.time.end + 1 }}pm"
                             }
                         }
                     }
                 }
             }
         }
+    }
 
     */
 
