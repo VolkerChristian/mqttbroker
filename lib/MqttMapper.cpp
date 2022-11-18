@@ -44,11 +44,11 @@ namespace apps::mqttbroker::lib {
     }
 
     void MqttMapper::extractTopics(const nlohmann::json& json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList) {
-        for (auto& [key, subJson] : json.items()) {
-            if (subJson.is_object() && subJson.contains("payload")) {
+        for (auto& [key, subJsonMapping] : json.items()) {
+            if (subJsonMapping.is_object() && subJsonMapping.contains("payload")) {
                 uint8_t qoS = 0;
-                if (subJson.contains("subscribtion")) {
-                    nlohmann::json subscribtion = subJson["subscribtion"];
+                if (subJsonMapping.contains("subscribtion")) {
+                    nlohmann::json subscribtion = subJsonMapping["subscribtion"];
                     if (subscribtion.is_object() && subscribtion.contains("qos")) {
                         qoS = subscribtion["qos"];
                     }
@@ -56,8 +56,8 @@ namespace apps::mqttbroker::lib {
 
                 topicList.push_back(iot::mqtt::Topic(topic + (topic.empty() || topic == "/" ? "" : "/") + key, qoS));
             }
-            if (key != "payload" && key != "qos" && subJson.is_object()) {
-                extractTopics(subJson, topic + (topic.empty() || topic == "/" ? "" : "/") + key, topicList);
+            if (key != "payload" && key != "qos" && subJsonMapping.is_object()) {
+                extractTopics(subJsonMapping, topic + (topic.empty() || topic == "/" ? "" : "/") + key, topicList);
             }
         }
     }
@@ -69,12 +69,12 @@ namespace apps::mqttbroker::lib {
         return topicList;
     }
 
-    void MqttMapper::publishRenderedTemplate(const nlohmann::json& subJson,
-                                             const nlohmann::json& json,
-                                             const iot::mqtt::packets::Publish& publish) {
-        if (subJson.contains("command_topic") && subJson.contains("state_template")) {
-            const std::string& topic = subJson["command_topic"];
-            const std::string& stateTemplate = subJson["state_template"];
+    void MqttMapper::publishTemplate(const nlohmann::json& subJsonMapping,
+                                     const nlohmann::json& json,
+                                     const iot::mqtt::packets::Publish& publish) {
+        if (subJsonMapping.contains("command_topic") && subJsonMapping.contains("state_template")) {
+            const std::string& topic = subJsonMapping["command_topic"];
+            const std::string& stateTemplate = subJsonMapping["state_template"];
 
             try {
                 // Render
@@ -87,19 +87,20 @@ namespace apps::mqttbroker::lib {
         }
     }
 
-    void
-    MqttMapper::publishTemplate(const nlohmann::json& subJson, const nlohmann::json& json, const iot::mqtt::packets::Publish& publish) {
-        if (subJson.is_object()) {
-            publishRenderedTemplate(subJson, json, publish);
-        } else if (subJson.is_array()) {
-            for (const nlohmann::json& elementJson : subJson) {
-                publishRenderedTemplate(elementJson, json, publish);
+    void MqttMapper::publishTemplates(const nlohmann::json& subJsonMapping,
+                                      const nlohmann::json& json,
+                                      const iot::mqtt::packets::Publish& publish) {
+        if (subJsonMapping.is_object()) {
+            publishTemplate(subJsonMapping, json, publish);
+        } else if (subJsonMapping.is_array()) {
+            for (const nlohmann::json& elementJson : subJsonMapping) {
+                publishTemplate(elementJson, json, publish);
             }
         }
     }
 
     void MqttMapper::publishMappings(const iot::mqtt::packets::Publish& publish) {
-        nlohmann::json subJson = jsonMapping;
+        nlohmann::json subJsonMapping = jsonMapping;
 
         std::string remainingTopic = publish.getTopic();
         std::string topicLevel;
@@ -112,24 +113,24 @@ namespace apps::mqttbroker::lib {
             topicLevel = remainingTopic.substr(0, slashPosition);
             remainingTopic.erase(0, topicLevel.size() + 1);
 
-            currentTopicExistsInMapping = subJson.contains(topicLevel);
+            currentTopicExistsInMapping = subJsonMapping.contains(topicLevel);
             if (!topicLevel.empty() && currentTopicExistsInMapping) {
-                subJson = subJson[topicLevel];
+                subJsonMapping = subJsonMapping[topicLevel];
             }
         } while (!topicLevel.empty() && currentTopicExistsInMapping);
 
-        if (topicLevel.empty() && subJson.contains("payload")) {
-            subJson = subJson["payload"];
+        if (topicLevel.empty() && subJsonMapping.contains("payload")) {
+            subJsonMapping = subJsonMapping["payload"];
 
-            if (subJson.contains("static")) {
-                subJson = subJson["static"];
+            if (subJsonMapping.contains("static")) {
+                subJsonMapping = subJsonMapping["static"];
 
-                if (subJson.contains("command_topic") && subJson.contains(publish.getMessage())) {
-                    const std::string& topic = subJson["command_topic"];
-                    subJson = subJson[publish.getMessage()];
+                if (subJsonMapping.contains("command_topic") && subJsonMapping.contains(publish.getMessage())) {
+                    const std::string& topic = subJsonMapping["command_topic"];
+                    subJsonMapping = subJsonMapping[publish.getMessage()];
 
-                    if (subJson.contains("state")) {
-                        const std::string& message = subJson["state"];
+                    if (subJsonMapping.contains("state")) {
+                        const std::string& message = subJsonMapping["state"];
 
                         LOG(INFO) << "Topic mapping found:";
                         LOG(INFO) << "  " << publish.getTopic() << ":" << publish.getMessage() << " -> " << topic << ":" << message;
@@ -137,25 +138,21 @@ namespace apps::mqttbroker::lib {
                         publishMapping(topic, message, publish.getQoS());
                     }
                 }
-            } else if (subJson.contains("value")) {
-                subJson = subJson["value"];
-
+            } else {
                 try {
                     nlohmann::json json;
-                    json["value"] = publish.getMessage();
 
-                    publishTemplate(subJson, json, publish);
-                } catch (const nlohmann::json::exception& e) {
-                    LOG(ERROR) << e.what();
-                }
-            } else if (subJson.contains("json")) {
-                subJson = subJson["json"];
+                    if (subJsonMapping.contains("value")) {
+                        subJsonMapping = subJsonMapping["value"];
 
-                try {
-                    nlohmann::json json;
-                    json["json"] = nlohmann::json::parse(publish.getMessage());
+                        json["value"] = publish.getMessage();
+                    } else if (subJsonMapping.contains("json")) {
+                        subJsonMapping = subJsonMapping["json"];
 
-                    publishTemplate(subJson, json, publish);
+                        json["json"] = nlohmann::json::parse(publish.getMessage());
+                    }
+
+                    publishTemplates(subJsonMapping, json, publish);
                 } catch (const nlohmann::json::exception& e) {
                     LOG(ERROR) << e.what();
                 }

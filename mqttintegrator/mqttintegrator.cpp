@@ -66,20 +66,21 @@ int main(int argc, char* argv[]) {
 
                 using LegacyInSocketConnection = InMqttIntegratorClient::SocketConnection;
 
-                decltype([](InMqttIntegratorClient& inMqttIntegratorClient, const std::function<void()>& stopTimer = nullptr) -> void {
-                    inMqttIntegratorClient.connect(
-                        [stopTimer](const InMqttIntegratorClient::SocketAddress& socketAddress, int errnum) -> void {
-                            if (errnum != 0) {
-                                PLOG(ERROR) << "OnError: " << socketAddress.toString();
-                            } else {
-                                VLOG(0) << "MqttIntegrator connected to " << socketAddress.toString();
+                decltype(
+                    [](const InMqttIntegratorClient& inMqttIntegratorClient, const std::function<void()>& stopTimer = nullptr) -> void {
+                        inMqttIntegratorClient.connect(
+                            [stopTimer](const InMqttIntegratorClient::SocketAddress& socketAddress, int errnum) -> void {
+                                if (errnum != 0) {
+                                    PLOG(ERROR) << "OnError: " << socketAddress.toString();
+                                } else {
+                                    VLOG(0) << "MqttIntegrator connected to " << socketAddress.toString();
 
-                                if (stopTimer) {
-                                    stopTimer();
+                                    if (stopTimer) {
+                                        stopTimer();
+                                    }
                                 }
-                            }
-                        });
-                }) doConnect{};
+                            });
+                    }) doConnect{};
 
                 InMqttIntegratorClient inMqttIntegratorClient(
                     "clientmapper",
