@@ -19,7 +19,7 @@
                         "qos" : 2
                     },
                     "payload": {
-                        "static1" : {
+                        "static" : {
                             "command_topic" : "test02/onboard/set",
                             "pressed" : {
                                 "state" : "on"
@@ -28,7 +28,7 @@
                                 "state" : "off"
                             }
                         },
-                        "value1" : {
+                        "value" : {
                             "command_topic" : "test02/onboard/set",
                             "state_template" : "{{ value }}pm"
                         },
