@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-configure_file(config.h.in config.h @ONLY)
+find_package(nlohmann_json 3.7.0)
 
 if(NOT SNODEC_INTREE_BUILD)
     find_package(
