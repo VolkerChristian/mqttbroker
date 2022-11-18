@@ -14,31 +14,27 @@
         "iotempower" : {
             "test01" : {
                 "button1" : {
+                    "type" : "binary_sensor",
                     "subscribtion" : {
                         "qos" : 2
                     },
-                    "payload" : {
-                        "type" : "binary_sensor",
-                        "pressed" : {
-                            "state" : "on"
+                    "payload": {
+                        "static1" : {
+                            "command_topic" : "test02/onboard/set",
+                            "pressed" : {
+                                "state" : "on"
+                            },
+                            "released": {
+                                "state" : "off"
+                            }
                         },
-                        "released" : {
+                        "value1" : {
                             "command_topic" : "test02/onboard/set",
-                            "state" : "off"
-                        }
-                    },
-                    "value" : {
-                        "type" : "binary_sensor",
-                        "template" : {
+                            "state_template" : "{{ value }}pm"
+                        },
+                        "json" : {
                             "command_topic" : "test02/onboard/set",
-                            "state" : "template for state"
-                        }
-                    },
-                    "value-json" : {
-                        "type" : "binary_sensor",
-                        "template" : {
-                            "command_topic" : "template for topic",
-                            "state" : "template for state"
+                            "state_template" : "{{ json.time.start }} to {{ json.time.end + 1 }}pm"
                         }
                     }
                 }

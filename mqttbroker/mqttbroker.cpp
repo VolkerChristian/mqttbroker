@@ -58,12 +58,12 @@ int main(int argc, char* argv[]) {
     static nlohmann::json sharedJsonMapping;
 
     if (!mappingFilePath.empty()) {
-        static const nlohmann::json& jsonMapping = apps::mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFilePath);
+        nlohmann::json jsonMapping = apps::mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFilePath);
 
         if (jsonMapping.contains("mapping")) {
-            sharedJsonMapping = jsonMapping["mapping"];
-            if (sharedJsonMapping.contains(discoverPrefix)) {
-                sharedJsonMapping = sharedJsonMapping[discoverPrefix];
+            jsonMapping = jsonMapping["mapping"];
+            if (jsonMapping.contains(discoverPrefix)) {
+                sharedJsonMapping = jsonMapping[discoverPrefix];
             }
         }
         VLOG(0) << "Mapping File " << mappingFilePath;

@@ -40,7 +40,11 @@ namespace apps::mqttbroker::lib {
             if (mappingFile) {
                 VLOG(0) << "MappingFilePath: " << mappingFilePath;
 
-                jsonMapping = nlohmann::json::parse(mappingFile);
+                try {
+                    jsonMapping = nlohmann::json::parse(mappingFile);
+                } catch (const nlohmann::json::exception& e) {
+                    LOG(ERROR) << e.what();
+                }
             } else {
                 VLOG(0) << "MappingFilePath: " << mappingFilePath << " not found";
             }

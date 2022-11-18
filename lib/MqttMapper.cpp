@@ -23,6 +23,7 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
+#include "inja.hpp"
 #include "log/Logger.h"
 
 #include <map>
@@ -89,17 +90,70 @@ namespace apps::mqttbroker::lib {
         if (topicLevel.empty() && subJson.contains("payload")) {
             subJson = subJson["payload"];
 
-            if (subJson.contains(publish.getMessage())) {
-                subJson = subJson[publish.getMessage()];
+            if (subJson.contains("static")) {
+                subJson = subJson["static"];
 
-                if (subJson.contains("command_topic") && subJson.contains("state")) {
+                if (subJson.contains("command_topic") && subJson.contains(publish.getMessage())) {
                     const std::string& topic = subJson["command_topic"];
-                    const std::string& message = subJson["state"];
+                    subJson = subJson[publish.getMessage()];
 
-                    LOG(INFO) << "Topic mapping found:";
-                    LOG(INFO) << "  " << publish.getTopic() << ":" << publish.getMessage() << " -> " << topic << ":" << message;
+                    if (subJson.contains("state")) {
+                        const std::string& message = subJson["state"];
 
-                    publishMapping(topic, message, publish.getQoS());
+                        LOG(INFO) << "Topic mapping found:";
+                        LOG(INFO) << "  " << publish.getTopic() << ":" << publish.getMessage() << " -> " << topic << ":" << message;
+
+                        publishMapping(topic, message, publish.getQoS());
+                    }
+                }
+            } else if (subJson.contains("value")) {
+                subJson = subJson["value"];
+
+                if (subJson.contains("command_topic") && subJson.contains("state_template")) {
+                    const std::string& topic = subJson["command_topic"];
+                    const std::string& stateTemplate = subJson["state_template"];
+
+                    try {
+                        nlohmann::json json;
+
+                        json["value"] = publish.getMessage();
+
+                        VLOG(0) << json.dump();
+
+                        try {
+                            // Render
+                            std::string renderedMessage = inja::render(stateTemplate, json);
+
+                            publishMapping(topic, renderedMessage, publish.getQoS());
+                        } catch (const inja::InjaError& e) {
+                            LOG(ERROR) << e.what();
+                        }
+                    } catch (const nlohmann::json::exception& e) {
+                        LOG(ERROR) << e.what();
+                    }
+                }
+            } else if (subJson.contains("json")) {
+                subJson = subJson["json"];
+
+                if (subJson.contains("command_topic") && subJson.contains("state_template")) {
+                    const std::string& topic = subJson["command_topic"];
+                    const std::string& stateTemplate = subJson["state_template"];
+
+                    try {
+                        nlohmann::json json;
+                        json["json"] = nlohmann::json::parse(publish.getMessage());
+
+                        try {
+                            // Render
+                            std::string renderedMessage = inja::render(stateTemplate, json);
+
+                            publishMapping(topic, renderedMessage, publish.getQoS());
+                        } catch (const inja::InjaError& e) {
+                            LOG(ERROR) << e.what();
+                        }
+                    } catch (const nlohmann::json::exception& e) {
+                        LOG(ERROR) << e.what();
+                    }
                 }
             }
         }
@@ -160,11 +214,11 @@ namespace apps::mqttbroker::lib {
                 "iotempower" : {
                     "test01" : {
                         "button1" : {
+                            "type" : "binary_sensor",
                             "subscribtion" : {
                                 "qos" : 2
                             },
                             "payload" : {
-                                "type" : "binary_sensor",
                                 "pressed" : {
                                     "command_topic" : "test02/onboard/set",
                                     "state" : "on"
