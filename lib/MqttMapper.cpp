@@ -81,7 +81,7 @@ namespace apps::mqttbroker::lib {
                 // Render
                 std::string renderedMessage = inja::render(stateTemplate, json);
 
-                LOG(INFO) << "      " << stateTemplate << " -> " << renderedMessage;
+                LOG(INFO) << "      " << topic << " : " << stateTemplate << " -> " << renderedMessage;
 
                 publishMapping(topic, renderedMessage, publish.getQoS());
             } catch (const inja::InjaError& e) {
@@ -93,8 +93,7 @@ namespace apps::mqttbroker::lib {
     void MqttMapper::publishTemplates(const nlohmann::json& subJsonMapping,
                                       const nlohmann::json& json,
                                       const iot::mqtt::packets::Publish& publish) {
-        LOG(INFO) << "Topic mapping found:";
-        LOG(INFO) << "  " << publish.getTopic() << ":" << publish.getMessage() << " -> " << json.dump();
+        LOG(INFO) << "  " << publish.getTopic() << " : " << publish.getMessage() << " -> " << json.dump();
 
         if (subJsonMapping.is_object()) {
             publishTemplate(subJsonMapping, json, publish);
@@ -156,6 +155,10 @@ namespace apps::mqttbroker::lib {
                         subJsonMapping = subJsonMapping["json"];
 
                         json["json"] = nlohmann::json::parse(publish.getMessage());
+                    }
+
+                    if (!json.empty()) {
+                        LOG(INFO) << "Topic mapping found:";
                     }
 
                     publishTemplates(subJsonMapping, json, publish);
