@@ -61,9 +61,9 @@ int main(int argc, char* argv[]) {
         nlohmann::json jsonMapping = apps::mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFilePath);
 
         VLOG(0) << "Mapping File " << mappingFilePath;
-        if (jsonMapping.contains("mapping") && jsonMapping["mapping"].contains("discover_prefix") &&
-            jsonMapping["mapping"].contains("topic_level")) {
-            sharedJsonMapping = jsonMapping["mapping"];
+        if (jsonMapping.contains("mappings") && jsonMapping["mappings"].contains("discover_prefix") &&
+            jsonMapping["mappings"].contains("topic_level")) {
+            sharedJsonMapping = jsonMapping["mappings"];
             VLOG(0) << "Activating mqttintegrator";
         }
     }

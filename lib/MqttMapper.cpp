@@ -48,7 +48,7 @@ namespace apps::mqttbroker::lib {
             if (item == "topic_level" && subJsonMapping.contains("name") && subJsonMapping["name"].is_string()) {
                 std::string subTopic = subJsonMapping["name"];
 
-                if (subJsonMapping.is_object() && subJsonMapping.contains("payload")) {
+                if (subJsonMapping.is_object() && subJsonMapping.contains("mapping")) {
                     uint8_t qoS = 0;
                     if (subJsonMapping.contains("subscribtion")) {
                         nlohmann::json subscribtion = subJsonMapping["subscribtion"];
@@ -78,9 +78,9 @@ namespace apps::mqttbroker::lib {
     void MqttMapper::publishTemplate(const nlohmann::json& subJsonMapping,
                                      const nlohmann::json& json,
                                      const iot::mqtt::packets::Publish& publish) {
-        if (subJsonMapping.contains("command_topic") && subJsonMapping.contains("state_template")) {
+        if (subJsonMapping.contains("command_topic") && subJsonMapping.contains("mapping_template")) {
             const std::string& topic = subJsonMapping["command_topic"];
-            const std::string& stateTemplate = subJsonMapping["state_template"];
+            const std::string& stateTemplate = subJsonMapping["mapping_template"];
 
             try {
                 // Render
@@ -131,23 +131,29 @@ namespace apps::mqttbroker::lib {
             }
         } while ((!topicLevelName.empty() || !remainingTopic.empty()) && currentTopicExistsInMapping);
 
-        if (topicLevelName.empty() && subJsonMapping.contains("payload")) {
-            subJsonMapping = subJsonMapping["payload"];
+        if (topicLevelName.empty() && subJsonMapping.contains("mapping")) {
+            subJsonMapping = subJsonMapping["mapping"];
 
             if (subJsonMapping.contains("static")) {
                 subJsonMapping = subJsonMapping["static"];
 
-                if (subJsonMapping.contains("command_topic") && subJsonMapping.contains(publish.getMessage())) {
-                    const std::string& topic = subJsonMapping["command_topic"];
-                    subJsonMapping = subJsonMapping[publish.getMessage()];
+                if (subJsonMapping.contains("command_topic") && subJsonMapping.contains("message_mappings") &&
+                    subJsonMapping["message_mappings"].is_array()) {
+                    const std::string& commandTopic = subJsonMapping["command_topic"];
+                    subJsonMapping = subJsonMapping["message_mappings"];
 
-                    if (subJsonMapping.contains("state")) {
-                        const std::string& message = subJsonMapping["state"];
+                    const nlohmann::json& concreteMapping =
+                        *std::find_if(subJsonMapping.begin(), subJsonMapping.end(), [&publish](const nlohmann::json& mapping) {
+                            return mapping.is_object() && mapping.value("message", "") == publish.getMessage();
+                        });
+
+                    if (concreteMapping.is_object() && concreteMapping.contains("mapped_message")) {
+                        const std::string& message = concreteMapping["mapped_message"];
 
                         LOG(INFO) << "Topic mapping found:";
-                        LOG(INFO) << "  " << publish.getTopic() << ":" << publish.getMessage() << " -> " << topic << ":" << message;
+                        LOG(INFO) << "  " << publish.getTopic() << ":" << publish.getMessage() << " -> " << commandTopic << ":" << message;
 
-                        publishMapping(topic, message, publish.getQoS());
+                        publishMapping(commandTopic, message, publish.getQoS());
                     }
                 }
             } else {
