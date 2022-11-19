@@ -29,9 +29,9 @@
                                 "state" : "off"
                             }
                         },
-                        "value1" : {
+                        "value" : {
                             "command_topic" : "test02/onboard/set",
-                            "state_template" : "{{ value }}pm"
+                            "state_template" : "{% if value == \"pressed\" %}on{% else if value == \"released\" %}off{% endif %}"
                         },
                         "json" : {
                             "command_topic" : "test02/onboard/set",
@@ -56,7 +56,7 @@
                             },
                             {
                                 "command_topic" : "anOtherCommandTopic",
-                                "state_template" : "onOtherStateThemplate"
+                                "state_template" : "anOtherStateThemplate"
                             }
                         ]
                     }

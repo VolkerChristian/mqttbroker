@@ -56,11 +56,12 @@ namespace apps::mqttbroker::lib {
 
                 topicList.push_back(iot::mqtt::Topic(topic + (topic.empty() || topic == "/" ? "" : "/") + key, qoS));
             }
-            if (key != "payload" && key != "qos" && subJsonMapping.is_object()) {
+            if (key != "payload" && subJsonMapping.is_object()) {
                 extractTopics(subJsonMapping, topic + (topic.empty() || topic == "/" ? "" : "/") + key, topicList);
             }
         }
     }
+
     std::list<iot::mqtt::Topic> MqttMapper::extractTopics() {
         std::list<iot::mqtt::Topic> topicList;
 
@@ -80,6 +81,8 @@ namespace apps::mqttbroker::lib {
                 // Render
                 std::string renderedMessage = inja::render(stateTemplate, json);
 
+                LOG(INFO) << "      " << stateTemplate << " -> " << renderedMessage;
+
                 publishMapping(topic, renderedMessage, publish.getQoS());
             } catch (const inja::InjaError& e) {
                 LOG(ERROR) << e.what();
@@ -90,6 +93,9 @@ namespace apps::mqttbroker::lib {
     void MqttMapper::publishTemplates(const nlohmann::json& subJsonMapping,
                                       const nlohmann::json& json,
                                       const iot::mqtt::packets::Publish& publish) {
+        LOG(INFO) << "Topic mapping found:";
+        LOG(INFO) << "  " << publish.getTopic() << ":" << publish.getMessage() << " -> " << json.dump();
+
         if (subJsonMapping.is_object()) {
             publishTemplate(subJsonMapping, json, publish);
         } else if (subJsonMapping.is_array()) {
