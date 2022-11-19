@@ -49,8 +49,8 @@ namespace apps::mqttbroker::integrator {
         , public apps::mqttbroker::lib::MqttMapper {
     public:
         explicit SocketContext(core::socket::SocketConnection* socketConnection,
-                               const nlohmann::json& connection,
-                               const nlohmann::json& jsonMapping);
+                               const nlohmann::json& connectionJson,
+                               const nlohmann::json& mappingJson);
 
         ~SocketContext() override;
 
@@ -63,8 +63,7 @@ namespace apps::mqttbroker::integrator {
 
         void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS) override;
 
-        const nlohmann::json& connection;
-        const nlohmann::json& jsonMapping;
+        const nlohmann::json& connectionJson;
 
         core::timer::Timer pingTimer;
 

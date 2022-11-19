@@ -51,7 +51,7 @@ namespace apps::mqttbroker::broker {
     public:
         explicit SocketContext(core::socket::SocketConnection* socketConnection,
                                const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
-                               const nlohmann::json& jsonMapping);
+                               const nlohmann::json& mappingJson);
 
     private:
         void onPublish(iot::mqtt::packets::Publish& publish) override;

@@ -28,9 +28,9 @@ namespace apps::mqttbroker::broker {
 
     SocketContext::SocketContext(core::socket::SocketConnection* socketConnection,
                                  const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
-                                 const nlohmann::json& jsonMapping)
+                                 const nlohmann::json& mappingJson)
         : iot::mqtt::server::SocketContext(socketConnection, broker)
-        , apps::mqttbroker::lib::MqttMapper(jsonMapping) {
+        , apps::mqttbroker::lib::MqttMapper(mappingJson) {
     }
 
     void SocketContext::onPublish(iot::mqtt::packets::Publish& publish) {

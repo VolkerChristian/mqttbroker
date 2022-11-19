@@ -32,16 +32,16 @@
 
 namespace apps::mqttbroker::lib {
 
-    nlohmann::json JsonMappingReader::jsonMapping;
+    nlohmann::json JsonMappingReader::mappingJson;
 
     const nlohmann::json& JsonMappingReader::readMappingFromFile(const std::string& mappingFilePath) {
-        if (jsonMapping.empty()) {
+        if (mappingJson.empty()) {
             std::ifstream mappingFile(mappingFilePath);
             if (mappingFile) {
                 VLOG(0) << "MappingFilePath: " << mappingFilePath;
 
                 try {
-                    jsonMapping = nlohmann::json::parse(mappingFile);
+                    mappingJson = nlohmann::json::parse(mappingFile);
                 } catch (const nlohmann::json::exception& e) {
                     LOG(ERROR) << e.what();
                 }
@@ -53,7 +53,7 @@ namespace apps::mqttbroker::lib {
             VLOG(0) << "MappingFilePath: " << mappingFilePath << " already loaded";
         }
 
-        return jsonMapping;
+        return mappingJson;
     }
 
 } // namespace apps::mqttbroker::lib

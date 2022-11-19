@@ -39,24 +39,26 @@ namespace apps::mqttbroker::lib {
 
     class MqttMapper {
     public:
-        MqttMapper(const nlohmann::json& jsonMapping);
+        MqttMapper(const nlohmann::json& mappingJson);
 
         virtual ~MqttMapper() = default;
 
     protected:
+        std::string dump();
+
         std::list<iot::mqtt::Topic> extractTopics();
         void publishMappings(const iot::mqtt::packets::Publish& publish);
 
     private:
         static void extractTopics(const nlohmann::json& json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList);
 
-        void publishTemplate(const nlohmann::json& subJsonMapping, const nlohmann::json& json, const iot::mqtt::packets::Publish& publish);
-        void publishTemplates(const nlohmann::json& subJsonMapping, const nlohmann::json& json, const iot::mqtt::packets::Publish& publish);
+        void publishTemplate(const nlohmann::json& mappingSubJson, const nlohmann::json& json, const iot::mqtt::packets::Publish& publish);
+        void publishTemplates(const nlohmann::json& mappingSubJson, const nlohmann::json& json, const iot::mqtt::packets::Publish& publish);
 
         virtual void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS) = 0;
 
     protected:
-        const nlohmann::json& jsonMapping;
+        const nlohmann::json& mappingJson;
     };
 
 } // namespace apps::mqttbroker::lib

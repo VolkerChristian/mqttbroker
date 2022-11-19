@@ -35,21 +35,20 @@
 namespace apps::mqttbroker::integrator {
 
     SocketContext::SocketContext(core::socket::SocketConnection* socketConnection,
-                                 const nlohmann::json& connection,
-                                 const nlohmann::json& jsonMapping)
+                                 const nlohmann::json& connectionJson,
+                                 const nlohmann::json& mappingJson)
         : iot::mqtt::client::SocketContext(socketConnection)
-        , apps::mqttbroker::lib::MqttMapper(jsonMapping)
-        , connection(connection)
-        , jsonMapping(jsonMapping) {
-        keepAlive = connection.contains("keep_alive") ? static_cast<uint16_t>(connection["keep_alive"]) : 60;
-        clientId = connection.contains("client_id") ? static_cast<std::string>(connection["client_id"]) : "";
-        cleanSession = connection.contains("clean_session") ? static_cast<bool>(connection["clean_session"]) : true;
-        willTopic = connection.contains("will_topic") ? static_cast<std::string>(connection["will_topic"]) : "";
-        willMessage = connection.contains("will_message") ? static_cast<std::string>(connection["will_message"]) : "";
-        willQoS = connection.contains("will_qos") ? static_cast<uint8_t>(connection["will_qos"]) : 0;
-        willRetain = connection.contains("will_retain") ? static_cast<bool>(connection["will_retain"]) : true;
-        username = connection.contains("username") ? static_cast<std::string>(connection["username"]) : "";
-        password = connection.contains("password") ? static_cast<std::string>(connection["password"]) : "";
+        , apps::mqttbroker::lib::MqttMapper(mappingJson)
+        , connectionJson(connectionJson) {
+        keepAlive = connectionJson.contains("keep_alive") ? static_cast<uint16_t>(connectionJson["keep_alive"]) : 60;
+        clientId = connectionJson.contains("client_id") ? static_cast<std::string>(connectionJson["client_id"]) : "";
+        cleanSession = connectionJson.contains("clean_session") ? static_cast<bool>(connectionJson["clean_session"]) : true;
+        willTopic = connectionJson.contains("will_topic") ? static_cast<std::string>(connectionJson["will_topic"]) : "";
+        willMessage = connectionJson.contains("will_message") ? static_cast<std::string>(connectionJson["will_message"]) : "";
+        willQoS = connectionJson.contains("will_qos") ? static_cast<uint8_t>(connectionJson["will_qos"]) : 0;
+        willRetain = connectionJson.contains("will_retain") ? static_cast<bool>(connectionJson["will_retain"]) : true;
+        username = connectionJson.contains("username") ? static_cast<std::string>(connectionJson["username"]) : "";
+        password = connectionJson.contains("password") ? static_cast<std::string>(connectionJson["password"]) : "";
 
         LOG(TRACE) << "Keep Alive: " << keepAlive;
         LOG(TRACE) << "Client Id: " << clientId;
@@ -88,19 +87,19 @@ namespace apps::mqttbroker::integrator {
     void SocketContext::onConnack(iot::mqtt::packets::Connack& connack) {
         if (connack.getReturnCode() == 0) {
             if (!connack.getSessionPresent()) {
-                nlohmann::json retainedConnect;
-                retainedConnect["keep_alive"] = keepAlive;
-                retainedConnect["client_id"] = clientId;
-                retainedConnect["clean_session"] = cleanSession;
-                retainedConnect["will_topic"] = willTopic;
-                retainedConnect["will_message"] = willMessage;
-                retainedConnect["will_qos"] = willQoS;
-                retainedConnect["will_retain"] = willRetain;
-                retainedConnect["username"] = username;
-                retainedConnect["password"] = password;
+                nlohmann::json connectJson;
+                connectJson["keep_alive"] = keepAlive;
+                connectJson["client_id"] = clientId;
+                connectJson["clean_session"] = cleanSession;
+                connectJson["will_topic"] = willTopic;
+                connectJson["will_message"] = willMessage;
+                connectJson["will_qos"] = willQoS;
+                connectJson["will_retain"] = willRetain;
+                connectJson["username"] = username;
+                connectJson["password"] = password;
 
-                this->sendPublish(++packetIdentifier, "snode.c/_cfg_/connection", retainedConnect.dump(), 0, true);
-                this->sendPublish(++packetIdentifier, "snode.c/_cfg_/mapping", jsonMapping.dump(), 0, true);
+                this->sendPublish(++packetIdentifier, "snode.c/_cfg_/connection", connectJson.dump(), 0, true);
+                this->sendPublish(++packetIdentifier, "snode.c/_cfg_/mapping", apps::mqttbroker::lib::MqttMapper::dump(), 0, true);
 
                 std::list<iot::mqtt::Topic> topicList = MqttMapper::extractTopics();
 

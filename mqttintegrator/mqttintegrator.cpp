@@ -46,22 +46,22 @@ int main(int argc, char* argv[]) {
     core::SNodeC::init(argc, argv);
 
     if (!mappingFilePath.empty()) {
-        const nlohmann::json& jsonMapping = apps::mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFilePath);
+        const nlohmann::json& mappingJson = apps::mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFilePath);
 
-        static nlohmann::json connection;
-        static nlohmann::json sharedJsonMapping;
+        static nlohmann::json connectionJson;
+        static nlohmann::json sharedMappingJson;
 
-        if (jsonMapping.contains("connection")) {
-            connection = jsonMapping["connection"];
+        if (mappingJson.contains("connection")) {
+            connectionJson = mappingJson["connection"];
         }
 
-        if (jsonMapping.contains("mappings") && jsonMapping["mappings"].contains("discover_prefix") &&
-            jsonMapping["mappings"].contains("topic_level")) {
-            sharedJsonMapping = jsonMapping["mappings"];
+        if (mappingJson.contains("mappings") && mappingJson["mappings"].contains("discover_prefix") &&
+            mappingJson["mappings"].contains("topic_level")) {
+            sharedMappingJson = mappingJson["mappings"];
 
-            if (sharedJsonMapping.contains("discover_prefix") && sharedJsonMapping.contains("topic_level")) {
+            if (sharedMappingJson.contains("discover_prefix") && sharedMappingJson.contains("topic_level")) {
                 using InMqttIntegratorClient = net::in::stream::legacy::SocketClient<
-                    apps::mqttbroker::integrator::SocketContextFactory<connection, sharedJsonMapping>>;
+                    apps::mqttbroker::integrator::SocketContextFactory<connectionJson, sharedMappingJson>>;
 
                 using LegacyInSocketConnection = InMqttIntegratorClient::SocketConnection;
 
