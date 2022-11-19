@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
         if (jsonMapping.contains("mapping")) {
             sharedJsonMapping = jsonMapping["mapping"];
 
-            if (sharedJsonMapping.contains("discover_prefix") && sharedJsonMapping.contains("level")) {
+            if (sharedJsonMapping.contains("discover_prefix") && sharedJsonMapping.contains("topic_level")) {
                 using InMqttIntegratorClient = net::in::stream::legacy::SocketClient<
                     apps::mqttbroker::integrator::SocketContextFactory<connection, sharedJsonMapping>>;
 

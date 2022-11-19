@@ -12,12 +12,12 @@
     },
     "mapping" : {
         "discover_prefix" : "iotempower",
-        "level" : {
-            "topic" : "test01",
-            "level" : {
-                "topic" : "button1",
-                "level" : {
-                    "topic" : "someotherlevel",
+        "topic_level" : {
+            "name" : "test01",
+            "topic_level" : {
+                "name" : "button1",
+                "topic_level" : {
+                    "name" : "someotherlevel",
                     "payload" : {
                         "static" : {
                             "command_topic" : "test02/onboard/set/some/other",
@@ -30,7 +30,6 @@
                         }
                     }
                 },
-
                 "type" : "binary_sensor",
                 "subscribtion" : {
                     "qos" : 2

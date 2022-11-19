@@ -45,8 +45,8 @@ namespace apps::mqttbroker::lib {
 
     void MqttMapper::extractTopics(const nlohmann::json& json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList) {
         for (auto& [item, subJsonMapping] : json.items()) {
-            if (item == "level" && subJsonMapping.contains("topic") && subJsonMapping["topic"].is_string()) {
-                std::string subTopic = subJsonMapping["topic"];
+            if (item == "topic_level" && subJsonMapping.contains("name") && subJsonMapping["name"].is_string()) {
+                std::string subTopic = subJsonMapping["name"];
 
                 if (subJsonMapping.is_object() && subJsonMapping.contains("payload")) {
                     uint8_t qoS = 0;
@@ -59,7 +59,7 @@ namespace apps::mqttbroker::lib {
 
                     topicList.push_back(iot::mqtt::Topic(topic + (topic.empty() || topic == "/" ? "" : "/") + subTopic, qoS));
                 }
-                if (subJsonMapping.is_object() && subJsonMapping.contains("level")) {
+                if (subJsonMapping.is_object() && subJsonMapping.contains("topic_level")) {
                     extractTopics(
                         subJsonMapping, topic + ((topic.empty() || topic == "/") && !subTopic.empty() ? "" : "/") + subTopic, topicList);
                 }
@@ -113,24 +113,25 @@ namespace apps::mqttbroker::lib {
         nlohmann::json subJsonMapping = jsonMapping;
 
         std::string remainingTopic = publish.getTopic();
-        std::string topicLevel;
+        std::string topicLevelName;
 
         bool currentTopicExistsInMapping = false;
 
         do {
             std::string::size_type slashPosition = remainingTopic.find("/");
 
-            topicLevel = remainingTopic.substr(0, slashPosition);
-            remainingTopic.erase(0, topicLevel.size() + 1);
+            topicLevelName = remainingTopic.substr(0, slashPosition);
+            remainingTopic.erase(0, topicLevelName.size() + 1);
 
-            currentTopicExistsInMapping = subJsonMapping.contains("level") && subJsonMapping["level"].is_object() &&
-                                          subJsonMapping["level"].contains("topic") && subJsonMapping["level"]["topic"] == topicLevel;
-            if ((!topicLevel.empty() || !remainingTopic.empty()) && currentTopicExistsInMapping) {
-                subJsonMapping = subJsonMapping["level"];
+            currentTopicExistsInMapping = subJsonMapping.contains("topic_level") && subJsonMapping["topic_level"].is_object() &&
+                                          subJsonMapping["topic_level"].contains("name") &&
+                                          subJsonMapping["topic_level"]["name"] == topicLevelName;
+            if ((!topicLevelName.empty() || !remainingTopic.empty()) && currentTopicExistsInMapping) {
+                subJsonMapping = subJsonMapping["topic_level"];
             }
-        } while ((!topicLevel.empty() || !remainingTopic.empty()) && currentTopicExistsInMapping);
+        } while ((!topicLevelName.empty() || !remainingTopic.empty()) && currentTopicExistsInMapping);
 
-        if (topicLevel.empty() && subJsonMapping.contains("payload")) {
+        if (topicLevelName.empty() && subJsonMapping.contains("payload")) {
             subJsonMapping = subJsonMapping["payload"];
 
             if (subJsonMapping.contains("static")) {

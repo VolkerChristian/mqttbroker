@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
 
         VLOG(0) << "Mapping File " << mappingFilePath;
         if (jsonMapping.contains("mapping") && jsonMapping["mapping"].contains("discover_prefix") &&
-            jsonMapping["mapping"].contains("level")) {
+            jsonMapping["mapping"].contains("topic_level")) {
             sharedJsonMapping = jsonMapping["mapping"];
             VLOG(0) << "Activating mqttintegrator";
         }
