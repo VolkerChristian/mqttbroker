@@ -11,55 +11,71 @@
         "password" : "Password"
     },
     "mapping" : {
-        "iotempower" : {
-            "test01" : {
-                "button1" : {
-                    "type" : "binary_sensor",
-                    "subscribtion" : {
-                        "qos" : 2
-                    },
-                    "payload": {
-                        "Comment" : "Either a \"static\", \"value\", or \"json\" object is required! E.g. next three objects. Exclusive order of interpretation: \"static\", \"value\", \"json\"",
-                        "static1" : {
-                            "command_topic" : "test02/onboard/set",
+        "discover_prefix" : "iotempower",
+        "level" : {
+            "topic" : "test01",
+            "level" : {
+                "topic" : "button1",
+                "level" : {
+                    "topic" : "someotherlevel",
+                    "payload" : {
+                        "static" : {
+                            "command_topic" : "test02/onboard/set/some/other",
                             "pressed" : {
                                 "state" : "on"
                             },
-                            "released": {
+                            "released" : {
                                 "state" : "off"
                             }
-                        },
-                        "value" : {
-                            "command_topic" : "test02/onboard/set",
-                            "state_template" : "{% if value == \"pressed\" %}on{% else if value == \"released\" %}off{% endif %}"
-                        },
-                        "json" : {
-                            "command_topic" : "test02/onboard/set",
-                            "state_template" : "{{ json.time.start }} to {{ json.time.end + 1 }}pm"
-                        },
-                        "The next objects are ignored" : "Listed only for documentation",
-                        "value | Comment: An array of \"value\" objects is also allowed for multi-mapping. E.g.:" : [
-                            {
-                                "command_topic" : "aCommandTopic",
-                                "state_template" : "aStateTemplate"
-                            },
-                            {
-                                "command_topic" : "anOtherCommandTopic",
-                                "state_template" : "anOtherStateTemplate"
-                            }
-
-                        ],
-                        "json | Comment: An array of \"json\" objects is also allowed for multi-mapping. E.g.:" : [
-                            {
-                                "command_topic" : "aCommandTopic",
-                                "state_template" : "aStateTemplate"
-                            },
-                            {
-                                "command_topic" : "anOtherCommandTopic",
-                                "state_template" : "anOtherStateThemplate"
-                            }
-                        ]
+                        }
                     }
+                },
+
+                "type" : "binary_sensor",
+                "subscribtion" : {
+                    "qos" : 2
+                },
+                "payload": {
+                    "Comment" : "Either a \"static\", \"value\", or \"json\" object is required! E.g. next three objects. Exclusive order of interpretation: \"static\", \"value\", \"json\"",
+                    "static1" : {
+                        "command_topic" : "test02/onboard/set",
+                        "pressed" : {
+                            "state" : "on"
+                        },
+                        "released": {
+                            "state" : "off"
+                        }
+                    },
+                    "value" : {
+                        "command_topic" : "test02/onboard/set",
+                        "state_template" : "{% if value == \"pressed\" %}on{% else if value == \"released\" %}off{% endif %}"
+                    },
+                    "json" : {
+                        "command_topic" : "test02/onboard/set",
+                        "state_template" : "{{ json.time.start }} to {{ json.time.end + 1 }}pm"
+                    },
+                    "The next objects are ignored" : "Listed only for documentation",
+                    "value | Comment: An array of \"value\" objects is also allowed for multi-mapping. E.g.:" : [
+                        {
+                            "command_topic" : "aCommandTopic",
+                            "state_template" : "aStateTemplate"
+                        },
+                        {
+                            "command_topic" : "anOtherCommandTopic",
+                            "state_template" : "anOtherStateTemplate"
+                        }
+
+                    ],
+                    "json | Comment: An array of \"json\" objects is also allowed for multi-mapping. E.g.:" : [
+                        {
+                            "command_topic" : "aCommandTopic",
+                            "state_template" : "aStateTemplate"
+                        },
+                        {
+                            "command_topic" : "anOtherCommandTopic",
+                            "state_template" : "anOtherStateThemplate"
+                        }
+                    ]
                 }
             }
         }

@@ -44,20 +44,25 @@ namespace apps::mqttbroker::lib {
     }
 
     void MqttMapper::extractTopics(const nlohmann::json& json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList) {
-        for (auto& [key, subJsonMapping] : json.items()) {
-            if (subJsonMapping.is_object() && subJsonMapping.contains("payload")) {
-                uint8_t qoS = 0;
-                if (subJsonMapping.contains("subscribtion")) {
-                    nlohmann::json subscribtion = subJsonMapping["subscribtion"];
-                    if (subscribtion.is_object() && subscribtion.contains("qos")) {
-                        qoS = subscribtion["qos"];
-                    }
-                }
+        for (auto& [item, subJsonMapping] : json.items()) {
+            if (item == "level" && subJsonMapping.contains("topic") && subJsonMapping["topic"].is_string()) {
+                std::string subTopic = subJsonMapping["topic"];
 
-                topicList.push_back(iot::mqtt::Topic(topic + (topic.empty() || topic == "/" ? "" : "/") + key, qoS));
-            }
-            if (key != "payload" && subJsonMapping.is_object()) {
-                extractTopics(subJsonMapping, topic + (topic.empty() || topic == "/" ? "" : "/") + key, topicList);
+                if (subJsonMapping.is_object() && subJsonMapping.contains("payload")) {
+                    uint8_t qoS = 0;
+                    if (subJsonMapping.contains("subscribtion")) {
+                        nlohmann::json subscribtion = subJsonMapping["subscribtion"];
+                        if (subscribtion.is_object() && subscribtion.contains("qos")) {
+                            qoS = subscribtion["qos"];
+                        }
+                    }
+
+                    topicList.push_back(iot::mqtt::Topic(topic + (topic.empty() || topic == "/" ? "" : "/") + subTopic, qoS));
+                }
+                if (subJsonMapping.is_object() && subJsonMapping.contains("level")) {
+                    extractTopics(
+                        subJsonMapping, topic + ((topic.empty() || topic == "/") && !subTopic.empty() ? "" : "/") + subTopic, topicList);
+                }
             }
         }
     }
@@ -118,11 +123,12 @@ namespace apps::mqttbroker::lib {
             topicLevel = remainingTopic.substr(0, slashPosition);
             remainingTopic.erase(0, topicLevel.size() + 1);
 
-            currentTopicExistsInMapping = subJsonMapping.contains(topicLevel);
-            if (!topicLevel.empty() && currentTopicExistsInMapping) {
-                subJsonMapping = subJsonMapping[topicLevel];
+            currentTopicExistsInMapping = subJsonMapping.contains("level") && subJsonMapping["level"].is_object() &&
+                                          subJsonMapping["level"].contains("topic") && subJsonMapping["level"]["topic"] == topicLevel;
+            if ((!topicLevel.empty() || !remainingTopic.empty()) && currentTopicExistsInMapping) {
+                subJsonMapping = subJsonMapping["level"];
             }
-        } while (!topicLevel.empty() && currentTopicExistsInMapping);
+        } while ((!topicLevel.empty() || !remainingTopic.empty()) && currentTopicExistsInMapping);
 
         if (topicLevel.empty() && subJsonMapping.contains("payload")) {
             subJsonMapping = subJsonMapping["payload"];
