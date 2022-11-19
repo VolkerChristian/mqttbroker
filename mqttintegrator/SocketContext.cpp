@@ -69,9 +69,7 @@ namespace apps::mqttbroker::integrator {
     void SocketContext::onConnected() {
         VLOG(0) << "On Connected";
 
-        if (connection.contains("keep_alive"))
-
-            this->sendConnect(keepAlive, clientId, cleanSession, willTopic, willMessage, willQoS, willRetain, username, password);
+        this->sendConnect(keepAlive, clientId, cleanSession, willTopic, willMessage, willQoS, willRetain, username, password);
 
         this->setTimeout(keepAlive * 1.5);
 
@@ -85,10 +83,6 @@ namespace apps::mqttbroker::integrator {
     void SocketContext::onExit() {
         VLOG(0) << "On Exit";
         this->sendDisconnect();
-    }
-
-    void SocketContext::onDisconnected() {
-        VLOG(0) << "On Disconnected";
     }
 
     void SocketContext::onConnack(iot::mqtt::packets::Connack& connack) {

@@ -57,7 +57,6 @@ namespace apps::mqttbroker::integrator {
     private:
         void onConnected() override;
         void onExit() override;
-        void onDisconnected() override;
 
         void onConnack(iot::mqtt::packets::Connack& connack) override;
         void onPublish(iot::mqtt::packets::Publish& publish) override;
