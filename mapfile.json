@@ -15,11 +15,11 @@
         "topic_level" : {
             "name" : "test01",
             "topic_level" : {
-                "name" : "button1",
-                "type" : "binary_sensor",
                 "subscribtion" : {
                     "qos" : 2
                 },
+                "name" : "button1",
+                "type" : "binary_sensor",
                 "mapping": {
                     "Comment" : "Either a \"static\", \"value\", or \"json\" object is required! E.g. next three objects. Exclusive order of interpretation: \"static\", \"value\", \"json\"",
                     "static1" : {
