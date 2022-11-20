@@ -15,23 +15,21 @@
         "topic_level" : [
             {
                 "name" : "test01",
-                "topic_level" : [
-                    {
-                        "name" : "button1",
-                        "type" : "binary_sensor",
-                        "subscribtion" : {
-                            "qos" : 2
-                        },
-                        "mapping": {
-                            "Comment" : "Either a \"static\", \"value\", or \"json\" object is required! E.g. next three objects. Exclusive order of interpretation: \"static\", \"value\", \"json\"",
-                            "value" : {
-                                "command_topic" : "test02/onboard/set",
-                                "retain_message" : false,
-                                "mapping_template" : "{% if value == \"pressed\" %}on{% else if value == \"released\" %}off{% endif %}"
-                            }
+                "topic_level" : {
+                    "name" : "button1",
+                    "type" : "binary_sensor",
+                    "subscribtion" : {
+                        "qos" : 2
+                    },
+                    "mapping": {
+                        "Comment" : "Either a \"static\", \"value\", or \"json\" object is required! E.g. next three objects. Exclusive order of interpretation: \"static\", \"value\", \"json\"",
+                        "value" : {
+                            "command_topic" : "test02/onboard/set",
+                            "retain_message" : false,
+                            "mapping_template" : "{% if value == \"pressed\" %}on{% else if value == \"released\" %}off{% endif %}"
                         }
                     }
-                ]
+                }
             },{
                 "name" : "test03",
                 "topic_level" : [

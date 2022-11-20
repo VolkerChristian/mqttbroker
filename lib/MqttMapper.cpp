@@ -54,9 +54,7 @@ namespace apps::mqttbroker::lib {
             if (nameJson.is_string()) {
                 std::string name = nameJson.get<std::string>();
 
-                const nlohmann::json& topicLevelMapping = topicLevel.value("mapping", nlohmann::json::object());
-
-                if (topicLevelMapping.is_object() && !topicLevelMapping.empty()) {
+                if (topicLevel.contains("mapping") && topicLevel["mapping"].is_object()) {
                     const nlohmann::json& subscribtionJson = topicLevel.value("subscribtion", nlohmann::json::object());
                     uint8_t qoS = 0;
 
@@ -144,7 +142,7 @@ namespace apps::mqttbroker::lib {
         std::string remainingTopic = publish.getTopic();
 
         if (!mappingJson.empty()) {
-            nlohmann::json subMapping = mappingJson;
+            nlohmann::json matchedTopicLevel = mappingJson;
 
             do {
                 std::string::size_type slashPosition = remainingTopic.find("/");
@@ -152,24 +150,33 @@ namespace apps::mqttbroker::lib {
                 std::string topicLevelName = remainingTopic.substr(0, slashPosition);
                 remainingTopic.erase(0, topicLevelName.size() + 1);
 
-                const nlohmann::json& topicLevels = subMapping.value("topic_level", nlohmann::json::array());
+                const nlohmann::json& topicLevels = matchedTopicLevel.value("topic_level", nlohmann::json::array());
 
                 if (topicLevels.is_array()) {
-                    subMapping = *std::find_if(
-                        topicLevels.begin(), topicLevels.end(), [&topicLevelName](const nlohmann::json& subMappingCandidat) -> bool {
-                            return subMappingCandidat.contains("name") && subMappingCandidat["name"].is_string() &&
-                                   subMappingCandidat["name"] == topicLevelName;
+                    nlohmann::json::const_iterator matchedTopicLevelIterator = std::find_if(
+                        topicLevels.begin(), topicLevels.end(), [&topicLevelName](const nlohmann::json& topicLevelCandidat) -> bool {
+                            return topicLevelCandidat.is_object() && topicLevelCandidat.contains("name") &&
+                                   topicLevelCandidat["name"].is_string() && topicLevelCandidat["name"] == topicLevelName;
                         });
+                    if (matchedTopicLevelIterator != topicLevels.end()) {
+                        matchedTopicLevel = *matchedTopicLevelIterator;
+                    } else {
+                        matchedTopicLevel.clear();
+                    }
                 } else if (topicLevels.is_object() && topicLevels.contains("name") && topicLevels["name"].is_string() &&
                            topicLevels["name"] == topicLevelName) {
-                    subMapping = topicLevels;
+                    matchedTopicLevel = topicLevels;
                 } else {
-                    subMapping.clear();
+                    matchedTopicLevel.clear();
                 }
-            } while ((!remainingTopic.empty()) && !subMapping.empty());
+            } while ((!remainingTopic.empty()) && !matchedTopicLevel.empty());
 
-            if (remainingTopic.empty() && subMapping.is_object()) {
-                const nlohmann::json& mapping = subMapping.value("mapping", nlohmann::json::object());
+            if (!remainingTopic.empty()) {
+                matchedTopicLevel.clear();
+            }
+
+            if (!matchedTopicLevel.empty()) {
+                const nlohmann::json& mapping = matchedTopicLevel.value("mapping", nlohmann::json::object());
 
                 if (mapping.contains("static")) {
                     const nlohmann::json& staticMapping = mapping["static"];
@@ -180,18 +187,20 @@ namespace apps::mqttbroker::lib {
                         bool retain = staticMapping.value("retain_message", false);
                         const nlohmann::json& messageMappingArray = staticMapping["message_mappings"];
 
-                        const nlohmann::json& messageMapping =
-                            *std::find_if(messageMappingArray.begin(),
-                                          messageMappingArray.end(),
-                                          [&publish](const nlohmann::json& messageMappingCandidat) {
-                                              return messageMappingCandidat.is_object() &&
-                                                     messageMappingCandidat.value("message", "") == publish.getMessage();
-                                          });
+                        const nlohmann::json::const_iterator matchedMessageMappingIterator = std::find_if(
+                            messageMappingArray.begin(),
+                            messageMappingArray.end(),
+                            [&publish](const nlohmann::json& messageMappingCandidat) {
+                                return messageMappingCandidat.is_object() && messageMappingCandidat.contains("mapped_message") &&
+                                       messageMappingCandidat["mapped_message"].is_string() && messageMappingCandidat.contains("message") &&
+                                       messageMappingCandidat["message"].is_string() &&
+                                       messageMappingCandidat.value("message", "") == publish.getMessage();
+                            });
 
-                        if (messageMapping.is_object() && messageMapping.contains("mapped_message")) {
-                            const std::string& message = messageMapping["mapped_message"];
+                        if (matchedMessageMappingIterator != messageMappingArray.end()) {
+                            const std::string& message = (*matchedMessageMappingIterator)["mapped_message"];
 
-                            LOG(INFO) << "Topic mapping found:";
+                            LOG(INFO) << "Topic mapping (static) found:";
                             LOG(INFO) << "  " << publish.getTopic() << ":" << publish.getMessage() << " -> " << commandTopic << ":"
                                       << message;
 
@@ -207,14 +216,14 @@ namespace apps::mqttbroker::lib {
                             templateMapping = mapping["value"];
 
                             json["value"] = publish.getMessage();
+
+                            LOG(INFO) << "Topic mapping (value) found:";
                         } else if (mapping.contains("json")) {
                             templateMapping = mapping["json"];
 
                             json["json"] = nlohmann::json::parse(publish.getMessage());
-                        }
 
-                        if (!json.empty()) {
-                            LOG(INFO) << "Topic mapping found:";
+                            LOG(INFO) << "Topic mapping (json) found:";
                         }
 
                         publishTemplates(templateMapping, json, publish);
