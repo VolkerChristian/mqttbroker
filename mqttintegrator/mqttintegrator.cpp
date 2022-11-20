@@ -55,11 +55,12 @@ int main(int argc, char* argv[]) {
             connectionJson = mappingJson["connection"];
         }
 
-        if (mappingJson.contains("mappings") && mappingJson["mappings"].contains("discover_prefix") &&
-            mappingJson["mappings"].contains("topic_level")) {
-            sharedMappingJson = mappingJson["mappings"];
+        if (mappingJson.contains("discover_prefix") && mappingJson["discover_prefix"].is_string() &&
+            mappingJson["discover_prefix"] == discoverPrefix) {
+            if (mappingJson.contains("mappings") && mappingJson["mappings"].is_object() &&
+                mappingJson["mappings"].contains("topic_level")) {
+                sharedMappingJson = mappingJson["mappings"];
 
-            if (sharedMappingJson.contains("discover_prefix") && sharedMappingJson.contains("topic_level")) {
                 using InMqttIntegratorClient = net::in::stream::legacy::SocketClient<
                     apps::mqttbroker::integrator::SocketContextFactory<connectionJson, sharedMappingJson>>;
 
@@ -109,12 +110,12 @@ int main(int argc, char* argv[]) {
 
                 ret = core::SNodeC::start();
             } else {
-                LOG(ERROR) << "Discover prefix object \"" << discoverPrefix << "\" not found in" << mappingFilePath;
+                LOG(ERROR) << "Mapping object \"mapping\" not found in " << mappingFilePath;
 
                 ret = 2;
             }
         } else {
-            LOG(ERROR) << "Mapping object \"mapping\" not found in " << mappingFilePath;
+            LOG(ERROR) << "Discover prefix object \"" << discoverPrefix << "\" not found in" << mappingFilePath;
 
             ret = 1;
         }
