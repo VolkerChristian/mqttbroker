@@ -73,15 +73,15 @@ namespace apps::mqttbroker::lib {
         }
     }
 
-    void MqttMapper::extractTopics(const nlohmann::json& json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList) {
-        if (json.is_object()) {
-            const nlohmann::json& topicLevels = json.value("topic_level", nlohmann::json::array());
+    void MqttMapper::extractTopics(const nlohmann::json& mappingJson, const std::string& topic, std::list<iot::mqtt::Topic>& topicList) {
+        if (mappingJson.is_object()) {
+            const nlohmann::json& topicLevels = mappingJson.value("topic_level", nlohmann::json::array());
 
             if (topicLevels.is_array() && !topicLevels.empty()) {
                 for (const nlohmann::json& topicLevel : topicLevels) {
                     extractTopic(topicLevel, topic, topicList);
                 }
-            } else {
+            } else if (topicLevels.is_object()) {
                 extractTopic(topicLevels, topic, topicList);
             }
         }
@@ -226,7 +226,11 @@ namespace apps::mqttbroker::lib {
                             LOG(INFO) << "Topic mapping (json) found:";
                         }
 
-                        publishTemplates(templateMapping, json, publish);
+                        if (!json.empty()) {
+                            publishTemplates(templateMapping, json, publish);
+                        } else {
+                            LOG(INFO) << "No valid mapping section found: " << matchedTopicLevel.dump();
+                        }
                     } catch (const nlohmann::json::exception& e) {
                         LOG(ERROR) << e.what();
                     }

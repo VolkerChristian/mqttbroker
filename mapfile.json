@@ -46,6 +46,13 @@
                                 "retain_message" : false,
                                 "mapping_template" : "{% if value == \"pressed\" %}on{% else if value == \"released\" %}off{% endif %}"
                             }
+                        },
+                        "topic_level" : {
+                            "name" : "SomeOtherTopicLevel",
+                            "type" : "binary_sensor",
+                            "mapping" : {
+                                "static,value,json" : "Mappings"
+                            }
                         }
                     },{
                         "name" : "button2",
