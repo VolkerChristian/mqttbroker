@@ -37,8 +37,12 @@ namespace apps::mqttbroker::broker {
         publishMappings(publish);
     }
 
-    void SocketContext::publishMapping(const std::string& topic, const std::string& message, uint8_t qoS) {
+    void SocketContext::publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) {
         broker->publish(topic, message, qoS);
+
+        if (retain) {
+            broker->retainMessage(topic, message, qoS);
+        }
     }
 
 } // namespace apps::mqttbroker::broker

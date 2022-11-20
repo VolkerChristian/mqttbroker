@@ -55,7 +55,7 @@ namespace apps::mqttbroker::lib {
         void publishTemplate(const nlohmann::json& mappingSubJson, const nlohmann::json& json, const iot::mqtt::packets::Publish& publish);
         void publishTemplates(const nlohmann::json& mappingSubJson, const nlohmann::json& json, const iot::mqtt::packets::Publish& publish);
 
-        virtual void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS) = 0;
+        virtual void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) = 0;
 
     protected:
         const nlohmann::json& mappingJson;

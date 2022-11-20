@@ -116,8 +116,8 @@ namespace apps::mqttbroker::integrator {
         publishMappings(publish);
     }
 
-    void SocketContext::publishMapping(const std::string& topic, const std::string& message, uint8_t qoS) {
-        sendPublish(++packetIdentifier, topic, message, qoS);
+    void SocketContext::publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) {
+        sendPublish(++packetIdentifier, topic, message, qoS, retain);
     }
 
 } // namespace apps::mqttbroker::integrator

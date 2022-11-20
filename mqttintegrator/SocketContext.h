@@ -61,7 +61,7 @@ namespace apps::mqttbroker::integrator {
         void onConnack(iot::mqtt::packets::Connack& connack) override;
         void onPublish(iot::mqtt::packets::Publish& publish) override;
 
-        void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS) override;
+        void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) override;
 
         const nlohmann::json& connectionJson;
 

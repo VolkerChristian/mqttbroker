@@ -24,6 +24,7 @@
                     "Comment" : "Either a \"static\", \"value\", or \"json\" object is required! E.g. next three objects. Exclusive order of interpretation: \"static\", \"value\", \"json\"",
                     "static1" : {
                         "command_topic" : "test02/onboard/set",
+                        "retain_message" : false,
                         "message_mappings" : [
                         {
                             "message" : "pressed",
@@ -37,20 +38,24 @@
                     },
                     "value" : {
                         "command_topic" : "test02/onboard/set",
+                        "retain_message" : false,
                         "mapping_template" : "{% if value == \"pressed\" %}on{% else if value == \"released\" %}off{% endif %}"
                     },
                     "json" : {
                         "command_topic" : "test02/onboard/set",
+                        "retain_message" : false,
                         "mapping_template" : "{{ json.time.start }} to {{ json.time.end + 1 }}pm"
                     },
                     "The next objects are ignored" : "Listed only for documentation",
                     "value | Comment: An array of \"value\" objects is also allowed for multi-mapping. E.g.:" : [
                         {
                             "command_topic" : "aCommandTopic",
+                            "retain_message" : false,
                             "mapping_template" : "aStateTemplate"
                         },
                         {
                             "command_topic" : "anOtherCommandTopic",
+                            "retain_message" : false,
                             "mapping_template" : "anOtherStateTemplate"
                         }
 
@@ -58,10 +63,12 @@
                     "json | Comment: An array of \"json\" objects is also allowed for multi-mapping. E.g.:" : [
                         {
                             "command_topic" : "aCommandTopic",
+                            "retain_message" : false,
                             "mapping_template" : "aStateTemplate"
                         },
                         {
                             "command_topic" : "anOtherCommandTopic",
+                            "retain_message" : false,
                             "mapping_template" : "anOtherStateThemplate"
                         }
                     ]

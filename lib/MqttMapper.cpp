@@ -86,14 +86,15 @@ namespace apps::mqttbroker::lib {
         if (mappingSubJson.contains("command_topic") && mappingSubJson.contains("mapping_template")) {
             const std::string& topic = mappingSubJson["command_topic"];
             const std::string& stateTemplate = mappingSubJson["mapping_template"];
+            bool retain = mappingSubJson.value("retain_message", false);
 
             try {
                 // Render
                 std::string renderedMessage = inja::render(stateTemplate, json);
 
-                LOG(INFO) << "      " << topic << " : " << stateTemplate << " -> " << renderedMessage;
+                LOG(INFO) << "      " << topic << " : " << stateTemplate << " -> '" << renderedMessage << "'";
 
-                publishMapping(topic, renderedMessage, publish.getQoS());
+                publishMapping(topic, renderedMessage, publish.getQoS(), retain);
             } catch (const inja::InjaError& e) {
                 LOG(ERROR) << e.what();
             }
@@ -145,6 +146,7 @@ namespace apps::mqttbroker::lib {
                 if (mappingSubJson.contains("command_topic") && mappingSubJson.contains("message_mappings") &&
                     mappingSubJson["message_mappings"].is_array()) {
                     const std::string& commandTopic = mappingSubJson["command_topic"];
+                    bool retain = mappingSubJson.value("retain_message", false);
                     mappingSubJson = mappingSubJson["message_mappings"];
 
                     const nlohmann::json& concreteMapping =
@@ -158,7 +160,7 @@ namespace apps::mqttbroker::lib {
                         LOG(INFO) << "Topic mapping found:";
                         LOG(INFO) << "  " << publish.getTopic() << ":" << publish.getMessage() << " -> " << commandTopic << ":" << message;
 
-                        publishMapping(commandTopic, message, publish.getQoS());
+                        publishMapping(commandTopic, message, publish.getQoS(), retain);
                     }
                 }
             } else {
