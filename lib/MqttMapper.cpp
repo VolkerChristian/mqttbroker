@@ -47,27 +47,44 @@ namespace apps::mqttbroker::lib {
         return mappingJson.dump();
     }
 
-    void MqttMapper::extractTopics(const nlohmann::json& json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList) {
-        for (auto& [item, mappingSubJson] : json.items()) {
-            if (item == "topic_level" && mappingSubJson.contains("name") && mappingSubJson["name"].is_string()) {
-                std::string subTopic = mappingSubJson["name"];
+    void MqttMapper::extractTopic(const nlohmann::json& topicLevel, const std::string& topic, std::list<iot::mqtt::Topic>& topicList) {
+        if (topicLevel.is_object() && topicLevel.contains("name")) {
+            const nlohmann::json& nameJson = topicLevel.value("name", "");
 
-                if (mappingSubJson.is_object() && mappingSubJson.contains("mapping")) {
+            if (nameJson.is_string()) {
+                std::string name = nameJson.get<std::string>();
+
+                const nlohmann::json& topicLevelMapping = topicLevel.value("mapping", nlohmann::json::object());
+
+                if (topicLevelMapping.is_object() && !topicLevelMapping.empty()) {
+                    const nlohmann::json& subscribtionJson = topicLevel.value("subscribtion", nlohmann::json::object());
                     uint8_t qoS = 0;
-                    if (mappingSubJson.contains("subscribtion")) {
-                        nlohmann::json subscribtion = mappingSubJson["subscribtion"];
-                        if (subscribtion.is_object() && subscribtion.contains("qos")) {
-                            qoS = subscribtion["qos"];
-                        }
+
+                    if (subscribtionJson.is_object()) {
+                        qoS = subscribtionJson.value<uint8_t>("qos", 0);
                     }
 
                     topicList.push_back(
-                        iot::mqtt::Topic(topic + ((topic.empty() || topic == "/") && !subTopic.empty() ? "" : "/") + subTopic, qoS));
+                        iot::mqtt::Topic(topic + ((topic.empty() || topic == "/") && !name.empty() ? "" : "/") + name, qoS));
                 }
-                if (mappingSubJson.is_object() && mappingSubJson.contains("topic_level")) {
-                    extractTopics(
-                        mappingSubJson, topic + ((topic.empty() || topic == "/") && !subTopic.empty() ? "" : "/") + subTopic, topicList);
+
+                if (topicLevel.contains("topic_level")) {
+                    extractTopics(topicLevel, topic + ((topic.empty() || topic == "/") && !name.empty() ? "" : "/") + name, topicList);
                 }
+            }
+        }
+    }
+
+    void MqttMapper::extractTopics(const nlohmann::json& json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList) {
+        if (json.is_object()) {
+            const nlohmann::json& topicLevels = json.value("topic_level", nlohmann::json::array());
+
+            if (topicLevels.is_array() && !topicLevels.empty()) {
+                for (const nlohmann::json& topicLevel : topicLevels) {
+                    extractTopic(topicLevel, topic, topicList);
+                }
+            } else {
+                extractTopic(topicLevels, topic, topicList);
             }
         }
     }
@@ -75,87 +92,101 @@ namespace apps::mqttbroker::lib {
     std::list<iot::mqtt::Topic> MqttMapper::extractTopics() {
         std::list<iot::mqtt::Topic> topicList;
 
-        MqttMapper::extractTopics(mappingJson, "", topicList);
+        try {
+            MqttMapper::extractTopics(mappingJson, "", topicList);
+        } catch (const nlohmann::json::exception& e) {
+            LOG(ERROR) << e.what();
+        }
 
         return topicList;
     }
 
-    void MqttMapper::publishTemplate(const nlohmann::json& mappingSubJson,
+    void MqttMapper::publishTemplate(const nlohmann::json& templateMapping,
                                      const nlohmann::json& json,
                                      const iot::mqtt::packets::Publish& publish) {
-        if (mappingSubJson.contains("command_topic") && mappingSubJson.contains("mapping_template")) {
-            const std::string& topic = mappingSubJson["command_topic"];
-            const std::string& stateTemplate = mappingSubJson["mapping_template"];
-            bool retain = mappingSubJson.value("retain_message", false);
+        const std::string& commandTopic = templateMapping.value("command_topic", "");
+        const std::string& mappingTemplate = templateMapping.value("mapping_template", "");
+        bool retain = templateMapping.value("retain_message", false);
 
+        if (commandTopic.empty()) {
+            LOG(WARNING) << "No \"command_topic\" in mapping '" << templateMapping.dump() << "'";
+        } else if (mappingTemplate.empty()) {
+            LOG(WARNING) << "No \"mapping_template\" in mapping '" << templateMapping.dump() << "'";
+        } else {
             try {
                 // Render
-                std::string renderedMessage = inja::render(stateTemplate, json);
+                std::string renderedMessage = inja::render(mappingTemplate, json);
 
-                LOG(INFO) << "      " << topic << " : " << stateTemplate << " -> '" << renderedMessage << "'";
+                LOG(INFO) << "      " << commandTopic << " : " << mappingTemplate << " -> '" << renderedMessage << "'";
 
-                publishMapping(topic, renderedMessage, publish.getQoS(), retain);
+                publishMapping(commandTopic, renderedMessage, publish.getQoS(), retain);
             } catch (const inja::InjaError& e) {
                 LOG(ERROR) << e.what();
             }
         }
     }
 
-    void MqttMapper::publishTemplates(const nlohmann::json& mappingSubJson,
+    void MqttMapper::publishTemplates(const nlohmann::json& templateMapping,
                                       const nlohmann::json& json,
                                       const iot::mqtt::packets::Publish& publish) {
         LOG(INFO) << "  " << publish.getTopic() << " : " << publish.getMessage() << " -> " << json.dump();
 
-        if (mappingSubJson.is_object()) {
-            publishTemplate(mappingSubJson, json, publish);
-        } else if (mappingSubJson.is_array()) {
-            for (const nlohmann::json& elementJson : mappingSubJson) {
-                publishTemplate(elementJson, json, publish);
+        if (templateMapping.is_object()) {
+            publishTemplate(templateMapping, json, publish);
+        } else if (templateMapping.is_array()) {
+            for (const nlohmann::json& concreteTemplateMapping : templateMapping) {
+                publishTemplate(concreteTemplateMapping, json, publish);
             }
         }
     }
 
     void MqttMapper::publishMappings(const iot::mqtt::packets::Publish& publish) {
-        nlohmann::json mappingSubJson = mappingJson;
-
         std::string remainingTopic = publish.getTopic();
-        std::string topicLevelName;
 
-        bool currentTopicExistsInMapping = false;
+        nlohmann::json subMapping = mappingJson;
 
         do {
             std::string::size_type slashPosition = remainingTopic.find("/");
 
-            topicLevelName = remainingTopic.substr(0, slashPosition);
+            std::string topicLevelName = remainingTopic.substr(0, slashPosition);
             remainingTopic.erase(0, topicLevelName.size() + 1);
 
-            currentTopicExistsInMapping = mappingSubJson.contains("topic_level") && mappingSubJson["topic_level"].is_object() &&
-                                          mappingSubJson["topic_level"].contains("name") &&
-                                          mappingSubJson["topic_level"]["name"] == topicLevelName;
-            if ((!topicLevelName.empty() || !remainingTopic.empty()) && currentTopicExistsInMapping) {
-                mappingSubJson = mappingSubJson["topic_level"];
+            const nlohmann::json& topicLevels = subMapping.value("topic_level", nlohmann::json::array());
+
+            if (topicLevels.is_array()) {
+                subMapping = *std::find_if(
+                    topicLevels.begin(), topicLevels.end(), [&topicLevelName](const nlohmann::json& subMappingCandidat) -> bool {
+                        return subMappingCandidat.contains("name") && subMappingCandidat["name"].is_string() &&
+                               subMappingCandidat["name"] == topicLevelName;
+                    });
+            } else if (topicLevels.is_object() && topicLevels.contains("name") && topicLevels["name"].is_string() &&
+                       topicLevels["name"] == topicLevelName) {
+                subMapping = topicLevels;
+            } else {
+                subMapping.clear();
             }
-        } while ((!topicLevelName.empty() || !remainingTopic.empty()) && currentTopicExistsInMapping);
+        } while ((!remainingTopic.empty()) && !subMapping.empty());
 
-        if (topicLevelName.empty() && mappingSubJson.contains("mapping")) {
-            mappingSubJson = mappingSubJson["mapping"];
+        if (remainingTopic.empty() && subMapping.is_object()) {
+            const nlohmann::json& mapping = subMapping.value("mapping", nlohmann::json::object());
 
-            if (mappingSubJson.contains("static")) {
-                mappingSubJson = mappingSubJson["static"];
+            if (mapping.contains("static")) {
+                const nlohmann::json& staticMapping = mapping["static"];
 
-                if (mappingSubJson.contains("command_topic") && mappingSubJson.contains("message_mappings") &&
-                    mappingSubJson["message_mappings"].is_array()) {
-                    const std::string& commandTopic = mappingSubJson["command_topic"];
-                    bool retain = mappingSubJson.value("retain_message", false);
-                    mappingSubJson = mappingSubJson["message_mappings"];
+                if (staticMapping.is_object() && staticMapping.contains("command_topic") && staticMapping.contains("message_mappings") &&
+                    staticMapping["message_mappings"].is_array()) {
+                    const std::string& commandTopic = staticMapping["command_topic"];
+                    bool retain = staticMapping.value("retain_message", false);
+                    const nlohmann::json& messageMappingArray = staticMapping["message_mappings"];
 
-                    const nlohmann::json& concreteMapping =
-                        *std::find_if(mappingSubJson.begin(), mappingSubJson.end(), [&publish](const nlohmann::json& mapping) {
-                            return mapping.is_object() && mapping.value("message", "") == publish.getMessage();
+                    const nlohmann::json& messageMapping = *std::find_if(
+                        messageMappingArray.begin(), messageMappingArray.end(), [&publish](const nlohmann::json& messageMappingCandidat) {
+                            return messageMappingCandidat.is_object() &&
+                                   messageMappingCandidat.value("message", "") == publish.getMessage();
                         });
 
-                    if (concreteMapping.is_object() && concreteMapping.contains("mapped_message")) {
-                        const std::string& message = concreteMapping["mapped_message"];
+                    if (messageMapping.is_object() && messageMapping.contains("mapped_message")) {
+                        const std::string& message = messageMapping["mapped_message"];
 
                         LOG(INFO) << "Topic mapping found:";
                         LOG(INFO) << "  " << publish.getTopic() << ":" << publish.getMessage() << " -> " << commandTopic << ":" << message;
@@ -166,13 +197,14 @@ namespace apps::mqttbroker::lib {
             } else {
                 try {
                     nlohmann::json json;
+                    nlohmann::json templateMapping;
 
-                    if (mappingSubJson.contains("value")) {
-                        mappingSubJson = mappingSubJson["value"];
+                    if (mapping.contains("value")) {
+                        templateMapping = mapping["value"];
 
                         json["value"] = publish.getMessage();
-                    } else if (mappingSubJson.contains("json")) {
-                        mappingSubJson = mappingSubJson["json"];
+                    } else if (mapping.contains("json")) {
+                        templateMapping = mapping["json"];
 
                         json["json"] = nlohmann::json::parse(publish.getMessage());
                     }
@@ -181,7 +213,7 @@ namespace apps::mqttbroker::lib {
                         LOG(INFO) << "Topic mapping found:";
                     }
 
-                    publishTemplates(mappingSubJson, json, publish);
+                    publishTemplates(templateMapping, json, publish);
                 } catch (const nlohmann::json::exception& e) {
                     LOG(ERROR) << e.what();
                 }
@@ -242,82 +274,104 @@ namespace apps::mqttbroker::lib {
         },
         "mappings" : {
             "discover_prefix" : "iotempower",
-            "topic_level" : {
-                "name" : "test01",
-                "topic_level" : {
-                    "name" : "button1",
-                    "type" : "binary_sensor",
-                    "subscribtion" : {
-                        "qos" : 2
-                    },
-                    "mapping": {
-                        "Comment" : "Either a \"static\", \"value\", or \"json\" object is required! E.g. next three objects. Exclusive
-    order of interpretation: \"static\", \"value\", \"json\"", "static1" : { "command_topic" : "test02/onboard/set", "message_mappings" : [
-                                {
-                                    "message" : "pressed",
-                                    "mapped_message" : "on"
-                                },
-                                {
-                                    "message" : "released",
-                                    "mapped_message" : "off"
+            "topic_level" : [
+                {
+                    "name" : "test01",
+                    "topic_level" : [
+                        {
+                            "name" : "button1",
+                            "type" : "binary_sensor",
+                            "subscribtion" : {
+                                "qos" : 2
+                            },
+                            "mapping": {
+                                "Comment" : "Either a \"static\", \"value\", or \"json\" object is required! E.g. next three objects.
+    Exclusive order of interpretation: \"static\", \"value\", \"json\"", "value" : { "command_topic" : "test02/onboard/set",
+                                    "retain_message" : false,
+                                    "mapping_template" : "{% if value == \"pressed\" %}on{% else if value == \"released\" %}off{% endif %}"
                                 }
-                            ]
-                        },
-                        "value" : {
-                            "command_topic" : "test02/onboard/set",
-                            "mapping_template" : "{% if value == \"pressed\" %}on{% else if value == \"released\" %}off{% endif %}"
-                        },
-                        "json" : {
-                            "command_topic" : "test02/onboard/set",
-                            "mapping_template" : "{{ json.time.start }} to {{ json.time.end + 1 }}pm"
-                        },
-                        "The next objects are ignored" : "Listed only for documentation",
-                        "value | Comment: An array of \"value\" objects is also allowed for multi-mapping. E.g.:" : [
-                            {
-                                "command_topic" : "aCommandTopic",
-                                "mapping_template" : "aStateTemplate"
-                            },
-                            {
-                                "command_topic" : "anOtherCommandTopic",
-                                "mapping_template" : "anOtherStateTemplate"
                             }
-
-                        ],
-                        "json | Comment: An array of \"json\" objects is also allowed for multi-mapping. E.g.:" : [
-                            {
-                                "command_topic" : "aCommandTopic",
-                                "mapping_template" : "aStateTemplate"
+                        }
+                    ]
+                },{
+                    "name" : "test03",
+                    "topic_level" : [
+                        {
+                            "name" : "button1",
+                            "type" : "binary_sensor",
+                            "subscribtion" : {
+                                "qos" : 2
                             },
-                            {
-                                "command_topic" : "anOtherCommandTopic",
-                                "mapping_template" : "anOtherStateThemplate"
+                            "mapping": {
+                                "Comment" : "Either a \"static\", \"value\", or \"json\" object is required! E.g. next three objects.
+    Exclusive order of interpretation: \"static\", \"value\", \"json\"", "value" : { "command_topic" : "test02/onboard/set",
+                                    "retain_message" : false,
+                                    "mapping_template" : "{% if value == \"pressed\" %}on{% else if value == \"released\" %}off{% endif %}"
+                                }
                             }
-                        ]
-                    },
-                    "topic_level" : {
-                        "name" : "someothertopiclevelname",
-                        "type" : "binary_sensor",
-                        "subscribtion" : {
-                            "qos" : 1
-                        },
-                        "mapping" : {
-                            "static" : {
-                                "command_topic" : "some/other/topic/set",
-                                "message_mappings" : [
+                        },{
+                            "name" : "button2",
+                            "type" : "binary_sensor",
+                            "subscribtion" : {
+                                "qos" : 2
+                            },
+                            "mapping": {
+                                "Comment" : "Either a \"static\", \"value\", or \"json\" object is required! E.g. next three objects.
+    Exclusive order of interpretation: \"static\", \"value\", \"json\"", "static" : { "command_topic" : "test02/onboard/set",
+                                    "retain_message" : false,
+                                    "message_mappings" : [
+                                        {
+                                            "message" : "pressed",
+                                            "mapped_message" : "on"
+                                        },{
+                                            "message" : "released",
+                                            "mapped_message" : "off"
+                                        }
+                                    ]
+                                },
+                                "The next objects are ignored" : "Listed only for documentation",
+                                "value | Comment: An array of \"value\" objects is also allowed for multi-mapping. E.g.:" : [
                                     {
-                                        "message" : "pressed",
-                                        "mapped_message" : "on"
+                                        "command_topic" : "aCommandTopic",
+                                        "retain_message" : false,
+                                        "mapping_template" : "aStateTemplate"
                                     },
                                     {
-                                        "message" : "released",
-                                        "mapped_message" : "off"
+                                        "command_topic" : "anOtherCommandTopic",
+                                        "retain_message" : false,
+                                        "mapping_template" : "anOtherStateTemplate"
+                                    }
+
+                                ],
+                                "json | Comment: An array of \"json\" objects is also allowed for multi-mapping. E.g.:" : [
+                                    {
+                                        "command_topic" : "aCommandTopic",
+                                        "retain_message" : false,
+                                        "mapping_template" : "aStateTemplate"
+                                    },
+                                    {
+                                        "command_topic" : "anOtherCommandTopic",
+                                        "retain_message" : false,
+                                        "mapping_template" : "anOtherStateThemplate"
                                     }
                                 ]
                             }
+                        },{
+                            "name" : "button3",
+                            "type" : "binary_sensor",
+                            "subscribtion" : {
+                                "qos" : 2
+                            },
+                            "mapping": {
+                                "Comment" : "Either a \"static\", \"value\", or \"json\" object is required! E.g. next three objects.
+    Exclusive order of interpretation: \"static\", \"value\", \"json\"", "json" : { "command_topic" : "test02/onboard/set", "retain_message"
+    : false, "mapping_template" : "{{ json.time.start }} to {{ json.time.end + 1 }}pm"
+                                }
+                            }
                         }
-                    }
+                    ]
                 }
-            }
+            ]
         }
     }
 
