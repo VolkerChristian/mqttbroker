@@ -55,11 +55,11 @@ namespace apps::mqttbroker::lib {
                 std::string name = nameJson.get<std::string>();
 
                 if (topicLevel.contains("mapping") && topicLevel["mapping"].is_object()) {
-                    const nlohmann::json& subscribtionJson = topicLevel.value("subscribtion", nlohmann::json::object());
+                    const nlohmann::json& subscriptionJson = topicLevel.value("subscription", nlohmann::json::object());
                     uint8_t qoS = 0;
 
-                    if (subscribtionJson.is_object()) {
-                        qoS = subscribtionJson.value<uint8_t>("qos", 0);
+                    if (subscriptionJson.is_object()) {
+                        qoS = subscriptionJson.value<uint8_t>("qos", 0);
                     }
 
                     topicList.push_back(
@@ -102,12 +102,12 @@ namespace apps::mqttbroker::lib {
     void MqttMapper::publishTemplate(const nlohmann::json& templateMapping,
                                      const nlohmann::json& json,
                                      const iot::mqtt::packets::Publish& publish) {
-        const std::string& commandTopic = templateMapping.value("command_topic", "");
+        const std::string& commandTopic = templateMapping.value("mapped_topic", "");
         const std::string& mappingTemplate = templateMapping.value("mapping_template", "");
         bool retain = templateMapping.value("retain_message", false);
 
         if (commandTopic.empty()) {
-            LOG(WARNING) << "No \"command_topic\" in mapping '" << templateMapping.dump() << "'";
+            LOG(WARNING) << "No \"mapped_topic\" in mapping '" << templateMapping.dump() << "'";
         } else if (mappingTemplate.empty()) {
             LOG(WARNING) << "No \"mapping_template\" in mapping '" << templateMapping.dump() << "'";
         } else {
@@ -181,9 +181,9 @@ namespace apps::mqttbroker::lib {
                 if (mapping.contains("static")) {
                     const nlohmann::json& staticMapping = mapping["static"];
 
-                    if (staticMapping.is_object() && staticMapping.contains("command_topic") &&
-                        staticMapping.contains("message_mappings") && staticMapping["message_mappings"].is_array()) {
-                        const std::string& commandTopic = staticMapping["command_topic"];
+                    if (staticMapping.is_object() && staticMapping.contains("mapped_topic") && staticMapping.contains("message_mappings") &&
+                        staticMapping["message_mappings"].is_array()) {
+                        const std::string& commandTopic = staticMapping["mapped_topic"];
                         bool retain = staticMapping.value("retain_message", false);
                         const nlohmann::json& messageMappingArray = staticMapping["message_mappings"];
 
@@ -255,7 +255,7 @@ namespace apps::mqttbroker::lib {
         "state_topic": "test02/onboard",
         "state_on": "on",
         "state_off": "off",
-        "command_topic": "test02/onboard/set",
+        "mapped_topic": "test02/onboard/set",
         "payload_on": "on",
         "payload_off": "off"
     }
@@ -272,7 +272,7 @@ namespace apps::mqttbroker::lib {
             "state_topic": "test02/onboard",
             "state_on": "on",
             "state_off": "off",
-            "command_topic": "test02/onboard/set",
+            "mapped_topic": "test02/onboard/set",
             "payload_on": "on",
             "payload_off": "off"
         }]
@@ -299,12 +299,12 @@ namespace apps::mqttbroker::lib {
                         {
                             "name" : "button1",
                             "type" : "binary_sensor",
-                            "subscribtion" : {
+                            "subscription" : {
                                 "qos" : 2
                             },
                             "mapping": {
                                 "Comment" : "Either a \"static\", \"value\", or \"json\" object is required! E.g. next three objects.
-    Exclusive order of interpretation: \"static\", \"value\", \"json\"", "value" : { "command_topic" : "test02/onboard/set",
+    Exclusive order of interpretation: \"static\", \"value\", \"json\"", "value" : { "mapped_topic" : "test02/onboard/set",
                                     "retain_message" : false,
                                     "mapping_template" : "{% if value == \"pressed\" %}on{% else if value == \"released\" %}off{% endif %}"
                                 }
@@ -317,12 +317,12 @@ namespace apps::mqttbroker::lib {
                         {
                             "name" : "button1",
                             "type" : "binary_sensor",
-                            "subscribtion" : {
+                            "subscription" : {
                                 "qos" : 2
                             },
                             "mapping": {
                                 "Comment" : "Either a \"static\", \"value\", or \"json\" object is required! E.g. next three objects.
-    Exclusive order of interpretation: \"static\", \"value\", \"json\"", "value" : { "command_topic" : "test02/onboard/set",
+    Exclusive order of interpretation: \"static\", \"value\", \"json\"", "value" : { "mapped_topic" : "test02/onboard/set",
                                     "retain_message" : false,
                                     "mapping_template" : "{% if value == \"pressed\" %}on{% else if value == \"released\" %}off{% endif %}"
                                 }
@@ -330,12 +330,12 @@ namespace apps::mqttbroker::lib {
                         },{
                             "name" : "button2",
                             "type" : "binary_sensor",
-                            "subscribtion" : {
+                            "subscription" : {
                                 "qos" : 2
                             },
                             "mapping": {
                                 "Comment" : "Either a \"static\", \"value\", or \"json\" object is required! E.g. next three objects.
-    Exclusive order of interpretation: \"static\", \"value\", \"json\"", "static" : { "command_topic" : "test02/onboard/set",
+    Exclusive order of interpretation: \"static\", \"value\", \"json\"", "static" : { "mapped_topic" : "test02/onboard/set",
                                     "retain_message" : false,
                                     "message_mappings" : [
                                         {
@@ -350,12 +350,12 @@ namespace apps::mqttbroker::lib {
                                 "The next objects are ignored" : "Listed only for documentation",
                                 "value | Comment: An array of \"value\" objects is also allowed for multi-mapping. E.g.:" : [
                                     {
-                                        "command_topic" : "aCommandTopic",
+                                        "mapped_topic" : "aCommandTopic",
                                         "retain_message" : false,
                                         "mapping_template" : "aStateTemplate"
                                     },
                                     {
-                                        "command_topic" : "anOtherCommandTopic",
+                                        "mapped_topic" : "anOtherCommandTopic",
                                         "retain_message" : false,
                                         "mapping_template" : "anOtherStateTemplate"
                                     }
@@ -363,12 +363,12 @@ namespace apps::mqttbroker::lib {
                                 ],
                                 "json | Comment: An array of \"json\" objects is also allowed for multi-mapping. E.g.:" : [
                                     {
-                                        "command_topic" : "aCommandTopic",
+                                        "mapped_topic" : "aCommandTopic",
                                         "retain_message" : false,
                                         "mapping_template" : "aStateTemplate"
                                     },
                                     {
-                                        "command_topic" : "anOtherCommandTopic",
+                                        "mapped_topic" : "anOtherCommandTopic",
                                         "retain_message" : false,
                                         "mapping_template" : "anOtherStateThemplate"
                                     }
@@ -377,12 +377,12 @@ namespace apps::mqttbroker::lib {
                         },{
                             "name" : "button3",
                             "type" : "binary_sensor",
-                            "subscribtion" : {
+                            "subscription" : {
                                 "qos" : 2
                             },
                             "mapping": {
                                 "Comment" : "Either a \"static\", \"value\", or \"json\" object is required! E.g. next three objects.
-    Exclusive order of interpretation: \"static\", \"value\", \"json\"", "json" : { "command_topic" : "test02/onboard/set", "retain_message"
+    Exclusive order of interpretation: \"static\", \"value\", \"json\"", "json" : { "mapped_topic" : "test02/onboard/set", "retain_message"
     : false, "mapping_template" : "{{ json.time.start }} to {{ json.time.end + 1 }}pm"
                                 }
                             }
