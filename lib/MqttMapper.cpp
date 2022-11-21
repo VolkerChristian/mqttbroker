@@ -279,6 +279,7 @@ namespace apps::mqttbroker::lib {
     }
 
     {
+        "discover_prefix" : "iotempower",
         "connection" : {
             "keep_alive" : 60,
             "client_id" : "Client",
@@ -291,7 +292,6 @@ namespace apps::mqttbroker::lib {
             "password" : "Password"
         },
         "mappings" : {
-            "discover_prefix" : "iotempower",
             "topic_level" : [
                 {
                     "name" : "test01",
