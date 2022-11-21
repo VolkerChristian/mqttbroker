@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
                     }) doConnect{};
 
                 InMqttIntegratorClient inMqttIntegratorClient(
-                    "clientmapper",
+                    "mqttintegrator",
                     [](LegacyInSocketConnection* socketConnection) -> void {
                         VLOG(0) << "OnConnect";
 
