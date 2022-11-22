@@ -42,16 +42,16 @@ namespace apps::mqttbroker::webfrontend {
         publishMappings(publish);
     }
 
-    void SocketContext::onDisconnected() {
-        MqttModel::instance().delDisconnectedClient(this);
-    }
-
     void SocketContext::publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) {
         broker->publish(topic, message, qoS);
 
         if (retain) {
             broker->retainMessage(topic, message, qoS);
         }
+    }
+
+    void SocketContext::onDisconnected() {
+        MqttModel::instance().delDisconnectedClient(this);
     }
 
 } // namespace apps::mqttbroker::webfrontend

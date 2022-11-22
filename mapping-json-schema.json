@@ -1,0 +1,246 @@
+{
+  "type": "object",
+  "required": [
+    "discover_prefix",
+    "mappings"
+  ],
+  "properties": {
+    "discover_prefix": {
+      "type": "string"
+    },
+    "connection": {
+      "type": "object",
+      "properties": {
+        "keep_alive": {
+          "type": "integer"
+        },
+        "client_id": {
+          "type": "string"
+        },
+        "clean_session": {
+          "type": "boolean"
+        },
+        "will_topic": {
+          "type": "string"
+        },
+        "will_message": {
+          "type": "string"
+        },
+        "will_qos": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "will_retain": {
+          "type": "boolean"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "mappings": {
+      "type": "object",
+      "required": [
+        "topic_level"
+      ],
+      "properties": {
+        "topic_level": {
+          "type": "array",
+          "items": {
+            "$id": "https://example.com/schemas/customer",
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "anyOf": [
+              {
+                "required": [
+                  "topic_level"
+                ]
+              },
+              {
+                "required": [
+                  "mapping"
+                ]
+              }
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "subscription": {
+                "type": "object",
+                "properties": {
+                  "qos": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2
+                  }
+                }
+              },
+              "topic_level": {
+                "type": "array",
+                "items": {
+                  "$ref": "#"
+                }
+              },
+              "mapping": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "required": [
+                      "static"
+                    ],
+                    "properties": {
+                      "static": {
+                        "type": "object",
+                        "required": [
+                          "mapped_topic"
+                        ],
+                        "properties": {
+                          "mapped_topic": {
+                            "type": "string"
+                          },
+                          "retain_message": {
+                            "type": "boolean"
+                          },
+                          "message_mappings": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "required": [
+                                "message",
+                                "mapped_message"
+                              ],
+                              "properties": {
+                                "message": {
+                                  "type": "string"
+                                },
+                                "mapped_message": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "value"
+                    ],
+                    "properties": {
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "required": [
+                              "mapped_topic",
+                              "mapping_template"
+                            ],
+                            "properties": {
+                              "mapped_topic": {
+                                "type": "string"
+                              },
+                              "retain_message": {
+                                "type": "boolean"
+                              },
+                              "mapping_template": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "required": [
+                                "mapped_topic",
+                                "mapping_template"
+                              ],
+                              "properties": {
+                                "mapped_topic": {
+                                  "type": "string"
+                                },
+                                "retain_message": {
+                                  "type": "boolean"
+                                },
+                                "mapping_template": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "json"
+                    ],
+                    "properties": {
+                      "json": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "required": [
+                              "mapped_topic",
+                              "mapping_template"
+                            ],
+                            "properties": {
+                              "mapped_topic": {
+                                "type": "string"
+                              },
+                              "retain_message": {
+                                "type": "boolean"
+                              },
+                              "mapping_template": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "required": [
+                                "mapped_topic",
+                                "mapping_template"
+                              ],
+                              "properties": {
+                                "mapped_topic": {
+                                  "type": "string"
+                                },
+                                "retain_message": {
+                                  "type": "boolean"
+                                },
+                                "mapping_template": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -58,11 +58,11 @@ namespace apps::mqttbroker::webfrontend {
         void onConnect(iot::mqtt::packets::Connect& connect) override;
         void onPublish(iot::mqtt::packets::Publish& publish) override;
 
-        // inherited from core::socket::SocketContext, the root class of all SocketContext classes
-        void onDisconnected() override;
-
         // inherited from apps::mqttbroker::lib::MqttMapper
         void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) override;
+
+        // inherited from core::socket::SocketContext (the root class of all SocketContext classes) via iot::mqtt::server::SocketContext
+        void onDisconnected() override;
     };
 
 } // namespace apps::mqttbroker::webfrontend
