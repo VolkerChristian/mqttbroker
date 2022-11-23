@@ -20,7 +20,7 @@
             "name": "button1",
             "type": "binary_sensor",
             "subscription": {
-              "qos": 2
+                "qos": 0
             },
             "mapping": {
               "value": {

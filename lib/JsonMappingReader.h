@@ -36,6 +36,7 @@ namespace apps::mqttbroker::lib {
         static const nlohmann::json& readMappingFromFile(const std::string& mappingFilePath);
 
     private:
+        static nlohmann::json mappingJsonSchema;
         static nlohmann::json mappingJson;
     };
 

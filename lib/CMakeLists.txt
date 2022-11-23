@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(nlohmann_json 3.7.0)
 
+add_subdirectory(json-schema-validator)
+
 if(NOT SNODEC_INTREE_BUILD)
     find_package(snodec COMPONENTS mqtt)
 endif(NOT SNODEC_INTREE_BUILD)
@@ -51,4 +53,4 @@ add_library(
                         JsonMappingReader.h MqttMapper.h
 )
 
-target_link_libraries(mqtt-mapping snodec::mqtt)
+target_link_libraries(mqtt-mapping PRIVATE snodec::mqtt nlohmann_json_schema_validator)

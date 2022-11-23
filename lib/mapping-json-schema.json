@@ -1,4 +1,4 @@
-{
+R"({
   "type": "object",
   "required": [
     "discover_prefix",
@@ -12,33 +12,42 @@
       "type": "object",
       "properties": {
         "keep_alive": {
-          "type": "integer"
+          "type": "integer",
+          "default": 60
         },
         "client_id": {
-          "type": "string"
+          "type": "string",
+          "default": ""
         },
         "clean_session": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "will_topic": {
-          "type": "string"
+          "type": "string",
+          "default": ""
         },
         "will_message": {
-          "type": "string"
+          "type": "string",
+          "default": ""
         },
         "will_qos": {
           "type": "integer",
+          "default": 0,
           "minimum": 0,
           "maximum": 2
         },
         "will_retain": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "username": {
-          "type": "string"
+          "type": "string",
+          "default": ""
         },
         "password": {
-          "type": "string"
+          "type": "string",
+          "default": ""
         }
       }
     },
@@ -70,19 +79,25 @@
             ],
             "properties": {
               "name": {
-                "type": "string"
+                "type": "string",
+                "default": ""
               },
               "type": {
-                "type": "string"
+                "type": "string",
+                "default": ""
               },
               "subscription": {
                 "type": "object",
                 "properties": {
                   "qos": {
                     "type": "integer",
+                    "default": 0,
                     "minimum": 0,
                     "maximum": 2
                   }
+                },
+                "default" : {
+                    "qos" : 0
                 }
               },
               "topic_level": {
@@ -106,10 +121,12 @@
                         ],
                         "properties": {
                           "mapped_topic": {
-                            "type": "string"
+                            "type": "string",
+                            "default": ""
                           },
                           "retain_message": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "default": false
                           },
                           "message_mappings": {
                             "type": "array",
@@ -121,10 +138,12 @@
                               ],
                               "properties": {
                                 "message": {
-                                  "type": "string"
+                                  "type": "string",
+                                  "default": ""
                                 },
                                 "mapped_message": {
-                                  "type": "string"
+                                  "type": "string",
+                                  "default": ""
                                 }
                               }
                             }
@@ -149,13 +168,16 @@
                             ],
                             "properties": {
                               "mapped_topic": {
-                                "type": "string"
+                                "type": "string",
+                                "default": ""
                               },
                               "retain_message": {
-                                "type": "boolean"
+                                "type": "boolean",
+                                "default": false
                               },
                               "mapping_template": {
-                                "type": "string"
+                                "type": "string",
+                                "default": ""
                               }
                             }
                           },
@@ -169,13 +191,16 @@
                               ],
                               "properties": {
                                 "mapped_topic": {
-                                  "type": "string"
+                                  "type": "string",
+                                  "default": ""
                                 },
                                 "retain_message": {
-                                  "type": "boolean"
+                                  "type": "boolean",
+                                  "default": false
                                 },
                                 "mapping_template": {
-                                  "type": "string"
+                                  "type": "string",
+                                  "default": ""
                                 }
                               }
                             }
@@ -200,13 +225,16 @@
                             ],
                             "properties": {
                               "mapped_topic": {
-                                "type": "string"
+                                "type": "string",
+                                "default": ""
                               },
                               "retain_message": {
-                                "type": "boolean"
+                                "type": "boolean",
+                                "default": false
                               },
                               "mapping_template": {
-                                "type": "string"
+                                "type": "string",
+                                "default": ""
                               }
                             }
                           },
@@ -220,13 +248,16 @@
                               ],
                               "properties": {
                                 "mapped_topic": {
-                                  "type": "string"
+                                  "type": "string",
+                                  "default": ""
                                 },
                                 "retain_message": {
-                                  "type": "boolean"
+                                  "type": "boolean",
+                                  "default": false
                                 },
                                 "mapping_template": {
-                                  "type": "string"
+                                  "type": "string",
+                                  "default": ""
                                 }
                               }
                             }
@@ -243,4 +274,4 @@
       }
     }
   }
-}
+})"_json;
