@@ -1,4 +1,4 @@
-R"({
+{
   "type": "object",
   "required": [
     "discover_prefix",
@@ -60,7 +60,7 @@ R"({
         "topic_level": {
           "type": "array",
           "items": {
-            "$id": "https://example.com/schemas/customer",
+            "$id": "https://www.vchrist.at/snode.c/schemas/",
             "type": "object",
             "required": [
               "name"
@@ -117,16 +117,23 @@ R"({
                       "static": {
                         "type": "object",
                         "required": [
-                          "mapped_topic"
+                          "mapped_topic",
+                          "message_mappings"
                         ],
                         "properties": {
                           "mapped_topic": {
                             "type": "string",
-                            "default": ""
+                            "minLength": 1
                           },
                           "retain_message": {
                             "type": "boolean",
                             "default": false
+                          },
+                          "qos": {
+                            "type": "integer",
+                            "default": 0,
+                            "minimum": 0,
+                            "maximum": 2
                           },
                           "message_mappings": {
                             "type": "array",
@@ -139,11 +146,11 @@ R"({
                               "properties": {
                                 "message": {
                                   "type": "string",
-                                  "default": ""
+                                  "minLength": 1
                                 },
                                 "mapped_message": {
                                   "type": "string",
-                                  "default": ""
+                                  "minLength" : 1
                                 }
                               }
                             }
@@ -169,15 +176,21 @@ R"({
                             "properties": {
                               "mapped_topic": {
                                 "type": "string",
-                                "default": ""
+                                "minLength": 1
                               },
                               "retain_message": {
                                 "type": "boolean",
                                 "default": false
                               },
+                              "qos": {
+                                "type": "integer",
+                                "default": 0,
+                                "minimum": 0,
+                                "maximum": 2
+                              },
                               "mapping_template": {
                                 "type": "string",
-                                "default": ""
+                                "minLength": 1
                               }
                             }
                           },
@@ -192,15 +205,21 @@ R"({
                               "properties": {
                                 "mapped_topic": {
                                   "type": "string",
-                                  "default": ""
+                                  "minLength": 1
                                 },
                                 "retain_message": {
                                   "type": "boolean",
                                   "default": false
                                 },
+                                "qos": {
+                                  "type": "integer",
+                                  "default": 0,
+                                  "minimum": 0,
+                                  "maximum": 2
+                                },
                                 "mapping_template": {
                                   "type": "string",
-                                  "default": ""
+                                  "minLength": 1
                                 }
                               }
                             }
@@ -223,10 +242,16 @@ R"({
                               "mapped_topic",
                               "mapping_template"
                             ],
+                            "qos": {
+                              "type": "integer",
+                              "default": 0,
+                              "minimum": 0,
+                              "maximum": 2
+                            },
                             "properties": {
                               "mapped_topic": {
                                 "type": "string",
-                                "default": ""
+                                "minLength": 1
                               },
                               "retain_message": {
                                 "type": "boolean",
@@ -234,7 +259,7 @@ R"({
                               },
                               "mapping_template": {
                                 "type": "string",
-                                "default": ""
+                                "minLength": 1
                               }
                             }
                           },
@@ -246,10 +271,16 @@ R"({
                                 "mapped_topic",
                                 "mapping_template"
                               ],
+                              "qos": {
+                                "type": "integer",
+                                "default": 0,
+                                "minimum": 0,
+                                "maximum": 2
+                              },
                               "properties": {
                                 "mapped_topic": {
                                   "type": "string",
-                                  "default": ""
+                                  "minLength": 1
                                 },
                                 "retain_message": {
                                   "type": "boolean",
@@ -257,7 +288,7 @@ R"({
                                 },
                                 "mapping_template": {
                                   "type": "string",
-                                  "default": ""
+                                  "minLength": 1
                                 }
                               }
                             }
@@ -274,4 +305,4 @@ R"({
       }
     }
   }
-})"_json;
+}
