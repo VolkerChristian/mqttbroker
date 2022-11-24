@@ -153,7 +153,7 @@ namespace inja {
             Callback,
             ParenLeft,
             ParenRight,
-            None,
+            None
         };
 
         struct FunctionData {
@@ -512,10 +512,7 @@ namespace inja {
         using Op = FunctionStorage::Operation;
 
     public:
-        enum class Associativity {
-            Left,
-            Right,
-        };
+        enum class Associativity { Left, Right };
 
         unsigned int precedence;
         Associativity associativity;
@@ -1060,7 +1057,7 @@ namespace inja {
             LessThan,           // <
             LessEqual,          // <=
             Unknown,
-            Eof,
+            Eof
         };
 
         Kind kind{Kind::Unknown};
@@ -1111,13 +1108,10 @@ namespace inja {
             StatementBody,
             CommentStart,
             CommentStartForceLstrip,
-            CommentBody,
+            CommentBody
         };
 
-        enum class MinusState {
-            Operator,
-            Number,
-        };
+        enum class MinusState { Operator, Number };
 
         const LexerConfig& config;
 
@@ -1391,6 +1385,7 @@ namespace inja {
 
             switch (state) {
                 default:
+                    [[fallthrough]];
                 case State::Text: {
                     // fast-scan to first open character
                     const size_t open_start = m_in.substr(pos).find_first_of(config.open_chars);

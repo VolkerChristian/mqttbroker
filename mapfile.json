@@ -27,50 +27,8 @@
                 "mapped_topic": "test02/onboard/set",
                 "retain_message": false,
                 "mapping_template": "{% if value == \"pressed\" %}on{% else if value == \"released\" %}off{% endif %}"
-              }
-            }
-          }
-        ]
-      },
-      {
-        "name": "test03",
-        "topic_level": [
-          {
-            "name": "button1",
-            "type": "binary_sensor",
-            "subscription": {
-              "qos": 2
-            },
-            "mapping": {
-              "value": {
-                "mapped_topic": "test02/onboard/set",
-                "retain_message": false,
-                "mapping_template": "{% if value == \"pressed\" %}on{% else if value == \"released\" %}off{% endif %}"
-              }
-            },
-            "topic_level": [
-              {
-                "name": "SomeOtherTopicLevel",
-                "type": "binary_sensor",
-                "mapping": {
-                  "static,value,json": "Mappings",
-                  "value": {
-                    "mapped_topic": "test02/onboard/set",
-                    "retain_message": false,
-                    "mapping_template": "{% if value == \"pressed\" %}on{% else if value == \"released\" %}off{% endif %}"
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "name": "button2",
-            "type": "binary_sensor",
-            "subscription": {
-              "qos": 2
-            },
-            "mapping": {
-              "static": {
+              },
+              "static-example": {
                 "mapped_topic": "test02/onboard/set",
                 "retain_message": false,
                 "message_mappings": [
@@ -84,43 +42,10 @@
                   }
                 ]
               },
-              "value | comment: An array of \"value\" objects is also allowed for multi-mapping. E.g.:": [
-                {
-                  "mapped_topic": "aCommandTopic",
-                  "retain_message": false,
-                  "mapping_template": "aStateTemplate"
-                },
-                {
-                  "mapped_topic": "anOtherCommandTopic",
-                  "retain_message": false,
-                  "mapping_template": "anOtherStateTemplate"
-                }
-              ],
-              "json | comment: An array of \"json\" objects is also allowed for multi-mapping. E.g.:": [
-                {
-                  "mapped_topic": "aCommandTopic",
-                  "retain_message": false,
-                  "mapping_template": "aStateTemplate"
-                },
-                {
-                  "mapped_topic": "anOtherCommandTopic",
-                  "retain_message": false,
-                  "mapping_template": "anOtherStateThemplate"
-                }
-              ]
-            }
-          },
-          {
-            "name": "button3",
-            "type": "binary_sensor",
-            "subscription": {
-              "qos": 2
-            },
-            "mapping": {
-              "json": {
+              "json-example": {
                 "mapped_topic": "test02/onboard/set",
                 "retain_message": false,
-                "mapping_template": "{{ json.time.start }} to {{ json.time.end + 1 }}pm"
+                "mapping_template": "{% if json.state == \"pressed\" %}on{% else if json.state == \"released\" %}off{% endif %}"
               }
             }
           }

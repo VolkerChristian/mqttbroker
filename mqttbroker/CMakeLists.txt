@@ -22,6 +22,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         -Wno-shadow
         -Wno-shadow-field
         -Wno-used-but-marked-unused
+        -Wno-weak-vtables
     )
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # using GCC

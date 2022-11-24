@@ -34,19 +34,10 @@
 
 namespace apps::mqttbroker::lib {
 
-    nlohmann::json JsonMappingReader::mappingJson;
-
-    static void loader(const nlohmann::json_uri& uri, nlohmann::json& schema) {
-        std::string filename = "./" + uri.path();
-        std::ifstream lf(filename);
-        if (!lf.good())
-            throw std::invalid_argument("could not open " + uri.url() + " tried with " + filename);
-        try {
-            lf >> schema;
-        } catch (const std::exception& e) {
-            throw;
-        }
-    }
+    static std::string mappingJsonSchemaString =
+#include "mapping-schema.json.h"
+        ; // The semicolon at the end of the assignment.
+    nlohmann::json JsonMappingReader::mappingJsonSchema = nlohmann::json::parse(mappingJsonSchemaString);
 
     class custom_error_handler : public nlohmann::json_schema::basic_error_handler {
         void error(const nlohmann::json::json_pointer& ptr, const nlohmann::json& instance, const std::string& message) override {
@@ -55,49 +46,50 @@ namespace apps::mqttbroker::lib {
         }
     };
 
-    const nlohmann::json& JsonMappingReader::readMappingFromFile(const std::string& mappingFilePath) {
-        if (mappingJson.empty()) {
-            std::ifstream mappingFile(mappingFilePath);
+    const nlohmann::json JsonMappingReader::readMappingFromFile(const std::string& mappingFilePath) {
+        nlohmann::json mappingJson;
 
-            if (mappingFile.good()) {
-                VLOG(0) << "MappingFilePath: " << mappingFilePath;
+        std::ifstream mappingFile(mappingFilePath);
 
-                try {
-                    try {
-                        mappingFile >> mappingJson;
-                    } catch (const std::exception& e) {
-                        std::cerr << e.what() << " at " << mappingFile.tellg() << " - while parsing the json mapping file\n";
-                        exit(0);
-                    }
+        if (mappingFile.is_open()) {
+            VLOG(0) << "MappingFilePath: " << mappingFilePath;
 
-                    nlohmann::json_schema::json_validator validator(loader, nlohmann::json_schema::default_string_format_check);
-
-                    custom_error_handler err;
-                    try {
-                        validator.set_root_schema(mappingJsonSchema);
-                    } catch (const std::exception& e) {
-                        VLOG(0) << "Setting root schema failed";
-                        VLOG(0) << e.what();
-                    }
-
-                    nlohmann::json defaultPatch = validator.validate(mappingJson, err);
-                    VLOG(0) << defaultPatch.dump(2);
-                    mappingJson = mappingJson.patch(defaultPatch);
-                } catch (const nlohmann::json::exception& e) {
-                    LOG(ERROR) << e.what();
-                }
-            } else {
-                VLOG(0) << "MappingFilePath: " << mappingFilePath << " not found";
+            try {
+                mappingFile >> mappingJson;
+            } catch (const std::exception& e) {
+                std::cerr << "JSON map file parsing failed: " << e.what() << " at " << mappingFile.tellg();
+                exit(0);
             }
+
+            nlohmann::json_schema::json_validator validator(nullptr, nlohmann::json_schema::default_string_format_check);
+
+            try {
+                validator.set_root_schema(mappingJsonSchema);
+            } catch (const std::exception& e) {
+                VLOG(0) << "Setting root json mapping schema failed";
+                VLOG(0) << e.what();
+            }
+
+            try {
+                custom_error_handler err;
+                nlohmann::json defaultPatch = validator.validate(mappingJson, err);
+
+                if (!err) {
+                    mappingJson = mappingJson.patch(defaultPatch);
+                } else {
+                    VLOG(0) << "JSON schema validation failed.";
+                    mappingJson.clear();
+                }
+            } catch (const std::exception& e) {
+                LOG(ERROR) << e.what();
+            }
+
             mappingFile.close();
         } else {
-            VLOG(0) << "MappingFilePath: " << mappingFilePath << " already loaded";
+            VLOG(0) << "MappingFilePath: " << mappingFilePath << " not found";
         }
 
         return mappingJson;
     }
-
-    nlohmann::json JsonMappingReader::mappingJsonSchema =
-#include "mapping-json-schema.json"
 
 } // namespace apps::mqttbroker::lib

@@ -21,6 +21,10 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         -Wno-shadow
         -Wno-shadow-field
         -Wno-used-but-marked-unused
+        -Wno-weak-vtables
+        -Wno-reserved-macro-identifier
+        -Wno-c++98-compat-pedantic
+        -Wno-covered-switch-default
     )
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # using GCC
@@ -48,9 +52,21 @@ add_compile_options(
     ${ADDITIONAL_OPTIONS}
 )
 
+function(make_includable input_file output_file)
+    message(Recreating ${output_file})
+    file(READ ${input_file} content)
+    set(bdelim "(")
+    set(edelim ")")
+    set(content "R\"${bdelim}\n${content}${edelim}\"\n")
+    file(WRITE ${output_file} "${content}")
+endfunction(make_includable)
+
+make_includable(mapping-schema.json ${CMAKE_CURRENT_BINARY_DIR}/mapping-schema.json.h)
+
 add_library(
     mqtt-mapping STATIC JsonMappingReader.cpp MqttMapper.cpp
-                        JsonMappingReader.h MqttMapper.h
+                        JsonMappingReader.h MqttMapper.h mapping-schema.json.h
 )
 
+target_include_directories(mqtt-mapping PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(mqtt-mapping PRIVATE snodec::mqtt nlohmann_json_schema_validator)
