@@ -50,8 +50,8 @@ namespace apps::mqttbroker::lib {
     void MqttMapper::extractTopic(const nlohmann::json& topicLevel, const std::string& topic, std::list<iot::mqtt::Topic>& topicList) {
         std::string name = topicLevel["name"];
 
-        if (topicLevel.contains("mapping")) {
-            uint8_t qoS = topicLevel["mapping"]["subscription"]["qos"];
+        if (topicLevel.contains("subscription")) {
+            uint8_t qoS = topicLevel["subscription"]["qos"];
 
             topicList.push_back(iot::mqtt::Topic(topic + ((topic.empty() || topic == "/") && !name.empty() ? "" : "/") + name, qoS));
         }
@@ -156,8 +156,8 @@ namespace apps::mqttbroker::lib {
                 matchedTopicLevel.clear();
             }
 
-            if (!matchedTopicLevel.empty() && matchedTopicLevel.contains("mapping")) {
-                const nlohmann::json& mapping = matchedTopicLevel["mapping"];
+            if (!matchedTopicLevel.empty() && matchedTopicLevel.contains("subscription")) {
+                const nlohmann::json& mapping = matchedTopicLevel["subscription"];
 
                 if (mapping.contains("static")) {
                     const nlohmann::json& staticMapping = mapping["static"];

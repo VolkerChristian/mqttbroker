@@ -19,48 +19,45 @@
           {
             "name": "button1",
             "type": "binary_sensor",
-            "mapping": {
+            "subscription": {
               "static": {
                 "mapped_topic": "mapping/value",
-                "retain_message": false,
-                "example_message": "pressed",
                 "message_mappings": [
                   {
                     "message": "pressed",
-                    "mapped_message": "pressed"
+                    "mapped_message": "on"
                   },
                   {
                     "message": "released",
-                    "mapped_message": "released"
+                    "mapped_message": "off"
                   }
-                ]
+                ],
+                "retain_message": false
               }
             }
           }
         ]
       }, {
         "name": "mapping",
-        "topic_level" : [
+        "topic_level": [
           {
             "name": "value",
-            "mapping": {
+            "subscription": {
               "value": {
                 "mapped_topic": "mapping/json",
                 "mapping_template": "{\"state\":\"{{value}}\"}",
-                "mapping_template_also_works": "{% if value == \"pressed\" %}{\"state\" : \"pressed\"}{% else if value == \"released\" %}{\"state\" : \"released\"}{% endif %}"
+                "mapping_template_also_works": "{% if value == \"on\" %}{\"state\": \"on\"}{% else if value == \"off\" %}{\"state\": \"off\"}{% endif %}"
               }
             }
           },
           {
             "name": "json",
-            "mapping": {
-              "subscription": {
-                  "qos": 0
-              },
+            "subscription": {
+              "qos": 0,
               "json": {
                 "mapped_topic": "test02/onboard/set",
-                "retain_message": false,
-                "mapping_template": "{% if json.state == \"pressed\" %}on{% else if json.state == \"released\" %}off{% endif %}"
+                "mapping_template": "{% if json.state == \"on\" %}on{% else if json.state == \"off\" %}off{% endif %}",
+                "retain_message": false
               }
             }
           }
