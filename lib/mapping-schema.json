@@ -1,12 +1,12 @@
 {
   "type": "object",
   "required": [
-    "discover_prefix",
     "mappings"
   ],
   "properties": {
     "discover_prefix": {
-      "type": "string"
+      "type": "string",
+      "default": ""
     },
     "connection": {
       "type": "object",
@@ -53,6 +53,7 @@
     },
     "mappings": {
       "type": "object",
+
       "required": [
         "topic_level"
       ],
@@ -160,144 +161,83 @@
                     }
                   },
                   {
-                    "type": "object",
-                    "required": [
-                      "value"
-                    ],
-                    "properties": {
-                      "value": {
-                        "anyOf": [
-                          {
-                            "type": "object",
-                            "required": [
-                              "mapped_topic",
-                              "mapping_template"
-                            ],
-                            "properties": {
-                              "mapped_topic": {
-                                "type": "string",
-                                "minLength": 1
-                              },
-                              "retain_message": {
-                                "type": "boolean",
-                                "default": false
-                              },
-                              "qos": {
-                                "type": "integer",
-                                "default": 0,
-                                "minimum": 0,
-                                "maximum": 2
-                              },
-                              "mapping_template": {
-                                "type": "string",
-                                "minLength": 1
-                              }
-                            }
-                          },
-                          {
-                            "type": "array",
-                            "items": {
-                              "type": "object",
-                              "required": [
-                                "mapped_topic",
-                                "mapping_template"
-                              ],
-                              "properties": {
-                                "mapped_topic": {
-                                  "type": "string",
-                                  "minLength": 1
-                                },
-                                "retain_message": {
-                                  "type": "boolean",
-                                  "default": false
-                                },
-                                "qos": {
-                                  "type": "integer",
-                                  "default": 0,
-                                  "minimum": 0,
-                                  "maximum": 2
-                                },
-                                "mapping_template": {
-                                  "type": "string",
-                                  "minLength": 1
-                                }
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    }
+                    "$ref" : "#/$defs/mapping-value"
                   },
                   {
-                    "type": "object",
-                    "required": [
-                      "json"
-                    ],
-                    "properties": {
-                      "json": {
-                        "anyOf": [
-                          {
-                            "type": "object",
-                            "required": [
-                              "mapped_topic",
-                              "mapping_template"
-                            ],
-                            "qos": {
-                              "type": "integer",
-                              "default": 0,
-                              "minimum": 0,
-                              "maximum": 2
-                            },
-                            "properties": {
-                              "mapped_topic": {
-                                "type": "string",
-                                "minLength": 1
-                              },
-                              "retain_message": {
-                                "type": "boolean",
-                                "default": false
-                              },
-                              "mapping_template": {
-                                "type": "string",
-                                "minLength": 1
-                              }
-                            }
-                          },
-                          {
-                            "type": "array",
-                            "items": {
-                              "type": "object",
-                              "required": [
-                                "mapped_topic",
-                                "mapping_template"
-                              ],
-                              "qos": {
-                                "type": "integer",
-                                "default": 0,
-                                "minimum": 0,
-                                "maximum": 2
-                              },
-                              "properties": {
-                                "mapped_topic": {
-                                  "type": "string",
-                                  "minLength": 1
-                                },
-                                "retain_message": {
-                                  "type": "boolean",
-                                  "default": false
-                                },
-                                "mapping_template": {
-                                  "type": "string",
-                                  "minLength": 1
-                                }
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    }
+                    "$ref" : "#/$defs/mapping-json"
                   }
                 ]
+              }
+            },
+            "$defs" : {
+              "mapping-value" : {
+                "type": "object",
+                "required": [
+                 "value"
+                ],
+                "properties": {
+                  "value": {
+                    "anyOf": [
+                      {
+                        "$ref" : "#/$defs/template_mapping"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "$ref" : "#/$defs/template_mapping"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "mapping-json" : {
+                "type": "object",
+                "required": [
+                  "json"
+                ],
+                "properties": {
+                  "json": {
+                    "anyOf": [
+                      {
+                        "$ref" : "#/$defs/template_mapping"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "$ref" : "#/$defs/template_mapping"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "template_mapping" : {
+                "type": "object",
+                "required": [
+                  "mapped_topic",
+                  "mapping_template"
+                ],
+                "qos": {
+                  "type": "integer",
+                  "default": 0,
+                  "minimum": 0,
+                  "maximum": 2
+                },
+                "properties": {
+                  "mapped_topic": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "retain_message": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "mapping_template": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               }
             }
           }
