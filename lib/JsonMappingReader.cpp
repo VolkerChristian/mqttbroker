@@ -37,6 +37,7 @@ namespace apps::mqttbroker::lib {
     static std::string mappingJsonSchemaString =
 #include "mapping-schema.json.h"
         ; // The semicolon at the end of the assignment.
+
     nlohmann::json JsonMappingReader::mappingJsonSchema = nlohmann::json::parse(mappingJsonSchemaString);
 
     class custom_error_handler : public nlohmann::json_schema::basic_error_handler {
@@ -77,7 +78,7 @@ namespace apps::mqttbroker::lib {
                 if (!err) {
                     mappingJson = mappingJson.patch(defaultPatch);
                 } else {
-                    VLOG(0) << "JSON schema validation failed.";
+                    VLOG(0) << "JSON schema patching failed.";
                     mappingJson.clear();
                 }
             } catch (const std::exception& e) {
