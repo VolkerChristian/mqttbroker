@@ -18,11 +18,10 @@
 
 #include "JsonMappingReader.h"
 
-#include "nlohmann/json-schema.hpp"
-
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 #include "log/Logger.h"
+#include "nlohmann/json-schema.hpp"
 
 #include <fstream>
 #include <initializer_list>
