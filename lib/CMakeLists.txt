@@ -52,20 +52,22 @@ add_compile_options(
     ${ADDITIONAL_OPTIONS}
 )
 
-function(make_includable input_file output_file)
-    message(Recreating ${output_file})
-    file(READ ${input_file} content)
-    set(bdelim "(")
-    set(edelim ")")
-    set(content "R\"${bdelim}\n${content}${edelim}\"\n")
-    file(WRITE ${output_file} "${content}")
-endfunction(make_includable)
-
-make_includable(mapping-schema.json ${CMAKE_CURRENT_BINARY_DIR}/mapping-schema.json.h)
+# Recreate mapping-schema.json.h in case mapping-schema.json has changed on disk.
+add_custom_command(
+    PRE_BUILD
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/mapping-schema.json.h
+    COMMAND ${CMAKE_COMMAND}
+        -DTARGET_NAME=MyExecutable
+        -DTARGET_PATH=${CMAKE_CURRENT_BINARY_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/recreate-mapping-schema-json-h.cmake
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/mapping-schema.json
+    COMMENT "Recreating ${CMAKE_CURRENT_BINARY_DIR}/mapping-schema.json.h"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
 
 add_library(
     mqtt-mapping STATIC JsonMappingReader.cpp MqttMapper.cpp
-                        JsonMappingReader.h MqttMapper.h mapping-schema.json.h
+                        JsonMappingReader.h MqttMapper.h ${CMAKE_CURRENT_BINARY_DIR}/mapping-schema.json.h
 )
 
 target_include_directories(mqtt-mapping PRIVATE ${CMAKE_CURRENT_BINARY_DIR})

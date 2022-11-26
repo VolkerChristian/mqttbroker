@@ -1,0 +1,11 @@
+function(make_includable input_file output_file)
+    file(READ ${input_file} content)
+    set(bdelim "(")
+    set(edelim ")")
+    set(content "R\"${bdelim}\n${content}${edelim}\"\n")
+    file(WRITE ${output_file} "${content}")
+endfunction(make_includable)
+
+if(mapping-schema.json IS_NEWER_THAN ${TARGET_PATH}/mapping-schema.json.h)
+    make_includable(mapping-schema.json ${TARGET_PATH}/mapping-schema.json.h)
+endif(mapping-schema.json IS_NEWER_THAN ${TARGET_PATH}/mapping-schema.json.h)
