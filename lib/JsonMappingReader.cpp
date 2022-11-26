@@ -55,39 +55,41 @@ namespace apps::mqttbroker::lib {
 
             try {
                 mappingFile >> mappingJson;
-            } catch (const std::exception& e) {
-                std::cerr << "JSON map file parsing failed: " << e.what() << " at " << mappingFile.tellg();
-                exit(0);
-            }
 
-            nlohmann::json_schema::json_validator validator(nullptr, nlohmann::json_schema::default_string_format_check);
+                nlohmann::json_schema::json_validator validator(nullptr, nlohmann::json_schema::default_string_format_check);
 
-            try {
-                validator.set_root_schema(mappingJsonSchema);
-            } catch (const std::exception& e) {
-                VLOG(0) << "Setting root json mapping schema failed";
-                VLOG(0) << e.what();
-            }
+                try {
+                    validator.set_root_schema(mappingJsonSchema);
 
-            try {
-                custom_error_handler err;
-                nlohmann::json defaultPatch = validator.validate(mappingJson, err);
+                    custom_error_handler err;
+                    nlohmann::json defaultPatch = validator.validate(mappingJson, err);
 
-                if (!err) {
-                    if (!defaultPatch.empty()) {
-                        VLOG(0) << "Patching JSON with default values:\n" << defaultPatch.dump(4);
-                        mappingJson = mappingJson.patch(defaultPatch);
+                    if (!err) {
+                        if (!defaultPatch.empty()) {
+                            try {
+                                mappingJson = mappingJson.patch(defaultPatch);
+                            } catch (const std::exception& e) {
+                                LOG(ERROR) << e.what();
+                                LOG(ERROR) << "Patching JSON with default patch failed:\n" << defaultPatch.dump(4);
+                                mappingJson.clear();
+                            }
+                        }
+                    } else {
+                        LOG(ERROR) << "JSON schema validating failed.";
+                        mappingJson.clear();
                     }
-                } else {
-                    VLOG(0) << "JSON schema validating failed.";
+
+                } catch (const std::exception& e) {
+                    LOG(ERROR) << e.what();
+                    LOG(ERROR) << "Setting root json mapping schema failed; " << mappingJsonSchema.dump(4);
                     mappingJson.clear();
                 }
-            } catch (const std::exception& e) {
-                LOG(ERROR) << e.what();
-                mappingJson.clear();
-            }
 
-            mappingFile.close();
+                mappingFile.close();
+            } catch (const std::exception& e) {
+                LOG(ERROR) << "JSON map file parsing failed: " << e.what() << " at " << mappingFile.tellg();
+                exit(0);
+            }
         } else {
             VLOG(0) << "MappingFilePath: " << mappingFilePath << " not found";
         }
