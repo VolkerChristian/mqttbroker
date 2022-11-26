@@ -99,168 +99,168 @@
               "mapping": {
                 "anyOf": [
                   {
-                    "$ref" : "#/items/defs/mapping_static"
+                    "$ref" : "#/$defs/mapping_static"
                   },
                   {
-                    "$ref" : "#/items/defs/mapping_value"
+                    "$ref" : "#/$defs/mapping_value"
                   },
                   {
-                    "$ref" : "#/items/defs/mapping_json"
+                    "$ref" : "#/$defs/mapping_json"
                   }
                 ]
               }
-            },
-            "defs" : {
-              "mapping_static": {
-                "type": "object",
-                "required": [
-                  "static"
-                ],
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "default": ""
-                  },
-                  "subscription": {
-                    "$ref" : "#/items/defs/subscription"
-                  },
-                  "static": {
-                    "type": "object",
-                    "required": [
-                      "mapped_topic",
-                      "message_mappings"
-                    ],
-                    "properties": {
-                      "mapped_topic": {
-                        "type": "string",
-                        "minLength": 1
-                      },
-                      "retain_message": {
-                        "type": "boolean",
-                        "default": false
-                      },
-                      "qos": {
-                        "type": "integer",
-                        "minimum": 0,
-                        "maximum": 2
-                      },
-                      "message_mappings": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
+            }
+          },
+          "$defs" : {
+            "mapping_static": {
+              "type": "object",
+              "required": [
+                "static"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "default": ""
+                },
+                "subscription": {
+                  "$ref" : "#/$defs/subscription"
+                },
+                "static": {
+                  "type": "object",
+                  "required": [
+                    "mapped_topic",
+                    "message_mappings"
+                  ],
+                  "properties": {
+                    "mapped_topic": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "retain_message": {
+                      "type": "boolean",
+                      "default": false
+                    },
+                    "qos": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 2
+                    },
+                    "message_mappings": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
                           "required": [
-                            "message",
-                            "mapped_message"
-                          ],
-                          "properties": {
-                            "message": {
-                              "type": "string",
-                              "minLength": 1
-                            },
-                            "mapped_message": {
-                              "type": "string",
-                              "minLength" : 1
-                            }
+                          "message",
+                          "mapped_message"
+                        ],
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "mapped_message": {
+                            "type": "string",
+                            "minLength" : 1
                           }
                         }
                       }
                     }
                   }
                 }
-              },
-              "mapping_value" : {
-                "type": "object",
-                "required": [
-                 "value"
-                ],
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "default": ""
-                  },
-                  "subscription": {
-                    "$ref" : "#/items/defs/subscription"
-                  },
-                  "value": {
-                    "anyOf": [
-                      {
-                        "$ref" : "#/items/defs/template_mapping"
-                      },
-                      {
-                        "type": "array",
-                        "items": {
-                          "$ref" : "#/items/defs/template_mapping"
-                        }
-                      }
-                    ]
-                  }
-                }
-              },
-              "mapping_json" : {
-                "type": "object",
-                "required": [
-                  "json"
-                ],
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "default": ""
-                  },
-                  "subscription": {
-                    "$ref" : "#/items/defs/subscription"
-                  },
-                  "json": {
-                    "anyOf": [
-                      {
-                        "$ref" : "#/items/defs/template_mapping"
-                      },
-                      {
-                        "type": "array",
-                        "items": {
-                          "$ref" : "#/items/defs/template_mapping"
-                        }
-                      }
-                    ]
-                  }
-                }
-              },
-              "subscription": {
-                "type": "object",
-                "properties": {
-                  "qos": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 2
-                  }
+              }
+            },
+            "mapping_value" : {
+              "type": "object",
+              "required": [
+               "value"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "default": ""
                 },
-                "default" : {
-                  "qos" : 0
+                "subscription": {
+                  "$ref" : "#/$defs/subscription"
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "$ref" : "#/$defs/template_mapping"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "$ref" : "#/$defs/template_mapping"
+                      }
+                    }
+                  ]
                 }
-              },
-              "template_mapping" : {
-                "type": "object",
-                "required": [
-                  "mapped_topic",
-                  "mapping_template"
-                ],
+              }
+            },
+            "mapping_json" : {
+              "type": "object",
+              "required": [
+                "json"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "default": ""
+                },
+                "subscription": {
+                  "$ref" : "#/$defs/subscription"
+                },
+                "json": {
+                  "anyOf": [
+                    {
+                      "$ref" : "#/$defs/template_mapping"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "$ref" : "#/$defs/template_mapping"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "subscription": {
+              "type": "object",
+              "properties": {
                 "qos": {
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 2
+                }
+              },
+              "default" : {
+                "qos" : 0
+              }
+            },
+            "template_mapping" : {
+              "type": "object",
+              "required": [
+                "mapped_topic",
+                "mapping_template"
+              ],
+              "qos": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2
+              },
+              "properties": {
+                "mapped_topic": {
+                  "type": "string",
+                  "minLength": 1
                 },
-                "properties": {
-                  "mapped_topic": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "retain_message": {
-                    "type": "boolean",
-                    "default": false
-                  },
-                  "mapping_template": {
-                    "type": "string",
-                    "minLength": 1
-                  }
+                "retain_message": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "mapping_template": {
+                  "type": "string",
+                  "minLength": 1
                 }
               }
             }
