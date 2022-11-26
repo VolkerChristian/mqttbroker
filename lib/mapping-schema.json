@@ -110,67 +110,70 @@
               "mapping": {
                 "anyOf": [
                   {
-                    "type": "object",
-                    "required": [
-                      "static"
-                    ],
-                    "properties": {
-                      "static": {
-                        "type": "object",
-                        "required": [
-                          "mapped_topic",
-                          "message_mappings"
-                        ],
-                        "properties": {
-                          "mapped_topic": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "retain_message": {
-                            "type": "boolean",
-                            "default": false
-                          },
-                          "qos": {
-                            "type": "integer",
-                            "default": 0,
-                            "minimum": 0,
-                            "maximum": 2
-                          },
-                          "message_mappings": {
-                            "type": "array",
-                            "items": {
-                              "type": "object",
-                              "required": [
-                                "message",
-                                "mapped_message"
-                              ],
-                              "properties": {
-                                "message": {
-                                  "type": "string",
-                                  "minLength": 1
-                                },
-                                "mapped_message": {
-                                  "type": "string",
-                                  "minLength" : 1
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
+                    "$ref" : "#/$defs/mapping_static"
                   },
                   {
-                    "$ref" : "#/$defs/mapping-value"
+                    "$ref" : "#/$defs/mapping_value"
                   },
                   {
-                    "$ref" : "#/$defs/mapping-json"
+                    "$ref" : "#/$defs/mapping_json"
                   }
                 ]
               }
             },
             "$defs" : {
-              "mapping-value" : {
+              "mapping_static": {
+                "type": "object",
+                "required": [
+                  "static"
+                ],
+                "properties": {
+                  "static": {
+                    "type": "object",
+                    "required": [
+                      "mapped_topic",
+                      "message_mappings"
+                    ],
+                    "properties": {
+                      "mapped_topic": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "retain_message": {
+                        "type": "boolean",
+                        "default": false
+                      },
+                      "qos": {
+                        "type": "integer",
+                        "default": 0,
+                        "minimum": 0,
+                        "maximum": 2
+                      },
+                      "message_mappings": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "message",
+                            "mapped_message"
+                          ],
+                          "properties": {
+                            "message": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "mapped_message": {
+                              "type": "string",
+                              "minLength" : 1
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "mapping_value" : {
                 "type": "object",
                 "required": [
                  "value"
@@ -191,7 +194,7 @@
                   }
                 }
               },
-              "mapping-json" : {
+              "mapping_json" : {
                 "type": "object",
                 "required": [
                   "json"

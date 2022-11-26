@@ -23,26 +23,41 @@
                 "qos": 0
             },
             "mapping": {
-              "value": {
-                "mapped_topic": "test02/onboard/set",
+              "static": {
+                "mapped_topic": "mapping/value",
                 "retain_message": false,
-                "mapping_template": "{% if value == \"pressed\" %}on{% else if value == \"released\" %}off{% endif %}"
-              },
-              "static-example": {
-                "mapped_topic": "test02/onboard/set",
-                "retain_message": false,
+                "example_message": "pressed",
                 "message_mappings": [
                   {
                     "message": "pressed",
-                    "mapped_message": "on"
+                    "mapped_message": "pressed"
                   },
                   {
                     "message": "released",
-                    "mapped_message": "off"
+                    "mapped_message": "released"
                   }
                 ]
-              },
-              "json-example": {
+              }
+            }
+          }
+        ]
+      }, {
+        "name": "mapping",
+        "topic_level" : [
+          {
+            "name": "value",
+            "mapping": {
+              "value": {
+                "mapped_topic": "mapping/json",
+                "retain_message": false,
+                "mapping_template": "{% if value == \"pressed\" %}{\"state\" : \"pressed\"}{% else if value == \"released\" %}{\"state\" : \"released\"}{% endif %}"
+              }
+            }
+          },
+          {
+            "name": "json",
+            "mapping": {
+              "json": {
                 "mapped_topic": "test02/onboard/set",
                 "retain_message": false,
                 "mapping_template": "{% if json.state == \"pressed\" %}on{% else if json.state == \"released\" %}off{% endif %}"
