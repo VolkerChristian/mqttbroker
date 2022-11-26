@@ -52,14 +52,14 @@ add_compile_options(
     ${ADDITIONAL_OPTIONS}
 )
 
-# Recreate mapping-schema.json.h in case mapping-schema.json has changed on disk.
+# Create mapping-schema.json.h in case mapping-schema.json has changed on disk.
 add_custom_command(
     PRE_BUILD
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/mapping-schema.json.h
-    COMMAND ${CMAKE_COMMAND}
-        -DTARGET_NAME=MyExecutable
-        -DTARGET_PATH=${CMAKE_CURRENT_BINARY_DIR}
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/recreate-mapping-schema-json-h.cmake
+    COMMAND
+        ${CMAKE_COMMAND} -DTARGET_NAME=MyExecutable
+        -DTARGET_PATH=${CMAKE_CURRENT_BINARY_DIR} -P
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/recreate-mapping-schema-json-h.cmake
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/mapping-schema.json
     COMMENT "Creating ${CMAKE_CURRENT_BINARY_DIR}/mapping-schema.json.h"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -71,4 +71,6 @@ add_library(
 )
 
 target_include_directories(mqtt-mapping PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-target_link_libraries(mqtt-mapping PRIVATE snodec::mqtt nlohmann_json_schema_validator)
+target_link_libraries(
+    mqtt-mapping PRIVATE snodec::mqtt nlohmann_json_schema_validator
+)

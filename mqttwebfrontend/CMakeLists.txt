@@ -51,15 +51,16 @@ add_compile_options(
 
 set(MQTTWEBFRONTEND_CPP mqttwebfrontend.cpp SocketContext.cpp MqttModel.cpp)
 
-set(MQTTWEBFRONTEND_H SharedSocketContextFactory.h SharedSocketContextFactory.hpp
-                 SocketContext.h MqttModel.h
+set(MQTTWEBFRONTEND_H
+    SharedSocketContextFactory.h SharedSocketContextFactory.hpp SocketContext.h
+    MqttModel.h
 )
 
 add_executable(mqttwebfrontend ${MQTTWEBFRONTEND_CPP} ${MQTTWEBFRONTEND_H})
 
 target_include_directories(
-    mqttwebfrontend PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
-                      ${PROJECT_SOURCE_DIR}
+    mqttwebfrontend PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+                           ${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_SOURCE_DIR}
 )
 
 target_link_libraries(
