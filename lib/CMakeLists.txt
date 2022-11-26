@@ -61,13 +61,13 @@ add_custom_command(
         -DTARGET_PATH=${CMAKE_CURRENT_BINARY_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/recreate-mapping-schema-json-h.cmake
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/mapping-schema.json
-    COMMENT "Recreating ${CMAKE_CURRENT_BINARY_DIR}/mapping-schema.json.h"
+    COMMENT "Creating ${CMAKE_CURRENT_BINARY_DIR}/mapping-schema.json.h"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_library(
     mqtt-mapping STATIC JsonMappingReader.cpp MqttMapper.cpp
-                        JsonMappingReader.h MqttMapper.h ${CMAKE_CURRENT_BINARY_DIR}/mapping-schema.json.h
+                        JsonMappingReader.h MqttMapper.h mapping-schema.json.h
 )
 
 target_include_directories(mqtt-mapping PRIVATE ${CMAKE_CURRENT_BINARY_DIR})

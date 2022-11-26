@@ -19,9 +19,6 @@
           {
             "name": "button1",
             "type": "binary_sensor",
-            "subscription": {
-                "qos": 0
-            },
             "mapping": {
               "static": {
                 "mapped_topic": "mapping/value",
@@ -49,14 +46,17 @@
             "mapping": {
               "value": {
                 "mapped_topic": "mapping/json",
-                "retain_message": false,
-                "mapping_template": "{% if value == \"pressed\" %}{\"state\" : \"pressed\"}{% else if value == \"released\" %}{\"state\" : \"released\"}{% endif %}"
+                "mapping_template": "{\"state\":\"{{value}}\"}",
+                "mapping_template_also_works": "{% if value == \"pressed\" %}{\"state\" : \"pressed\"}{% else if value == \"released\" %}{\"state\" : \"released\"}{% endif %}"
               }
             }
           },
           {
             "name": "json",
             "mapping": {
+              "subscription": {
+                  "qos": 0
+              },
               "json": {
                 "mapped_topic": "test02/onboard/set",
                 "retain_message": false,

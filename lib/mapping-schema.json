@@ -83,24 +83,6 @@
                 "type": "string",
                 "default": ""
               },
-              "type": {
-                "type": "string",
-                "default": ""
-              },
-              "subscription": {
-                "type": "object",
-                "properties": {
-                  "qos": {
-                    "type": "integer",
-                    "default": 0,
-                    "minimum": 0,
-                    "maximum": 2
-                  }
-                },
-                "default" : {
-                    "qos" : 0
-                }
-              },
               "topic_level": {
                 "type": "array",
                 "items": {
@@ -128,6 +110,24 @@
                   "static"
                 ],
                 "properties": {
+                  "type": {
+                    "type": "string",
+                    "default": ""
+                  },
+                  "subscription": {
+                    "type": "object",
+                    "properties": {
+                      "qos": {
+                        "type": "integer",
+                        "default": 0,
+                        "minimum": 0,
+                        "maximum": 2
+                      }
+                    },
+                    "default" : {
+                      "qos" : 0
+                    }
+                  },
                   "static": {
                     "type": "object",
                     "required": [
@@ -145,7 +145,6 @@
                       },
                       "qos": {
                         "type": "integer",
-                        "default": 0,
                         "minimum": 0,
                         "maximum": 2
                       },
@@ -171,6 +170,11 @@
                       }
                     }
                   }
+                },
+                "default" : {
+                  "subscription": {
+                    "qos": 0
+                  }
                 }
               },
               "mapping_value" : {
@@ -179,6 +183,24 @@
                  "value"
                 ],
                 "properties": {
+                  "type": {
+                    "type": "string",
+                    "default": ""
+                  },
+                  "subscription": {
+                    "type": "object",
+                    "properties": {
+                      "qos": {
+                        "type": "integer",
+                        "default": 0,
+                        "minimum": 0,
+                        "maximum": 2
+                      }
+                    },
+                    "default" : {
+                      "qos" : 0
+                    }
+                  },
                   "value": {
                     "anyOf": [
                       {
@@ -200,6 +222,24 @@
                   "json"
                 ],
                 "properties": {
+                  "type": {
+                    "type": "string",
+                    "default": ""
+                  },
+                  "subscription": {
+                    "type": "object",
+                    "properties": {
+                      "qos": {
+                        "type": "integer",
+                        "default": 0,
+                        "minimum": 0,
+                        "maximum": 2
+                      }
+                    },
+                    "default" : {
+                      "qos" : 0
+                    }
+                  },
                   "json": {
                     "anyOf": [
                       {
@@ -223,7 +263,6 @@
                 ],
                 "qos": {
                   "type": "integer",
-                  "default": 0,
                   "minimum": 0,
                   "maximum": 2
                 },

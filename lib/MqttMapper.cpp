@@ -55,8 +55,7 @@ namespace apps::mqttbroker::lib {
                 std::string name = nameJson.get<std::string>();
 
                 if (topicLevel.contains("mapping")) {
-                    const nlohmann::json& subscriptionJson = topicLevel["subscription"];
-                    uint8_t qoS = subscriptionJson["qos"];
+                    uint8_t qoS = topicLevel["mapping"]["subscription"]["qos"];
 
                     topicList.push_back(
                         iot::mqtt::Topic(topic + ((topic.empty() || topic == "/") && !name.empty() ? "" : "/") + name, qoS));
@@ -105,8 +104,8 @@ namespace apps::mqttbroker::lib {
 
             LOG(INFO) << "      " << commandTopic << " : " << mappingTemplate << " -> '" << renderedMessage << "'";
 
-            bool retain = templateMapping.value("retain_message", false);
-            bool qoS = templateMapping.value("qos", publish.getQoS());
+            bool retain = templateMapping["retain_message"];
+            bool qoS = templateMapping.value("qos_override", publish.getQoS());
 
             publishMapping(commandTopic, renderedMessage, qoS, retain);
         } catch (const inja::InjaError& e) {
@@ -163,8 +162,8 @@ namespace apps::mqttbroker::lib {
                 matchedTopicLevel.clear();
             }
 
-            if (!matchedTopicLevel.empty()) {
-                const nlohmann::json& mapping = matchedTopicLevel.value("mapping", nlohmann::json::object());
+            if (!matchedTopicLevel.empty() && matchedTopicLevel.contains("mapping")) {
+                const nlohmann::json& mapping = matchedTopicLevel["mapping"];
 
                 if (mapping.contains("static")) {
                     const nlohmann::json& staticMapping = mapping["static"];
@@ -181,7 +180,7 @@ namespace apps::mqttbroker::lib {
 
                         if (matchedMessageMappingIterator != messageMappingArray.end()) {
                             const std::string& commandTopic = staticMapping["mapped_topic"];
-                            bool retain = staticMapping.value("retain_message", false);
+                            bool retain = staticMapping["retain_message"];
                             bool qoS = staticMapping.value("qos", publish.getQoS());
 
                             const std::string& message = (*matchedMessageMappingIterator)["mapped_message"];

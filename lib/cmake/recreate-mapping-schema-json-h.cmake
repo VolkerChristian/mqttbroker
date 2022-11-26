@@ -2,7 +2,7 @@ function(make_includable input_file output_file)
     file(READ ${input_file} content)
     set(bdelim "(")
     set(edelim ")")
-    set(content "R\"${bdelim}\n${content}${edelim}\"\n")
+    set(content "static std::string mappingJsonSchemaString = R\"${bdelim}\n${content}${edelim}\";\n")
     file(WRITE ${output_file} "${content}")
 endfunction(make_includable)
 
