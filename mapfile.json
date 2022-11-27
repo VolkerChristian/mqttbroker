@@ -57,7 +57,7 @@
               "qos": 0,
               "json": {
                 "mapped_topic": "test02/onboard/set",
-                "mapping_template": "{% if json.state == \"on\" %}on{% else if json.state == \"off\" %}off{% endif %}",
+                "mapping_template": "{% if state == \"on\" %}on{% else if state == \"off\" %}off{% endif %}",
                 "retain_message": false
               }
             }

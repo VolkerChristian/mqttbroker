@@ -138,10 +138,6 @@
                 },
                 "static": {
                   "type": "object",
-                  "required": [
-                    "mapped_topic",
-                    "message_mappings"
-                  ],
                   "allOf": [
                     {
                       "$ref": "#/$defs/mapping_commons"
@@ -149,24 +145,17 @@
                   ],
                   "properties": {
                     "message_mappings": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                          "required": [
-                          "message",
-                          "mapped_message"
-                        ],
-                        "properties": {
-                          "message": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "mapped_message": {
-                            "type": "string",
-                            "minLength": 1
-                          }
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/message_mappings"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/$defs/message_mappings"
                         }
                       }
+                    ]
                     }
                   }
                 }
@@ -211,6 +200,26 @@
                       }
                     }
                   ]
+                }
+              }
+            },
+            "message_mappings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                  "required": [
+                  "message",
+                  "mapped_message"
+                ],
+               "properties": {
+                  "message": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "mapped_message": {
+                    "type": "string",
+                    "minLength": 1
+                  }
                 }
               }
             },

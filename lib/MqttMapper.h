@@ -53,8 +53,19 @@ namespace apps::mqttbroker::lib {
         static void extractTopic(const nlohmann::json& json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList);
         static void extractTopics(const nlohmann::json& json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList);
 
-        void publishTemplate(const nlohmann::json& mappingSubJson, const nlohmann::json& json, const iot::mqtt::packets::Publish& publish);
-        void publishTemplates(const nlohmann::json& mappingSubJson, const nlohmann::json& json, const iot::mqtt::packets::Publish& publish);
+        nlohmann::json findMatchingTopicLevel(const iot::mqtt::packets::Publish& publish);
+
+        void
+        publishMappedTemplate(const nlohmann::json& mappingSubJson, const nlohmann::json& json, const iot::mqtt::packets::Publish& publish);
+        void publishMappedTemplates(const nlohmann::json& mappingSubJson,
+                                    const nlohmann::json& json,
+                                    const iot::mqtt::packets::Publish& publish);
+
+        void publishMappedMessage(const nlohmann::json& staticMapping,
+                                  const nlohmann::json& messageMappingArray,
+                                  const iot::mqtt::packets::Publish& publish);
+
+        void publishMappedMessages(const nlohmann::json& staticMapping, const iot::mqtt::packets::Publish& publish);
 
         virtual void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) = 0;
 
