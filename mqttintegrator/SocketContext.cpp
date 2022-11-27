@@ -39,17 +39,16 @@ namespace apps::mqttbroker::integrator {
                                  const nlohmann::json& mappingJson)
         : iot::mqtt::client::SocketContext(socketConnection)
         , apps::mqttbroker::lib::MqttMapper(mappingJson)
-        , connectionJson(connectionJson) {
-        keepAlive = connectionJson.contains("keep_alive") ? static_cast<uint16_t>(connectionJson["keep_alive"]) : 60;
-        clientId = connectionJson.contains("client_id") ? static_cast<std::string>(connectionJson["client_id"]) : "";
-        cleanSession = connectionJson.contains("clean_session") ? static_cast<bool>(connectionJson["clean_session"]) : true;
-        willTopic = connectionJson.contains("will_topic") ? static_cast<std::string>(connectionJson["will_topic"]) : "";
-        willMessage = connectionJson.contains("will_message") ? static_cast<std::string>(connectionJson["will_message"]) : "";
-        willQoS = connectionJson.contains("will_qos") ? static_cast<uint8_t>(connectionJson["will_qos"]) : 0;
-        willRetain = connectionJson.contains("will_retain") ? static_cast<bool>(connectionJson["will_retain"]) : true;
-        username = connectionJson.contains("username") ? static_cast<std::string>(connectionJson["username"]) : "";
-        password = connectionJson.contains("password") ? static_cast<std::string>(connectionJson["password"]) : "";
-
+        , connectionJson(connectionJson)
+        , keepAlive(connectionJson["keep_alive"])
+        , clientId(connectionJson["client_id"])
+        , cleanSession(connectionJson["clean_session"])
+        , willTopic(connectionJson["will_topic"])
+        , willMessage(connectionJson["will_message"])
+        , willQoS(connectionJson["will_qos"])
+        , willRetain(connectionJson["will_retain"])
+        , username(connectionJson["username"])
+        , password(connectionJson["password"]) {
         LOG(TRACE) << "Keep Alive: " << keepAlive;
         LOG(TRACE) << "Client Id: " << clientId;
         LOG(TRACE) << "Clean Session: " << cleanSession;
