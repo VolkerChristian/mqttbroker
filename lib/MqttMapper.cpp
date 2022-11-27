@@ -197,9 +197,7 @@ namespace apps::mqttbroker::lib {
             const nlohmann::json& mapping = matchedTopicLevel["subscription"];
 
             if (mapping.contains("static")) {
-                const nlohmann::json& staticMapping = mapping["static"];
-
-                publishMappedMessages(staticMapping, publish);
+                publishMappedMessages(mapping["static"], publish);
             } else {
                 nlohmann::json json;
                 nlohmann::json templateMapping;
