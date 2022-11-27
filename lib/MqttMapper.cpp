@@ -99,7 +99,7 @@ namespace apps::mqttbroker::lib {
             LOG(INFO) << "      " << commandTopic << " : " << mappingTemplate << " -> '" << renderedMessage << "'";
 
             bool retain = templateMapping["retain_message"];
-            bool qoS = templateMapping.value("qos_override", publish.getQoS());
+            uint8_t qoS = templateMapping.value("qos_override", publish.getQoS());
 
             publishMapping(commandTopic, renderedMessage, qoS, retain);
         } catch (const inja::InjaError& e) {
@@ -172,7 +172,7 @@ namespace apps::mqttbroker::lib {
                     if (matchedMessageMappingIterator != messageMappingArray.end()) {
                         const std::string& commandTopic = staticMapping["mapped_topic"];
                         bool retain = staticMapping["retain_message"];
-                        bool qoS = staticMapping.value("qos_override", publish.getQoS());
+                        uint8_t qoS = staticMapping.value("qos_override", publish.getQoS());
 
                         const std::string& message = (*matchedMessageMappingIterator)["mapped_message"];
 
