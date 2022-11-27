@@ -20,6 +20,8 @@
             "name": "button1",
             "subscription": {
               "type": "binary_sensor",
+              "qos": 2,
+              "retain_message": false,
               "static": {
                 "mapped_topic": "mapping/value",
                 "message_mappings": [
@@ -31,8 +33,7 @@
                     "message": "released",
                     "mapped_message": "off"
                   }
-                ],
-                "retain_message": false
+                ]
               }
             }
           }
