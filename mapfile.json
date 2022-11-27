@@ -18,8 +18,8 @@
         "topic_level": [
           {
             "name": "button1",
-            "type": "binary_sensor",
             "subscription": {
+              "type": "binary_sensor",
               "static": {
                 "mapped_topic": "mapping/value",
                 "message_mappings": [
