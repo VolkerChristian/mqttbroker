@@ -68,20 +68,20 @@ namespace apps::mqttbroker::integrator {
     void SocketContext::onConnected() {
         VLOG(0) << "On Connected";
 
-        this->sendConnect(keepAlive, clientId, cleanSession, willTopic, willMessage, willQoS, willRetain, username, password);
+        sendConnect(keepAlive, clientId, cleanSession, willTopic, willMessage, willQoS, willRetain, username, password);
 
-        this->setTimeout(keepAlive * 1.5);
+        setTimeout(keepAlive * 1.5);
 
         pingTimer = core::timer::Timer::intervalTimer(
             [this](void) -> void {
-                this->sendPingreq();
+                sendPingreq();
             },
             keepAlive);
     }
 
     void SocketContext::onExit() {
         VLOG(0) << "On Exit";
-        this->sendDisconnect();
+        sendDisconnect();
     }
 
     void SocketContext::onConnack(iot::mqtt::packets::Connack& connack) {
@@ -98,8 +98,8 @@ namespace apps::mqttbroker::integrator {
                 connectJson["username"] = username;
                 connectJson["password"] = password;
 
-                this->sendPublish(++packetIdentifier, "snode.c/_cfg_/connection", connectJson.dump(), 0, true);
-                this->sendPublish(++packetIdentifier, "snode.c/_cfg_/mapping", apps::mqttbroker::lib::MqttMapper::dump(), 0, true);
+                sendPublish(getPacketIdentifier(), "snode.c/_cfg_/connection", connectJson.dump(), 0, true);
+                sendPublish(getPacketIdentifier(), "snode.c/_cfg_/mapping", apps::mqttbroker::lib::MqttMapper::dump(), 0, true);
 
                 std::list<iot::mqtt::Topic> topicList = MqttMapper::extractTopics();
 
@@ -107,7 +107,7 @@ namespace apps::mqttbroker::integrator {
                     LOG(INFO) << "Subscribe Topic: " << topic.getName() << ", qoS: " << static_cast<uint16_t>(topic.getQoS());
                 }
 
-                this->sendSubscribe(++packetIdentifier, topicList);
+                sendSubscribe(getPacketIdentifier(), topicList);
             }
         }
     }
@@ -117,7 +117,7 @@ namespace apps::mqttbroker::integrator {
     }
 
     void SocketContext::publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) {
-        sendPublish(++packetIdentifier, topic, message, qoS, retain);
+        sendPublish(getPacketIdentifier(), topic, message, qoS, retain);
     }
 
 } // namespace apps::mqttbroker::integrator

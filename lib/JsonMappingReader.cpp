@@ -80,7 +80,7 @@ namespace apps::mqttbroker::lib {
 
                 } catch (const std::exception& e) {
                     LOG(ERROR) << e.what();
-                    LOG(ERROR) << "Setting root json mapping schema failed; " << mappingJsonSchema.dump(4);
+                    LOG(ERROR) << "Setting root json mapping schema failed:\n" << mappingJsonSchema.dump(4);
                     mappingJson.clear();
                 }
 

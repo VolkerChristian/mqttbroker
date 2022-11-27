@@ -67,8 +67,6 @@ namespace apps::mqttbroker::integrator {
 
         core::timer::Timer pingTimer;
 
-        uint16_t packetIdentifier = 0;
-
         uint16_t keepAlive;
         std::string clientId;
         bool cleanSession;

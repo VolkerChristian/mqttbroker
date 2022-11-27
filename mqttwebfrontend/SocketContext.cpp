@@ -19,6 +19,7 @@
 #include "SocketContext.h" // IWYU pragma: export
 
 #include "MqttModel.h"
+#include "iot/mqtt/packets/Publish.h"
 #include "iot/mqtt/server/broker/Broker.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -48,6 +49,8 @@ namespace apps::mqttbroker::webfrontend {
         if (retain) {
             broker->retainMessage(topic, message, qoS);
         }
+
+        publishMappings(iot::mqtt::packets::Publish(getPacketIdentifier(), topic, message, qoS, retain, MQTT_DUP_FALSE));
     }
 
     void SocketContext::onDisconnected() {
