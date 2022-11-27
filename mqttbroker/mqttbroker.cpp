@@ -142,23 +142,26 @@ int main(int argc, char* argv[]) {
                     static_cast<GENERAL_NAMES*>(X509_get_ext_d2i(server_cert, NID_subject_alt_name, nullptr, nullptr));
 
                 int32_t altNameCount = sk_GENERAL_NAME_num(subjectAltNames);
-                VLOG(0) << "\t   Subject alternative name count: " << altNameCount;
-                for (int32_t i = 0; i < altNameCount; ++i) {
-                    GENERAL_NAME* generalName = sk_GENERAL_NAME_value(subjectAltNames, i);
-                    if (generalName->type == GEN_URI) {
-                        std::string subjectAltName =
-                            std::string(reinterpret_cast<const char*>(ASN1_STRING_get0_data(generalName->d.uniformResourceIdentifier)),
-                                        static_cast<std::size_t>(ASN1_STRING_length(generalName->d.uniformResourceIdentifier)));
-                        VLOG(0) << "\t      SAN (URI): '" + subjectAltName;
-                    } else if (generalName->type == GEN_DNS) {
-                        std::string subjectAltName =
-                            std::string(reinterpret_cast<const char*>(ASN1_STRING_get0_data(generalName->d.dNSName)),
-                                        static_cast<std::size_t>(ASN1_STRING_length(generalName->d.dNSName)));
-                        VLOG(0) << "\t      SAN (DNS): '" + subjectAltName;
-                    } else {
-                        VLOG(0) << "\t      SAN (Type): '" + std::to_string(generalName->type);
+                if (altNameCount > 0) {
+                    VLOG(0) << "\t   Subject alternative name count: " << altNameCount;
+                    for (int32_t i = 0; i < altNameCount; ++i) {
+                        GENERAL_NAME* generalName = sk_GENERAL_NAME_value(subjectAltNames, i);
+                        if (generalName->type == GEN_URI) {
+                            std::string subjectAltName =
+                                std::string(reinterpret_cast<const char*>(ASN1_STRING_get0_data(generalName->d.uniformResourceIdentifier)),
+                                            static_cast<std::size_t>(ASN1_STRING_length(generalName->d.uniformResourceIdentifier)));
+                            VLOG(0) << "\t      SAN (URI): '" + subjectAltName;
+                        } else if (generalName->type == GEN_DNS) {
+                            std::string subjectAltName =
+                                std::string(reinterpret_cast<const char*>(ASN1_STRING_get0_data(generalName->d.dNSName)),
+                                            static_cast<std::size_t>(ASN1_STRING_length(generalName->d.dNSName)));
+                            VLOG(0) << "\t      SAN (DNS): '" + subjectAltName;
+                        } else {
+                            VLOG(0) << "\t      SAN (Type): '" + std::to_string(generalName->type);
+                        }
                     }
                 }
+
                 sk_GENERAL_NAME_pop_free(subjectAltNames, GENERAL_NAME_free);
 
                 X509_free(server_cert);
