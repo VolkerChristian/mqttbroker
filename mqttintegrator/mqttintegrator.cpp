@@ -97,14 +97,14 @@ int main(int argc, char* argv[]) {
                     VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
                     VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
 
-                    X509_VERIFY_PARAM* param = SSL_get0_param(socketConnection->getSSL());
+                    // X509_VERIFY_PARAM* param = SSL_get0_param(socketConnection->getSSL());
 
                     /* Enable automatic hostname checks */
-                    X509_VERIFY_PARAM_set_hostflags(param, X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS);
-                    if (!X509_VERIFY_PARAM_set1_host(param, "localhost", sizeof("localhost") - 1)) {
-                        // handle error
-                        socketConnection->close();
-                    }
+                    // X509_VERIFY_PARAM_set_hostflags(param, X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS);
+                    // if (!X509_VERIFY_PARAM_set1_host(param, "localhost", sizeof("localhost") - 1)) {
+                    //     // handle error
+                    //     socketConnection->close();
+                    // }
                 },
                 []([[maybe_unused]] TLSInSocketConnection* socketConnection) -> void {
                     VLOG(0) << "OnConnected";
