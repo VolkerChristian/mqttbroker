@@ -106,7 +106,7 @@ int main(int argc, char* argv[]) {
                     //     socketConnection->close();
                     // }
                 },
-                []([[maybe_unused]] TLSInSocketConnection* socketConnection) -> void {
+                [](TLSInSocketConnection* socketConnection) -> void {
                     VLOG(0) << "OnConnected";
 
                     X509* server_cert = SSL_get_peer_certificate(socketConnection->getSSL());
@@ -135,14 +135,14 @@ int main(int argc, char* argv[]) {
                                 for (int32_t i = 0; i < altNameCount; ++i) {
                                     GENERAL_NAME* generalName = sk_GENERAL_NAME_value(subjectAltNames, i);
                                     if (generalName->type == GEN_URI) {
-                                        std::string subjectAltName = std::string(
-                                            reinterpret_cast<const char*>(ASN1_STRING_get0_data(generalName->d.uniformResourceIdentifier)),
+                                        std::string subjectAltName = reinterpret_cast<const char*>(
+                                            ASN1_STRING_get0_data(generalName->d.uniformResourceIdentifier),
                                             static_cast<std::size_t>(ASN1_STRING_length(generalName->d.uniformResourceIdentifier)));
                                         VLOG(0) << "\t      SAN (URI): '" + subjectAltName;
                                     } else if (generalName->type == GEN_DNS) {
-                                        std::string subjectAltName =
-                                            std::string(reinterpret_cast<const char*>(ASN1_STRING_get0_data(generalName->d.dNSName)),
-                                                        static_cast<std::size_t>(ASN1_STRING_length(generalName->d.dNSName)));
+                                        std::string subjectAltName = reinterpret_cast<const char*>(
+                                            ASN1_STRING_get0_data(generalName->d.dNSName),
+                                            static_cast<std::size_t>(ASN1_STRING_length(generalName->d.dNSName)));
                                         VLOG(0) << "\t      SAN (DNS): '" + subjectAltName;
                                     } else {
                                         VLOG(0) << "\t      SAN (Type): '" + std::to_string(generalName->type);
