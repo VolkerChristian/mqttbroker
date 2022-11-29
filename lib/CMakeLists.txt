@@ -5,8 +5,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(nlohmann_json 3.7.0)
 
-add_subdirectory(json-schema-validator)
-
 if(NOT SNODEC_INTREE_BUILD)
     find_package(snodec COMPONENTS mqtt)
 endif(NOT SNODEC_INTREE_BUILD)
@@ -51,6 +49,8 @@ add_compile_options(
     -fexec-charset=UTF-8
     ${ADDITIONAL_OPTIONS}
 )
+
+add_subdirectory(json-schema-validator)
 
 # Create mapping-schema.json.h in case mapping-schema.json has changed on disk.
 add_custom_command(

@@ -19,10 +19,10 @@
 #ifndef APPS_MQTTBROKER_MQTTINTEGRATOR_SOCKETCONTEXT_H
 #define APPS_MQTTBROKER_MQTTINTEGRATOR_SOCKETCONTEXT_H
 
-#include "core/timer/Timer.h"
-#include "iot/mqtt/Topic.h" // IWYU pragma: export
-#include "iot/mqtt/client/SocketContext.h"
 #include "lib/MqttMapper.h" // IWYU pragma: export
+
+#include <core/timer/Timer.h> // IWYU pragma: export
+#include <iot/mqtt/client/SocketContext.h>
 
 namespace core::socket {
     class SocketConnection;

@@ -49,9 +49,10 @@ protected:
 	    nlohmann::json & /* default_value */) const
 	{
 		return nullptr;
-	};
+	}
 
 public:
+	schema(const schema &schema) = default;
 	virtual ~schema() = default;
 
 	schema(root_schema *root)
@@ -116,13 +117,13 @@ protected:
 		result->set_target(sch, true);
 		result->set_default_value(default_value);
 		return result;
-	};
+	}
 
 public:
 	schema_ref(const std::string &id, root_schema *root)
 	    : schema(root), id_(id) {}
 
-	const std::string &id() const { return id_; }
+	[[maybe_unused]] const std::string &id() const { return id_; }
 
 	void set_target(const std::shared_ptr<schema> &target, bool strong = false)
 	{
@@ -185,7 +186,6 @@ public:
 		auto sch = file.schemas.lower_bound(uri.fragment());
 		if (sch != file.schemas.end() && !(file.schemas.key_comp()(uri.fragment(), sch->first))) {
 			throw std::invalid_argument("schema with " + uri.to_string() + " already inserted");
-			return;
 		}
 
 		file.schemas.insert({uri.fragment(), s});
@@ -565,7 +565,7 @@ protected:
 		auto result = std::make_shared<type_schema>(*this);
 		result->set_default_value(default_value);
 		return result;
-	};
+	}
 
 public:
 	type_schema(json &sch,

@@ -16,9 +16,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "SocketContext.h" // IWYU pragma: export
+#include "SocketContext.h"
 
-#include "iot/mqtt/packets/Connack.h"
+#include <iot/mqtt/Topic.h>
+#include <iot/mqtt/packets/Connack.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 

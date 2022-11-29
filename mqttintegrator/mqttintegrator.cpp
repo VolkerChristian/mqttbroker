@@ -16,14 +16,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "SocketContext.h"          // IWYU pragma: keep
 #include "SocketContextFactory.hpp" // IWYU pragma: keep
-#include "core/SNodeC.h"
-#include "core/timer/Timer.h"
 #include "lib/JsonMappingReader.h"
-#include "net/in/stream/legacy/SocketClient.h"
-#include "net/in/stream/tls/SocketClient.h"
-#include "utils/Config.h"
+
+#include <core/SNodeC.h>
+#include <core/socket/stream/tls/SocketConnection.h>
+#include <net/in/stream/tls/SocketClient.h>
+#include <utils/Config.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -37,6 +36,9 @@
 #include <openssl/ossl_typ.h>
 #endif
 #include <nlohmann/json.hpp>
+#include <openssl/asn1.h>
+#include <openssl/crypto.h>
+#include <openssl/obj_mac.h>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 
@@ -135,14 +137,14 @@ int main(int argc, char* argv[]) {
                                 for (int32_t i = 0; i < altNameCount; ++i) {
                                     GENERAL_NAME* generalName = sk_GENERAL_NAME_value(subjectAltNames, i);
                                     if (generalName->type == GEN_URI) {
-                                        std::string subjectAltName = reinterpret_cast<const char*>(
-                                            ASN1_STRING_get0_data(generalName->d.uniformResourceIdentifier),
+                                        std::string subjectAltName = std::string(
+                                            reinterpret_cast<const char*>(ASN1_STRING_get0_data(generalName->d.uniformResourceIdentifier)),
                                             static_cast<std::size_t>(ASN1_STRING_length(generalName->d.uniformResourceIdentifier)));
                                         VLOG(0) << "\t      SAN (URI): '" + subjectAltName;
                                     } else if (generalName->type == GEN_DNS) {
-                                        std::string subjectAltName = reinterpret_cast<const char*>(
-                                            ASN1_STRING_get0_data(generalName->d.dNSName),
-                                            static_cast<std::size_t>(ASN1_STRING_length(generalName->d.dNSName)));
+                                        std::string subjectAltName =
+                                            std::string(reinterpret_cast<const char*>(ASN1_STRING_get0_data(generalName->d.dNSName)),
+                                                        static_cast<std::size_t>(ASN1_STRING_length(generalName->d.dNSName)));
                                         VLOG(0) << "\t      SAN (DNS): '" + subjectAltName;
                                     } else {
                                         VLOG(0) << "\t      SAN (Type): '" + std::to_string(generalName->type);

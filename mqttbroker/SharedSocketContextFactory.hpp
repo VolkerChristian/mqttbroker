@@ -17,7 +17,8 @@
  */
 
 #include "SharedSocketContextFactory.h" // IWYU pragma: export
-#include "iot/mqtt/server/SharedSocketContextFactory.hpp"
+
+#include <iot/mqtt/server/SharedSocketContextFactory.hpp>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 

@@ -19,8 +19,9 @@
 #ifndef APPS_MQTTBROKER_MQTTINTEGRATOR_SOCKETCONTEXTFACTORY_H
 #define APPS_MQTTBROKER_MQTTINTEGRATOR_SOCKETCONTEXTFACTORY_H
 
-#include "SocketContext.h"
-#include "core/socket/SocketContextFactory.h" // IWYU pragma: export
+#include "SocketContext.h" // IWYU pragma: export
+
+#include <core/socket/SocketContextFactory.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 

@@ -19,8 +19,9 @@
 #ifndef APPS_MQTTBROKER_MQTTWETFRONTEND_SOCKETCONTEXT_H
 #define APPS_MQTTBROKER_MQTTWETFRONTEND_SOCKETCONTEXT_H
 
-#include "iot/mqtt/server/SocketContext.h"
-#include "lib/MqttMapper.h" // IWYU pragma: export
+#include "lib/MqttMapper.h"
+
+#include <iot/mqtt/server/SocketContext.h>
 
 namespace core::socket {
     class SocketConnection;
@@ -28,17 +29,19 @@ namespace core::socket {
 
 namespace iot::mqtt {
     namespace packets {
+        class Connect;
         class Publish;
-    }
-    namespace server::broker {
-        class Broker;
-    }
+    } // namespace packets
+    namespace server {
+        namespace broker {
+            class Broker;
+        } // namespace broker
+    }     // namespace server
 } // namespace iot::mqtt
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 #include <memory>
-#include <nlohmann/json_fwd.hpp>
 #include <string>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS

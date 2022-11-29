@@ -18,15 +18,14 @@
 
 #include "MqttModel.h"
 #include "SharedSocketContextFactory.hpp" // IWYU pragma: keep
-#include "SocketContext.h"                // IWYU pragma: keep
-#include "core/SNodeC.h"
-#include "express/legacy/in/WebApp.h"
 #include "lib/JsonMappingReader.h"
-#include "log/Logger.h"
-#include "net/in/stream/legacy/SocketServer.h"
-#include "net/in/stream/tls/SocketServer.h"
-#include "net/un/stream/legacy/SocketServer.h"
-#include "utils/Config.h"
+
+#include <core/SNodeC.h>
+#include <express/legacy/in/WebApp.h>
+#include <log/Logger.h>
+#include <net/in/stream/tls/SocketServer.h>
+#include <net/un/stream/legacy/SocketServer.h>
+#include <utils/Config.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -36,6 +35,7 @@
 #include <openssl/obj_mac.h>
 #include <openssl/opensslv.h>
 #include <openssl/ssl3.h>
+#include <type_traits>
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 #include <openssl/types.h>
 #elif OPENSSL_VERSION_NUMBER >= 0x10100000L
@@ -43,6 +43,17 @@
 #endif
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
+
+namespace apps::mqttbroker::webfrontend {
+    class SocketContext;
+
+    template <const nlohmann::json& jsonMappingT>
+    class SharedSocketContextFactory;
+} // namespace apps::mqttbroker::webfrontend
+
+namespace iot::mqtt::packets {
+    class Connect;
+}
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 

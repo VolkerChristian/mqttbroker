@@ -18,14 +18,15 @@
 
 #include "MqttMapper.h"
 
-#include "iot/mqtt/Topic.h"
-#include "iot/mqtt/packets/Publish.h"
+#include <iot/mqtt/Topic.h>
+#include <iot/mqtt/packets/Publish.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 #include "inja.hpp"
 #include "log/Logger.h"
 
+#include <algorithm>
 #include <initializer_list>
 #include <map>
 #include <nlohmann/json.hpp>

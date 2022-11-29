@@ -13,7 +13,7 @@ namespace nlohmann
 namespace json_schema
 {
 
-json draft7_schema_builtin = R"( {
+static json draft7_schema_builtin = R"( {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://json-schema.org/draft-07/schema#",
     "title": "Core schema meta-schema",

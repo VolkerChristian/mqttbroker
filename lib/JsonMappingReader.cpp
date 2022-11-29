@@ -20,14 +20,17 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-#include "log/Logger.h"
 #include "nlohmann/json-schema.hpp"
 
+#include <exception>
 #include <fstream>
 #include <initializer_list>
+#include <log/Logger.h>
 #include <map>
 #include <nlohmann/json.hpp>
 #include <vector>
+
+// IWYU pragma: no_include <nlohmann/detail/json_pointer.hpp>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
@@ -40,7 +43,7 @@ namespace apps::mqttbroker::lib {
     class custom_error_handler : public nlohmann::json_schema::basic_error_handler {
         void error(const nlohmann::json::json_pointer& ptr, const nlohmann::json& instance, const std::string& message) override {
             nlohmann::json_schema::basic_error_handler::error(ptr, instance, message);
-            std::cerr << "ERROR: '" << ptr << "' - '" << instance << "': " << message << "\n";
+            LOG(ERROR) << "ERROR: '" << ptr << "' - '" << instance << "': " << message << "\n";
         }
     };
 
@@ -87,7 +90,6 @@ namespace apps::mqttbroker::lib {
                 mappingFile.close();
             } catch (const std::exception& e) {
                 LOG(ERROR) << "JSON map file parsing failed: " << e.what() << " at " << mappingFile.tellg();
-                exit(0);
             }
         } else {
             VLOG(0) << "MappingFilePath: " << mappingFilePath << " not found";

@@ -19,8 +19,11 @@
 #ifndef APPS_MQTTBROKER_MQTTWETFRONTEND_MQTTMODEL_H
 #define APPS_MQTTBROKER_MQTTWETFRONTEND_MQTTMODEL_H
 
-#include "SocketContext.h"
-#include "iot/mqtt/packets/Connect.h"
+#include <iot/mqtt/packets/Connect.h>
+
+namespace apps::mqttbroker::webfrontend {
+    class SocketContext;
+}
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 

@@ -267,7 +267,7 @@ const std::string stackoverflowMagicPart{R"((?:[[:alnum:]](?:[[:alnum:]-]*[[:aln
 const std::string email{"(?:" + dotAtom + "|" + quotedString + ")@(?:" + stackoverflowMagicPart + "|" + domainLiteral + ")"};
 
 /**
- * @see
+ * @see json schema
  *
  * @verbatim
  * URI           = scheme ":" hier-part [ "?" query ] [ "#" fragment ]

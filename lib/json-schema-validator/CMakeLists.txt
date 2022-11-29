@@ -20,6 +20,8 @@ if(JSON_VALIDATOR_HUNTER)
     hunter_add_package(nlohmann_json)
 endif()
 
+unset(CMAKE_CXX_INCLUDE_WHAT_YOU_USE)
+
 # the library
 add_library(
     nlohmann_json_schema_validator

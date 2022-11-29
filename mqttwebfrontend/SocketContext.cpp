@@ -16,11 +16,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "SocketContext.h" // IWYU pragma: export
+#include "SocketContext.h"
 
 #include "MqttModel.h"
-#include "iot/mqtt/packets/Publish.h"
-#include "iot/mqtt/server/broker/Broker.h"
+
+#include <iot/mqtt/packets/Publish.h>
+#include <iot/mqtt/server/broker/Broker.h>
+#include <iot/mqtt/server/broker/Message.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 

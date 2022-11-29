@@ -17,14 +17,14 @@
  */
 
 #include "SharedSocketContextFactory.hpp" // IWYU pragma: keep
-#include "SocketContext.h"                // IWYU pragma: keep
-#include "core/SNodeC.h"
 #include "lib/JsonMappingReader.h"
-#include "log/Logger.h"
-#include "net/in/stream/legacy/SocketServer.h"
-#include "net/in/stream/tls/SocketServer.h"
-#include "net/un/stream/legacy/SocketServer.h"
-#include "utils/Config.h"
+
+#include <core/SNodeC.h>
+#include <log/Logger.h>
+#include <net/in/stream/legacy/SocketServer.h>
+#include <net/in/stream/tls/SocketServer.h>
+#include <net/un/stream/legacy/SocketServer.h>
+#include <utils/Config.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 

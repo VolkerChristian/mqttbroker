@@ -19,8 +19,9 @@
 #ifndef APPS_MQTTBROKER_MQTTWETFRONTEND_SOCKETCONTEXTFACTORY_H
 #define APPS_MQTTBROKER_MQTTWETFRONTEND_SOCKETCONTEXTFACTORY_H
 
-#include "SocketContext.h"
-#include "iot/mqtt/server/SharedSocketContextFactory.h" // IWYU pragma: export
+#include "SocketContext.h" // IWYU pargma: export
+
+#include <iot/mqtt/server/SharedSocketContextFactory.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
