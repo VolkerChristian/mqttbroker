@@ -45,8 +45,6 @@
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
 int main(int argc, char* argv[]) {
-    int ret = 0;
-
     std::string mappingFilePath;
     utils::Config::add_option(
         "--mqtt-mapping-file", mappingFilePath, "MQTT mapping file (json format) for integration", true, "[path to json file]");
@@ -177,12 +175,8 @@ int main(int argc, char* argv[]) {
                 });
 
             doConnect(inMqttTlsIntegratorClient);
-
-            ret = core::SNodeC::start();
         }
-    } else {
-        ret = core::SNodeC::start();
     }
 
-    return ret;
+    return core::SNodeC::start();
 }
