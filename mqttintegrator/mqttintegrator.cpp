@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
                         });
                 }) doConnect;
 
-            InMqttTlsIntegratorClient inMqttTlsIntegratorClient(
+            static InMqttTlsIntegratorClient inMqttTlsIntegratorClient(
                 "mqtttlsintegrator",
                 [](TLSInSocketConnection* socketConnection) -> void {
                     VLOG(0) << "OnConnect";
@@ -163,28 +163,24 @@ int main(int argc, char* argv[]) {
                         // Here we can close the connection in case client didn't send a certificate
                     }
                 },
-                [&doConnect, &inMqttTlsIntegratorClient](TLSInSocketConnection* socketConnection) -> void {
+                [&doConnect](TLSInSocketConnection* socketConnection) -> void {
                     VLOG(0) << "OnDisconnect";
 
                     VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
                     VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
 
                     core::timer::Timer timer = core::timer::Timer::intervalTimer(
-                        [&doConnect, &inMqttTlsIntegratorClient](const std::function<void()>& stop) -> void {
+                        [&doConnect](const std::function<void()>& stop) -> void {
                             doConnect(inMqttTlsIntegratorClient, stop);
                         },
                         1);
                 });
 
             doConnect(inMqttTlsIntegratorClient);
-
-            ret = core::SNodeC::start();
-        } else {
-            ret = core::SNodeC::start();
         }
-    } else {
-        ret = core::SNodeC::start();
     }
+
+    ret = core::SNodeC::start();
 
     return ret;
 }

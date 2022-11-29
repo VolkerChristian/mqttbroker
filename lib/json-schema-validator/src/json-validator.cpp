@@ -43,20 +43,20 @@ protected:
 
 protected:
 	virtual std::shared_ptr<schema> make_for_default_(
-	    std::shared_ptr<::schema> & /* sch */,
-	    root_schema * /* root */,
-	    std::vector<nlohmann::json_uri> & /* uris */,
-	    nlohmann::json & /* default_value */) const
+		std::shared_ptr<::schema> & /* sch */,
+		root_schema * /* root */,
+		std::vector<nlohmann::json_uri> & /* uris */,
+		nlohmann::json & /* default_value */) const
 	{
 		return nullptr;
 	}
 
 public:
-	schema(const schema &schema) = default;
+	schema(const schema &) = default;
 	virtual ~schema() = default;
 
 	schema(root_schema *root)
-	    : root_(root) {}
+		: root_(root) {}
 
 	virtual void validate(const json::json_pointer &ptr, const json &instance, json_patch &patch, error_handler &e) const = 0;
 
@@ -68,9 +68,9 @@ public:
 	void set_default_value(const json &v) { default_value_ = v; }
 
 	static std::shared_ptr<schema> make(json &schema,
-	                                    root_schema *root,
-	                                    const std::vector<std::string> &key,
-	                                    std::vector<nlohmann::json_uri> uris);
+										root_schema *root,
+										const std::vector<std::string> &key,
+										std::vector<nlohmann::json_uri> uris);
 };
 
 class schema_ref : public schema
@@ -78,7 +78,7 @@ class schema_ref : public schema
 	const std::string id_;
 	std::weak_ptr<schema> target_;
 	std::shared_ptr<schema> target_strong_; // for references to references keep also the shared_ptr because
-	                                        // no one else might use it after resolving
+											// no one else might use it after resolving
 
 	void validate(const json::json_pointer &ptr, const json &instance, json_patch &patch, error_handler &e) const final
 	{
@@ -106,10 +106,10 @@ class schema_ref : public schema
 
 protected:
 	virtual std::shared_ptr<schema> make_for_default_(
-	    std::shared_ptr<::schema> &sch,
-	    root_schema *root,
-	    std::vector<nlohmann::json_uri> &uris,
-	    nlohmann::json &default_value) const override
+		std::shared_ptr<::schema> &sch,
+		root_schema *root,
+		std::vector<nlohmann::json_uri> &uris,
+		nlohmann::json &default_value) const override
 	{
 		// create a new reference schema using the original reference (which will be resolved later)
 		// to store this overloaded default value #209
@@ -121,7 +121,7 @@ protected:
 
 public:
 	schema_ref(const std::string &id, root_schema *root)
-	    : schema(root), id_(id) {}
+		: schema(root), id_(id) {}
 
 	[[maybe_unused]] const std::string &id() const { return id_; }
 
@@ -168,12 +168,12 @@ class root_schema
 
 public:
 	root_schema(schema_loader &&loader,
-	            format_checker &&format,
-	            content_checker &&content)
+				format_checker &&format,
+				content_checker &&content)
 
-	    : loader_(std::move(loader)),
-	      format_check_(std::move(format)),
-	      content_check_(std::move(content))
+		: loader_(std::move(loader)),
+		  format_check_(std::move(format)),
+		  content_check_(std::move(content))
 	{
 	}
 
@@ -271,8 +271,8 @@ public:
 			return r->second; // unresolved, already seen previously - use existing reference
 		} else {
 			return file.unresolved.insert(r,
-			                              {uri.fragment(), std::make_shared<schema_ref>(uri.to_string(), this)})
-			    ->second; // unresolved, create reference
+										  {uri.fragment(), std::make_shared<schema_ref>(uri.to_string(), this)})
+				->second; // unresolved, create reference
 		}
 	}
 
@@ -330,17 +330,17 @@ public:
 				urefs += "]";
 
 				throw std::invalid_argument("after all files have been parsed, '" +
-				                            (file.first == "" ? "<root>" : file.first) +
-				                            "' has still the following undefined references: " + urefs);
+											(file.first == "" ? "<root>" : file.first) +
+											"' has still the following undefined references: " + urefs);
 			}
 		}
 	}
 
 	void validate(const json::json_pointer &ptr,
-	              const json &instance,
-	              json_patch &patch,
-	              error_handler &e,
-	              const json_uri &initial) const
+				  const json &instance,
+				  json_patch &patch,
+				  error_handler &e,
+				  const json_uri &initial) const
 	{
 		if (!root_) {
 			e.error(ptr, "", "no root schema has yet been set for validating an instance");
@@ -411,9 +411,9 @@ class logical_not : public schema
 
 public:
 	logical_not(json &sch,
-	            root_schema *root,
-	            const std::vector<nlohmann::json_uri> &uris)
-	    : schema(root)
+				root_schema *root,
+				const std::vector<nlohmann::json_uri> &uris)
+		: schema(root)
 	{
 		subschema_ = schema::make(sch, root, {"not"}, uris);
 	}
@@ -456,9 +456,9 @@ class logical_combination : public schema
 
 public:
 	logical_combination(json &sch,
-	                    root_schema *root,
-	                    const std::vector<nlohmann::json_uri> &uris)
-	    : schema(root)
+						root_schema *root,
+						const std::vector<nlohmann::json_uri> &uris)
+		: schema(root)
 	{
 		size_t c = 0;
 		for (auto &subschema : sch)
@@ -505,10 +505,10 @@ class type_schema : public schema
 	std::vector<std::shared_ptr<schema>> logic_;
 
 	static std::shared_ptr<schema> make(json &schema,
-	                                    json::value_t type,
-	                                    root_schema *,
-	                                    const std::vector<nlohmann::json_uri> &,
-	                                    std::set<std::string> &);
+										json::value_t type,
+										root_schema *,
+										const std::vector<nlohmann::json_uri> &,
+										std::set<std::string> &);
 
 	std::shared_ptr<schema> if_, then_, else_;
 
@@ -535,7 +535,7 @@ class type_schema : public schema
 		}
 
 		if (const_.first &&
-		    const_.second != instance)
+			const_.second != instance)
 			e.error(ptr, instance, "instance not const");
 
 		for (auto l : logic_)
@@ -557,10 +557,10 @@ class type_schema : public schema
 
 protected:
 	virtual std::shared_ptr<schema> make_for_default_(
-	    std::shared_ptr<::schema> & /* sch */,
-	    root_schema * /* root */,
-	    std::vector<nlohmann::json_uri> & /* uris */,
-	    nlohmann::json &default_value) const override
+		std::shared_ptr<::schema> & /* sch */,
+		root_schema * /* root */,
+		std::vector<nlohmann::json_uri> & /* uris */,
+		nlohmann::json &default_value) const override
 	{
 		auto result = std::make_shared<type_schema>(*this);
 		result->set_default_value(default_value);
@@ -569,19 +569,19 @@ protected:
 
 public:
 	type_schema(json &sch,
-	            root_schema *root,
-	            const std::vector<nlohmann::json_uri> &uris)
-	    : schema(root), type_(static_cast<uint8_t>(json::value_t::discarded) + 1)
+				root_schema *root,
+				const std::vector<nlohmann::json_uri> &uris)
+		: schema(root), type_(static_cast<uint8_t>(json::value_t::discarded) + 1)
 	{
 		// association between JSON-schema-type and NLohmann-types
 		static const std::vector<std::pair<std::string, json::value_t>> schema_types = {
-		    {"null", json::value_t::null},
-		    {"object", json::value_t::object},
-		    {"array", json::value_t::array},
-		    {"string", json::value_t::string},
-		    {"boolean", json::value_t::boolean},
-		    {"integer", json::value_t::number_integer},
-		    {"number", json::value_t::number_float},
+			{"null", json::value_t::null},
+			{"object", json::value_t::object},
+			{"array", json::value_t::array},
+			{"string", json::value_t::string},
+			{"boolean", json::value_t::boolean},
+			{"integer", json::value_t::number_integer},
+			{"number", json::value_t::number_float},
 		};
 
 		std::set<std::string> known_keywords;
@@ -756,7 +756,7 @@ class string : public schema
 
 #ifndef NO_STD_REGEX
 		if (pattern_.first &&
-		    !REGEX_NAMESPACE::regex_search(instance.get<std::string>(), pattern_.second))
+			!REGEX_NAMESPACE::regex_search(instance.get<std::string>(), pattern_.second))
 			e.error(ptr, instance, "instance does not match regex pattern: " + patternString_);
 #endif
 
@@ -775,7 +775,7 @@ class string : public schema
 
 public:
 	string(json &sch, root_schema *root)
-	    : schema(root)
+		: schema(root)
 	{
 		auto attr = sch.find("maxLength");
 		if (attr != sch.end()) {
@@ -825,7 +825,7 @@ public:
 		if (attr != sch.end()) {
 			patternString_ = attr.value().get<std::string>();
 			pattern_ = {true, REGEX_NAMESPACE::regex(attr.value().get<std::string>(),
-			                                         REGEX_NAMESPACE::regex::ECMAScript)};
+													 REGEX_NAMESPACE::regex::ECMAScript)};
 			sch.erase(attr);
 		}
 #endif
@@ -885,7 +885,7 @@ class numeric : public schema
 
 public:
 	numeric(const json &sch, root_schema *root, std::set<std::string> &kw)
-	    : schema(root)
+		: schema(root)
 	{
 		auto attr = sch.find("maximum");
 		if (attr != sch.end()) {
@@ -931,7 +931,7 @@ class null : public schema
 
 public:
 	null(json &, root_schema *root)
-	    : schema(root) {}
+		: schema(root) {}
 };
 
 class boolean_type : public schema
@@ -940,7 +940,7 @@ class boolean_type : public schema
 
 public:
 	boolean_type(json &, root_schema *root)
-	    : schema(root) {}
+		: schema(root) {}
 };
 
 class boolean : public schema
@@ -963,7 +963,7 @@ class boolean : public schema
 
 public:
 	boolean(json &sch, root_schema *root)
-	    : schema(root), true_(sch) {}
+		: schema(root), true_(sch) {}
 };
 
 class required : public schema
@@ -979,7 +979,7 @@ class required : public schema
 
 public:
 	required(const std::vector<std::string> &r, root_schema *root)
-	    : schema(root), required_(r) {}
+		: schema(root), required_(r) {}
 };
 
 class object : public schema
@@ -1061,9 +1061,9 @@ class object : public schema
 
 public:
 	object(json &sch,
-	       root_schema *root,
-	       const std::vector<nlohmann::json_uri> &uris)
-	    : schema(root)
+		   root_schema *root,
+		   const std::vector<nlohmann::json_uri> &uris)
+		: schema(root)
 	{
 		auto attr = sch.find("maxProperties");
 		if (attr != sch.end()) {
@@ -1087,9 +1087,9 @@ public:
 		if (attr != sch.end()) {
 			for (auto prop : attr.value().items())
 				properties_.insert(
-				    std::make_pair(
-				        prop.key(),
-				        schema::make(prop.value(), root, {"properties", prop.key()}, uris)));
+					std::make_pair(
+						prop.key(),
+						schema::make(prop.value(), root, {"properties", prop.key()}, uris)));
 			sch.erase(attr);
 		}
 
@@ -1098,9 +1098,9 @@ public:
 		if (attr != sch.end()) {
 			for (auto prop : attr.value().items())
 				patternProperties_.push_back(
-				    std::make_pair(
-				        REGEX_NAMESPACE::regex(prop.key(), REGEX_NAMESPACE::regex::ECMAScript),
-				        schema::make(prop.value(), root, {prop.key()}, uris)));
+					std::make_pair(
+						REGEX_NAMESPACE::regex(prop.key(), REGEX_NAMESPACE::regex::ECMAScript),
+						schema::make(prop.value(), root, {prop.key()}, uris)));
 			sch.erase(attr);
 		}
 #endif
@@ -1117,13 +1117,13 @@ public:
 				switch (dep.value().type()) {
 				case json::value_t::array:
 					dependencies_.emplace(dep.key(),
-					                      std::make_shared<required>(
-					                          dep.value().get<std::vector<std::string>>(), root));
+										  std::make_shared<required>(
+											  dep.value().get<std::vector<std::string>>(), root));
 					break;
 
 				default:
 					dependencies_.emplace(dep.key(),
-					                      schema::make(dep.value(), root, {"dependencies", dep.key()}, uris));
+										  schema::make(dep.value(), root, {"dependencies", dep.key()}, uris));
 					break;
 				}
 			sch.erase(attr);
@@ -1207,7 +1207,7 @@ class array : public schema
 
 public:
 	array(json &sch, root_schema *root, const std::vector<nlohmann::json_uri> &uris)
-	    : schema(root)
+		: schema(root)
 	{
 		auto attr = sch.find("maxItems");
 		if (attr != sch.end()) {
@@ -1242,7 +1242,7 @@ public:
 				}
 
 			} else if (attr.value().type() == json::value_t::object ||
-			           attr.value().type() == json::value_t::boolean)
+					   attr.value().type() == json::value_t::boolean)
 				items_schema_ = schema::make(attr.value(), root, {"items"}, uris);
 
 			sch.erase(attr);
@@ -1318,11 +1318,11 @@ std::shared_ptr<schema> schema::make(json &schema,
 	else if (schema.type() == json::value_t::object) {
 
 		auto attr = schema.find("$id"); // if $id is present, this schema can be referenced by this ID
-		                                // as an additional URI
+										// as an additional URI
 		if (attr != schema.end()) {
 			if (std::find(uris.begin(),
-			              uris.end(),
-			              attr.value().get<std::string>()) == uris.end())
+						  uris.end(),
+						  attr.value().get<std::string>()) == uris.end())
 				uris.push_back(uris.back().derive(attr.value().get<std::string>())); // so add it to the list if it is not there already
 			schema.erase(attr);
 		}
@@ -1405,7 +1405,7 @@ json_validator::json_validator(const json &schema,
                      std::move(format),
                      std::move(content))
 {
-	set_root_schema(schema);
+    set_root_schema(schema);
 }
 
 json_validator::json_validator(json &&schema,
@@ -1417,7 +1417,7 @@ json_validator::json_validator(json &&schema,
                      std::move(format),
                      std::move(content))
 {
-	set_root_schema(std::move(schema));
+    set_root_schema(std::move(schema));
 }
 
 // move constructor, destructor and move assignment operator can be defaulted here
