@@ -16,6 +16,8 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         -Wno-exit-time-destructors
         -Wno-global-constructors
         -Wno-padded
+        -Wno-shadow
+        -Wno-shadow-field
         -Wno-used-but-marked-unused
         -Wno-weak-vtables
         -Wno-reserved-macro-identifier
@@ -41,8 +43,6 @@ add_compile_options(
     -Wuninitialized
     -Wunreachable-code
     -Wno-float-equal
-    -Wno-shadow
-    -Wno-shadow-field
     -Wno-switch-enum
     -Wno-implicit-int-float-conversion
     -pedantic-errors
