@@ -19,11 +19,11 @@
 #ifndef APPS_MQTTBROKER_MQTTINTEGRATOR_SOCKETCONTEXTFACTORY_H
 #define APPS_MQTTBROKER_MQTTINTEGRATOR_SOCKETCONTEXTFACTORY_H
 
-#include "SocketContext.h" // IWYU pragma: export
-
 #include <core/socket/SocketContextFactory.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+#include <nlohmann/json_fwd.hpp>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 

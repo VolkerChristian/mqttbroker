@@ -19,7 +19,7 @@
 #ifndef APPS_MQTTBROKER_MQTTINTEGRATOR_SOCKETCONTEXT_H
 #define APPS_MQTTBROKER_MQTTINTEGRATOR_SOCKETCONTEXT_H
 
-#include "lib/MqttMapper.h" // IWYU pragma: export
+#include "lib/MqttMapper.h"
 
 #include <core/timer/Timer.h> // IWYU pragma: export
 #include <iot/mqtt/client/SocketContext.h>
@@ -37,7 +37,6 @@ namespace iot::mqtt {
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-#include <nlohmann/json_fwd.hpp>
 #include <string>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS

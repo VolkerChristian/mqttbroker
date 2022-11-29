@@ -20,7 +20,6 @@
 #include "lib/JsonMappingReader.h"
 
 #include <core/SNodeC.h>
-#include <core/socket/stream/tls/SocketConnection.h>
 #include <net/in/stream/tls/SocketClient.h>
 #include <utils/Config.h>
 

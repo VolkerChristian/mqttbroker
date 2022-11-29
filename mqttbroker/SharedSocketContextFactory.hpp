@@ -17,6 +17,7 @@
  */
 
 #include "SharedSocketContextFactory.h" // IWYU pragma: export
+#include "SocketContext.h"              // IWYU pragma: export
 
 #include <iot/mqtt/server/SharedSocketContextFactory.hpp>
 

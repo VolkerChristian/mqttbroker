@@ -44,13 +44,6 @@
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 
-namespace apps::mqttbroker::webfrontend {
-    class SocketContext;
-
-    template <const nlohmann::json& jsonMappingT>
-    class SharedSocketContextFactory;
-} // namespace apps::mqttbroker::webfrontend
-
 namespace iot::mqtt::packets {
     class Connect;
 }

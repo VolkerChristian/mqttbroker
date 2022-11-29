@@ -19,11 +19,15 @@
 #ifndef APPS_MQTTBROKER_MQTTWETFRONTEND_SOCKETCONTEXTFACTORY_H
 #define APPS_MQTTBROKER_MQTTWETFRONTEND_SOCKETCONTEXTFACTORY_H
 
-#include "SocketContext.h" // IWYU pargma: export
-
 #include <iot/mqtt/server/SharedSocketContextFactory.h>
 
+namespace apps::mqttbroker::webfrontend {
+    class SocketContext;
+}
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+#include <nlohmann/json_fwd.hpp>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 

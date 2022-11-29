@@ -16,7 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "SharedSocketContextFactory.h"
+#include "SharedSocketContextFactory.h" // IWYU pragma: export
+#include "SocketContext.h"              // IWYU pragma: export
 
 #include <iot/mqtt/server/SharedSocketContextFactory.hpp>
 

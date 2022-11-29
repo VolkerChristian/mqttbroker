@@ -65,12 +65,12 @@ namespace apps::mqttbroker::lib {
     void MqttMapper::extractTopics(const nlohmann::json& mappingJson, const std::string& topic, std::list<iot::mqtt::Topic>& topicList) {
         const nlohmann::json& topicLevels = mappingJson["topic_level"];
 
-        if (topicLevels.is_array()) {
+        if (topicLevels.is_object()) {
+            extractTopic(topicLevels, topic, topicList);
+        } else {
             for (const nlohmann::json& topicLevel : topicLevels) {
                 extractTopic(topicLevel, topic, topicList);
             }
-        } else if (topicLevels.is_object()) {
-            extractTopic(topicLevels, topic, topicList);
         }
     }
 
@@ -114,7 +114,7 @@ namespace apps::mqttbroker::lib {
                                             const iot::mqtt::packets::Publish& publish) {
         LOG(INFO) << "  " << publish.getTopic() << " : " << publish.getMessage() << " -> " << json.dump();
 
-        if (!templateMapping.is_array()) {
+        if (templateMapping.is_object()) {
             publishMappedTemplate(templateMapping, json, publish);
         } else {
             for (const nlohmann::json& concreteTemplateMapping : templateMapping) {
@@ -188,13 +188,17 @@ namespace apps::mqttbroker::lib {
             }
         } while ((!remainingTopic.empty()) && !matchedTopicLevel.empty());
 
+        if (!matchedTopicLevel.contains("subscription")) {
+            matchedTopicLevel.clear();
+        }
+
         return matchedTopicLevel;
     }
 
     void MqttMapper::publishMappings(const iot::mqtt::packets::Publish& publish) {
         nlohmann::json matchedTopicLevel = findMatchingTopicLevel(publish);
 
-        if (!matchedTopicLevel.empty() && matchedTopicLevel.contains("subscription")) {
+        if (!matchedTopicLevel.empty()) {
             const nlohmann::json& mapping = matchedTopicLevel["subscription"];
 
             if (mapping.contains("static")) {
