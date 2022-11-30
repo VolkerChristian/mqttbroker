@@ -34,7 +34,7 @@ namespace apps::mqttbroker::integrator {
     public:
         SocketContextFactory();
 
-        core::socket::SocketContext* create(core::socket::SocketConnection* socketConnection) override;
+        core::socket::SocketContext* create(core::socket::SocketConnection* socketConnection) final;
 
     private:
         const nlohmann::json& connection;

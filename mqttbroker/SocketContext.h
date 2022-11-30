@@ -54,9 +54,9 @@ namespace apps::mqttbroker::broker {
                                const nlohmann::json& mappingJson);
 
     private:
-        void onPublish(iot::mqtt::packets::Publish& publish) override;
+        void onPublish(iot::mqtt::packets::Publish& publish) final;
 
-        void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) override;
+        void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) final;
     };
 
 } // namespace apps::mqttbroker::broker

@@ -39,7 +39,7 @@ namespace apps::mqttbroker::broker {
         SharedSocketContextFactory();
 
         core::socket::SocketContext* create(core::socket::SocketConnection* socketConnection,
-                                            std::shared_ptr<iot::mqtt::server::broker::Broker>& broker) override;
+                                            std::shared_ptr<iot::mqtt::server::broker::Broker>& broker) final;
 
     private:
         const nlohmann::json& jsonMapping;

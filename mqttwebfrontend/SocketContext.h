@@ -58,14 +58,14 @@ namespace apps::mqttbroker::webfrontend {
 
     private:
         // inherited from iot::mqtt::server::SocketContext - the plain and base MQTT broker
-        void onConnect(iot::mqtt::packets::Connect& connect) override;
-        void onPublish(iot::mqtt::packets::Publish& publish) override;
+        void onConnect(iot::mqtt::packets::Connect& connect) final;
+        void onPublish(iot::mqtt::packets::Publish& publish) final;
 
         // inherited from apps::mqttbroker::lib::MqttMapper
-        void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) override;
+        void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) final;
 
         // inherited from core::socket::SocketContext (the root class of all SocketContext classes) via iot::mqtt::server::SocketContext
-        void onDisconnected() override;
+        void onDisconnected() final;
     };
 
 } // namespace apps::mqttbroker::webfrontend
