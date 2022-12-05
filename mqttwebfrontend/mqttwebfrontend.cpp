@@ -21,10 +21,12 @@
 #include "lib/JsonMappingReader.h"
 
 #include <core/SNodeC.h>
-#include <express/legacy/in/WebApp.h>
+#include <core/socket/SocketAddress.h>
+#include <express/tls/in/WebApp.h>
 #include <log/Logger.h>
-#include <net/in/stream/tls/SocketServer.h>
-#include <net/un/stream/legacy/SocketServer.h>
+#include <net/in/stream/legacy/SocketServer.h> // IWYU pragma: keep
+#include <net/in/stream/tls/SocketServer.h>    // IWYU pragma: keep
+#include <net/un/stream/legacy/SocketServer.h> // IWYU pragma: keep
 #include <utils/Config.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -35,7 +37,6 @@
 #include <openssl/obj_mac.h>
 #include <openssl/opensslv.h>
 #include <openssl/ssl3.h>
-#include <type_traits>
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 #include <openssl/types.h>
 #elif OPENSSL_VERSION_NUMBER >= 0x10100000L
@@ -244,7 +245,7 @@ int main(int argc, char* argv[]) {
             }
         });
 
-    express::legacy::in::WebApp mqttWebView("mqttwebview");
+    express::tls::in::WebApp mqttWebView("mqttwebview");
 
     mqttWebView.get("/test", [] APPLICATION(req, res) {
         res.send("Response From MQTTWebView");
@@ -260,21 +261,42 @@ int main(int argc, char* argv[]) {
                                      "  </head>"
                                      "  <body>"
                                      "    <h1>List of all Connected Clients</h1>"
-                                     "    <ul>";
+                                     "    <table>"
+                                     "      <tr><th>ClientId</th><th>Address</th></tr>";
 
         for (const auto& [socketContext, connectPacket] : connectionList) {
-            responseString += "<li>ClientId: " + connectPacket.getClientId() + "</li>";
-            connectPacket.getClientId();
+            responseString += "<tr><td>" + socketContext->getClientId() + "</td><td>" +
+                              socketContext->getSocketConnection()->getRemoteAddress().toString() + "</td></tr>";
         }
 
-        responseString += "    </ul>"
+        responseString += "    </table>"
                           "  </body>"
                           "</html>";
 
         res.send(responseString);
     });
 
-    mqttWebView.listen([](const express::legacy::in::WebApp::SocketAddress& socketAddress, int errnum) mutable -> void {
+    /*
+    <table>
+        <tr>
+        <th>Company</th>
+        <th>Contact</th>
+        <th>Country</th>
+        </tr>
+        <tr>
+        <td>Alfreds Futterkiste</td>
+        <td>Maria Anders</td>
+        <td>Germany</td>
+        </tr>
+        <tr>
+        <td>Centro comercial Moctezuma</td>
+        <td>Francisco Chang</td>
+        <td>Mexico</td>
+        </tr>
+    </table>
+    */
+
+    mqttWebView.listen([](const express::tls::in::WebApp::SocketAddress& socketAddress, int errnum) mutable -> void {
         if (errnum < 0) {
             PLOG(ERROR) << "OnError";
         } else if (errnum > 0) {

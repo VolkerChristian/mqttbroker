@@ -43,7 +43,7 @@ namespace apps::mqttbroker::webfrontend {
         void addConnectedClient(apps::mqttbroker::webfrontend::SocketContext* socketContext, const iot::mqtt::packets::Connect& connect);
         void delDisconnectedClient(apps::mqttbroker::webfrontend::SocketContext* socketContext);
 
-        const std::map<apps::mqttbroker::webfrontend::SocketContext*, iot::mqtt::packets::Connect>& getConnectedClinets();
+        const std::map<apps::mqttbroker::webfrontend::SocketContext*, iot::mqtt::packets::Connect>& getConnectedClinets() const;
 
     protected:
         std::map<apps::mqttbroker::webfrontend::SocketContext*, iot::mqtt::packets::Connect> connectedClients;

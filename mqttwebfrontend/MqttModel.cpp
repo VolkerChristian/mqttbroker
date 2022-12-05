@@ -42,7 +42,7 @@ namespace apps::mqttbroker::webfrontend {
         connectedClients.erase(socketContext);
     }
 
-    const std::map<apps::mqttbroker::webfrontend::SocketContext*, iot::mqtt::packets::Connect>& MqttModel::getConnectedClinets() {
+    const std::map<apps::mqttbroker::webfrontend::SocketContext*, iot::mqtt::packets::Connect>& MqttModel::getConnectedClinets() const {
         return connectedClients;
     }
 
