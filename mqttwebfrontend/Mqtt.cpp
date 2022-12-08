@@ -16,7 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "SocketContext.h"
+#include "Mqtt.h"
 
 #include "MqttModel.h"
 
@@ -30,22 +30,21 @@
 
 namespace apps::mqttbroker::webfrontend {
 
-    SocketContext::SocketContext(core::socket::SocketConnection* socketConnection,
-                                 const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
-                                 const nlohmann::json& mappingJson)
-        : iot::mqtt::server::SocketContext(socketConnection, broker)
+    Mqtt::Mqtt(const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
+               const nlohmann::json& mappingJson)
+        : iot::mqtt::server::Mqtt(broker)
         , apps::mqttbroker::lib::MqttMapper(mappingJson) {
     }
 
-    void SocketContext::onConnect(iot::mqtt::packets::Connect& connect) {
+    void Mqtt::onConnect(iot::mqtt::packets::Connect& connect) {
         MqttModel::instance().addConnectedClient(this, connect);
     }
 
-    void SocketContext::onPublish(iot::mqtt::packets::Publish& publish) {
+    void Mqtt::onPublish(iot::mqtt::packets::Publish& publish) {
         publishMappings(publish);
     }
 
-    void SocketContext::publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) {
+    void Mqtt::publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) {
         broker->publish(topic, message, qoS);
 
         if (retain) {
@@ -55,7 +54,7 @@ namespace apps::mqttbroker::webfrontend {
         publishMappings(iot::mqtt::packets::Publish(getPacketIdentifier(), topic, message, qoS, retain, MQTT_DUP_FALSE));
     }
 
-    void SocketContext::onDisconnected() {
+    void Mqtt::onDisconnected() {
         MqttModel::instance().delDisconnectedClient(this);
     }
 

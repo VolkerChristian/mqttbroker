@@ -16,24 +16,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef APPS_MQTTBROKER_MQTTBROKER_SOCKETCONTEXT_H
-#define APPS_MQTTBROKER_MQTTBROKER_SOCKETCONTEXT_H
+#ifndef APPS_MQTTBROKER_MQTTWETFRONTEND_SOCKETCONTEXT_H
+#define APPS_MQTTBROKER_MQTTWETFRONTEND_SOCKETCONTEXT_H
 
 #include "lib/MqttMapper.h"
 
-#include <iot/mqtt/server/SocketContext.h>
-
-namespace core::socket {
-    class SocketConnection;
-}
+#include <iot/mqtt/server/Mqtt.h>
 
 namespace iot::mqtt {
     namespace packets {
+        class Connect;
         class Publish;
-    }
+    } // namespace packets
     namespace server::broker {
         class Broker;
-    }
+    } // namespace server::broker
 } // namespace iot::mqtt
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -43,22 +40,26 @@ namespace iot::mqtt {
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
-namespace apps::mqttbroker::broker {
+namespace apps::mqttbroker::webfrontend {
 
-    class SocketContext
-        : public iot::mqtt::server::SocketContext
+    class Mqtt
+        : public iot::mqtt::server::Mqtt
         , public apps::mqttbroker::lib::MqttMapper {
     public:
-        explicit SocketContext(core::socket::SocketConnection* socketConnection,
-                               const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
-                               const nlohmann::json& mappingJson);
+        explicit Mqtt(const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker, const nlohmann::json& mappingJson);
 
     private:
+        // inherited from iot::mqtt::server::SocketContext - the plain and base MQTT broker
+        void onConnect(iot::mqtt::packets::Connect& connect) final;
         void onPublish(iot::mqtt::packets::Publish& publish) final;
 
+        // inherited from apps::mqttbroker::lib::MqttMapper
         void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) final;
+
+        // inherited from core::socket::SocketContext (the root class of all SocketContext classes) via iot::mqtt::server::SocketContext
+        void onDisconnected() final;
     };
 
-} // namespace apps::mqttbroker::broker
+} // namespace apps::mqttbroker::webfrontend
 
-#endif // APPS_MQTTBROKER_MQTTBROKER_SOCKETCONTEXT_H
+#endif // APPS_MQTTBROKER_MQTTWETFRONTEND_SOCKETCONTEXT_H

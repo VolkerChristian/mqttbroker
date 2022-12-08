@@ -50,9 +50,9 @@ add_compile_options(
     ${ADDITIONAL_OPTIONS}
 )
 
-set(MQTTINTEGRATOR_CPP mqttintegrator.cpp SocketContext.cpp)
+set(MQTTINTEGRATOR_CPP mqttintegrator.cpp Mqtt.cpp)
 
-set(MQTTINTEGRATOR_H SocketContextFactory.h SocketContextFactory.hpp)
+set(MQTTINTEGRATOR_H Mqtt.h SocketContextFactory.h SocketContextFactory.hpp)
 
 add_executable(mqttintegrator ${MQTTINTEGRATOR_CPP} ${MQTTINTEGRATOR_H})
 

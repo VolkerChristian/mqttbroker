@@ -22,11 +22,7 @@
 #include "lib/MqttMapper.h"
 
 #include <core/timer/Timer.h> // IWYU pragma: export
-#include <iot/mqtt/client/SocketContext.h>
-
-namespace core::socket {
-    class SocketConnection;
-}
+#include <iot/mqtt/client/Mqtt.h>
 
 namespace iot::mqtt {
     namespace packets {
@@ -43,15 +39,13 @@ namespace iot::mqtt {
 
 namespace apps::mqttbroker::integrator {
 
-    class SocketContext
-        : public iot::mqtt::client::SocketContext
+    class Mqtt
+        : public iot::mqtt::client::Mqtt
         , public apps::mqttbroker::lib::MqttMapper {
     public:
-        explicit SocketContext(core::socket::SocketConnection* socketConnection,
-                               const nlohmann::json& connectionJson,
-                               const nlohmann::json& mappingJson);
+        explicit Mqtt(const nlohmann::json& connectionJson, const nlohmann::json& mappingJson);
 
-        ~SocketContext() override;
+        ~Mqtt() override;
 
     private:
         void onConnected() final;

@@ -16,8 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "SocketContext.h"
+#include "Mqtt.h"
 
+#include <iot/mqtt/MqttContext.h>
 #include <iot/mqtt/Topic.h>
 #include <iot/mqtt/packets/Connack.h>
 
@@ -35,11 +36,9 @@
 
 namespace apps::mqttbroker::integrator {
 
-    SocketContext::SocketContext(core::socket::SocketConnection* socketConnection,
-                                 const nlohmann::json& connectionJson,
-                                 const nlohmann::json& mappingJson)
-        : iot::mqtt::client::SocketContext(socketConnection)
-        , apps::mqttbroker::lib::MqttMapper(mappingJson)
+    Mqtt::Mqtt(const nlohmann::json& connectionJson,
+               const nlohmann::json& mappingJson)
+        : apps::mqttbroker::lib::MqttMapper(mappingJson)
         , connectionJson(connectionJson)
         , keepAlive(connectionJson["keep_alive"])
         , clientId(connectionJson["client_id"])
@@ -61,16 +60,16 @@ namespace apps::mqttbroker::integrator {
         LOG(TRACE) << "Password: " << password;
     }
 
-    SocketContext::~SocketContext() {
+    Mqtt::~Mqtt() {
         pingTimer.cancel();
     }
 
-    void SocketContext::onConnected() {
+    void Mqtt::onConnected() {
         VLOG(0) << "On Connected";
 
         sendConnect(keepAlive, clientId, cleanSession, willTopic, willMessage, willQoS, willRetain, username, password);
 
-        setTimeout(keepAlive * 1.5);
+        mqttContext->setKeepAlive(keepAlive * 1.5);
 
         pingTimer = core::timer::Timer::intervalTimer(
             [this](void) -> void {
@@ -79,12 +78,12 @@ namespace apps::mqttbroker::integrator {
             keepAlive);
     }
 
-    void SocketContext::onExit() {
+    void Mqtt::onExit() {
         VLOG(0) << "On Exit";
         sendDisconnect();
     }
 
-    void SocketContext::onConnack(iot::mqtt::packets::Connack& connack) {
+    void Mqtt::onConnack(iot::mqtt::packets::Connack& connack) {
         if (connack.getReturnCode() == 0) {
             if (!connack.getSessionPresent()) {
                 nlohmann::json connectJson;
@@ -112,11 +111,11 @@ namespace apps::mqttbroker::integrator {
         }
     }
 
-    void SocketContext::onPublish(iot::mqtt::packets::Publish& publish) {
+    void Mqtt::onPublish(iot::mqtt::packets::Publish& publish) {
         publishMappings(publish);
     }
 
-    void SocketContext::publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) {
+    void Mqtt::publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) {
         sendPublish(getPacketIdentifier(), topic, message, qoS, retain);
     }
 
