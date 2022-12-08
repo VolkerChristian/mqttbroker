@@ -49,10 +49,10 @@ add_compile_options(
     ${ADDITIONAL_OPTIONS}
 )
 
-set(MQTTWEBFRONTEND_CPP mqttwebfrontend.cpp SocketContext.cpp MqttModel.cpp)
+set(MQTTWEBFRONTEND_CPP mqttwebfrontend.cpp Mqtt.cpp MqttModel.cpp)
 
 set(MQTTWEBFRONTEND_H
-    SharedSocketContextFactory.h SharedSocketContextFactory.hpp SocketContext.h
+    SharedSocketContextFactory.h SharedSocketContextFactory.hpp Mqtt.h
     MqttModel.h
 )
 

@@ -16,9 +16,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Mqtt.h"                       // IWYU pragma: export
 #include "SharedSocketContextFactory.h" // IWYU pragma: export
-#include "SocketContext.h"              // IWYU pragma: export
 
+#include <iot/mqtt/SocketContext.h>
 #include <iot/mqtt/server/SharedSocketContextFactory.hpp>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -36,7 +37,7 @@ namespace apps::mqttbroker::broker {
     core::socket::SocketContext*
     SharedSocketContextFactory<jsonMappingT>::create(core::socket::SocketConnection* socketConnection,
                                                      std::shared_ptr<iot::mqtt::server::broker::Broker>& broker) {
-        return new SocketContext(socketConnection, broker, jsonMapping);
+        return new iot::mqtt::SocketContext(socketConnection, new Mqtt(broker, jsonMapping));
     }
 
 } // namespace apps::mqttbroker::broker

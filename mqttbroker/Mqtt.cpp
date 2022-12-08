@@ -16,7 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "SocketContext.h"
+#include "Mqtt.h"
 
 #include <iot/mqtt/packets/Publish.h>
 #include <iot/mqtt/server/broker/Broker.h>
@@ -28,18 +28,17 @@
 
 namespace apps::mqttbroker::broker {
 
-    SocketContext::SocketContext(core::socket::SocketConnection* socketConnection,
-                                 const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
-                                 const nlohmann::json& mappingJson)
-        : iot::mqtt::server::SocketContext(socketConnection, broker)
+    Mqtt::Mqtt(const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
+               const nlohmann::json& mappingJson)
+        : iot::mqtt::server::Mqtt(broker)
         , apps::mqttbroker::lib::MqttMapper(mappingJson) {
     }
 
-    void SocketContext::onPublish(iot::mqtt::packets::Publish& publish) {
+    void Mqtt::onPublish(iot::mqtt::packets::Publish& publish) {
         publishMappings(publish);
     }
 
-    void SocketContext::publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) {
+    void Mqtt::publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) {
         broker->publish(topic, message, qoS);
 
         if (retain) {

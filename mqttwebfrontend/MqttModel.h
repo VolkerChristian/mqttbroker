@@ -22,7 +22,7 @@
 #include <iot/mqtt/packets/Connect.h>
 
 namespace apps::mqttbroker::webfrontend {
-    class SocketContext;
+    class Mqtt;
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -40,13 +40,13 @@ namespace apps::mqttbroker::webfrontend {
     public:
         static MqttModel& instance();
 
-        void addConnectedClient(apps::mqttbroker::webfrontend::SocketContext* socketContext, const iot::mqtt::packets::Connect& connect);
-        void delDisconnectedClient(apps::mqttbroker::webfrontend::SocketContext* socketContext);
+        void addConnectedClient(apps::mqttbroker::webfrontend::Mqtt* mqtt, const iot::mqtt::packets::Connect& connect);
+        void delDisconnectedClient(apps::mqttbroker::webfrontend::Mqtt* mqtt);
 
-        const std::map<apps::mqttbroker::webfrontend::SocketContext*, iot::mqtt::packets::Connect>& getConnectedClinets() const;
+        const std::map<apps::mqttbroker::webfrontend::Mqtt*, iot::mqtt::packets::Connect>& getConnectedClinets() const;
 
     protected:
-        std::map<apps::mqttbroker::webfrontend::SocketContext*, iot::mqtt::packets::Connect> connectedClients;
+        std::map<apps::mqttbroker::webfrontend::Mqtt*, iot::mqtt::packets::Connect> connectedClients;
     };
 
 } // namespace apps::mqttbroker::webfrontend

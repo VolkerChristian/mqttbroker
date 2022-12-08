@@ -33,16 +33,16 @@ namespace apps::mqttbroker::webfrontend {
         return mqttModel;
     }
 
-    void MqttModel::addConnectedClient(apps::mqttbroker::webfrontend::SocketContext* socketContext,
+    void MqttModel::addConnectedClient(apps::mqttbroker::webfrontend::Mqtt* mqtt,
                                        const iot::mqtt::packets::Connect& connect) {
-        connectedClients[socketContext] = connect;
+        connectedClients[mqtt] = connect;
     }
 
-    void MqttModel::delDisconnectedClient(apps::mqttbroker::webfrontend::SocketContext* socketContext) {
-        connectedClients.erase(socketContext);
+    void MqttModel::delDisconnectedClient(apps::mqttbroker::webfrontend::Mqtt* mqtt) {
+        connectedClients.erase(mqtt);
     }
 
-    const std::map<apps::mqttbroker::webfrontend::SocketContext*, iot::mqtt::packets::Connect>& MqttModel::getConnectedClinets() const {
+    const std::map<apps::mqttbroker::webfrontend::Mqtt*, iot::mqtt::packets::Connect>& MqttModel::getConnectedClinets() const {
         return connectedClients;
     }
 

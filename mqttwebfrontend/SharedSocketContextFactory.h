@@ -22,7 +22,7 @@
 #include <iot/mqtt/server/SharedSocketContextFactory.h>
 
 namespace apps::mqttbroker::webfrontend {
-    class SocketContext;
+    class Mqtt;
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -34,7 +34,7 @@ namespace apps::mqttbroker::webfrontend {
 namespace apps::mqttbroker::webfrontend {
 
     template <const nlohmann::json& jsonMappingT>
-    class SharedSocketContextFactory : public iot::mqtt::server::SharedSocketContextFactory<SocketContext> {
+    class SharedSocketContextFactory : public iot::mqtt::server::SharedSocketContextFactory<Mqtt> {
     public:
         SharedSocketContextFactory();
 

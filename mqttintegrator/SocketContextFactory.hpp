@@ -16,8 +16,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "SocketContext.h"        // IWYU pragma: export
+#include "Mqtt.h"                 // IWYU pragma: export
 #include "SocketContextFactory.h" // IWYU pragma: export
+
+#include <iot/mqtt/SocketContext.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -33,7 +35,7 @@ namespace apps::mqttbroker::integrator {
 
     template <const nlohmann::json& connectionT, const nlohmann::json& jsonMappingT>
     core::socket::SocketContext* SocketContextFactory<connectionT, jsonMappingT>::create(core::socket::SocketConnection* socketConnection) {
-        return new SocketContext(socketConnection, connection, jsonMapping);
+        return new iot::mqtt::SocketContext(socketConnection, new Mqtt(connection, jsonMapping));
     }
 
 } // namespace apps::mqttbroker::integrator

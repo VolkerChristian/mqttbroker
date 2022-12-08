@@ -252,7 +252,7 @@ int main(int argc, char* argv[]) {
     });
 
     mqttWebView.get("/clients", [] APPLICATION(req, res) {
-        const std::map<apps::mqttbroker::webfrontend::SocketContext*, iot::mqtt::packets::Connect>& connectionList =
+        const std::map<apps::mqttbroker::webfrontend::Mqtt*, iot::mqtt::packets::Connect>& connectionList =
             apps::mqttbroker::webfrontend::MqttModel::instance().getConnectedClinets();
 
         std::string responseString = "<html>"
@@ -264,9 +264,9 @@ int main(int argc, char* argv[]) {
                                      "    <table>"
                                      "      <tr><th>ClientId</th><th>Address</th></tr>";
 
-        for (const auto& [socketContext, connectPacket] : connectionList) {
-            responseString += "<tr><td>" + socketContext->getClientId() + "</td><td>" +
-                              socketContext->getSocketConnection()->getRemoteAddress().toString() + "</td></tr>";
+        for (const auto& [mqtt, connectPacket] : connectionList) {
+            responseString +=
+                "<tr><td>" + mqtt->getClientId() + "</td><td>" + mqtt->getSocketConnection()->getRemoteAddress().toString() + "</td></tr>";
         }
 
         responseString += "    </table>"
