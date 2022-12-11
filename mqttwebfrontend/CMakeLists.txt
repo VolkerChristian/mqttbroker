@@ -68,8 +68,10 @@ target_link_libraries(
     PUBLIC snodec::mqtt-server snodec::net-in-stream-legacy
            snodec::net-in-stream-tls snodec::net-un-stream-legacy
            snodec::http-server-express
-    PRIVATE mqtt-mapping
+    PUBLIC mqtt-mapping
 )
+
+set_target_properties(mqttwebfrontend PROPERTIES LINK_FLAGS "-rdynamic")
 
 if(SNODEC_INTREE_BUILD)
     set_target_properties(

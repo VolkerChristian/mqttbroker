@@ -39,6 +39,7 @@
 #elif OPENSSL_VERSION_NUMBER >= 0x10100000L
 #include <openssl/ossl_typ.h>
 #endif
+#include <cstdlib>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 
@@ -48,10 +49,6 @@ int main(int argc, char* argv[]) {
     std::string mappingFilePath;
     utils::Config::add_option(
         "--mqtt-mapping-file", mappingFilePath, "MQTT mapping file (json format) for integration", false, "[path to json file]");
-
-    std::string discoverPrefix;
-    utils::Config::add_option(
-        "--mqtt-discover-prefix", discoverPrefix, "MQTT discover prefix in the json mapping file", false, "[utf8]", "iotempower");
 
     core::SNodeC::init(argc, argv);
 
@@ -64,6 +61,8 @@ int main(int argc, char* argv[]) {
             VLOG(0) << "Activating mqttintegrator";
             VLOG(0) << "  Mapping File " << mappingFilePath;
             sharedJsonMapping = mappingJson["mappings"];
+
+            setenv("MQTT_MAPPING_JSON", sharedJsonMapping.dump().data(), 1);
         }
     }
 

@@ -34,6 +34,7 @@
 #elif OPENSSL_VERSION_NUMBER >= 0x10100000L
 #include <openssl/ossl_typ.h>
 #endif
+#include <cstdlib>
 #include <nlohmann/json.hpp>
 #include <openssl/asn1.h>
 #include <openssl/crypto.h>
@@ -48,10 +49,6 @@ int main(int argc, char* argv[]) {
     utils::Config::add_option(
         "--mqtt-mapping-file", mappingFilePath, "MQTT mapping file (json format) for integration", true, "[path to json file]");
 
-    std::string discoverPrefix;
-    utils::Config::add_option(
-        "--mqtt-discover-prefix", discoverPrefix, "MQTT discover prefix in the json mapping file", false, "[utf8]", "iotempower");
-
     core::SNodeC::init(argc, argv);
 
     if (!mappingFilePath.empty()) {
@@ -59,16 +56,19 @@ int main(int argc, char* argv[]) {
 
         if (!mappingJson.empty()) {
             static nlohmann::json connectionJson;
-            static nlohmann::json sharedMappingJson;
+            static nlohmann::json sharedJsonMapping;
 
             if (mappingJson.contains("connection")) {
                 connectionJson = mappingJson["connection"];
             }
 
-            sharedMappingJson = mappingJson["mappings"];
+            sharedJsonMapping = mappingJson["mappings"];
+
+            setenv("MQTT_MAPPING_JSON", sharedJsonMapping.dump().data(), 1);
+            setenv("MQTT_CONNECTION_JSON", connectionJson.dump().data(), 1);
 
             using InMqttTlsIntegratorClient =
-                net::in::stream::tls::SocketClient<apps::mqttbroker::integrator::SocketContextFactory<connectionJson, sharedMappingJson>>;
+                net::in::stream::tls::SocketClient<apps::mqttbroker::integrator::SocketContextFactory<connectionJson, sharedJsonMapping>>;
 
             using TLSInSocketConnection = InMqttTlsIntegratorClient::SocketConnection;
 

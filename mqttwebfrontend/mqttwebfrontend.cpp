@@ -22,12 +22,14 @@
 
 #include <core/SNodeC.h>
 #include <core/socket/SocketAddress.h>
+#include <express/legacy/in/WebApp.h>
 #include <express/tls/in/WebApp.h>
 #include <log/Logger.h>
 #include <net/in/stream/legacy/SocketServer.h> // IWYU pragma: keep
 #include <net/in/stream/tls/SocketServer.h>    // IWYU pragma: keep
 #include <net/un/stream/legacy/SocketServer.h> // IWYU pragma: keep
 #include <utils/Config.h>
+#include <web/http/http_utils.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -42,6 +44,7 @@
 #elif OPENSSL_VERSION_NUMBER >= 0x10100000L
 #include <openssl/ossl_typ.h>
 #endif
+#include <cstdlib>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 
@@ -56,10 +59,6 @@ int main(int argc, char* argv[]) {
     utils::Config::add_option(
         "--mqtt-mapping-file", mappingFilePath, "MQTT mapping file (json format) for integration", false, "[path to json file]");
 
-    std::string discoverPrefix;
-    utils::Config::add_option(
-        "--mqtt-discover-prefix", discoverPrefix, "MQTT discover prefix in the json mapping file", false, "[utf8]", "iotempower");
-
     core::SNodeC::init(argc, argv);
 
     static nlohmann::json sharedJsonMapping;
@@ -71,6 +70,8 @@ int main(int argc, char* argv[]) {
             VLOG(0) << "Activating mqttintegrator";
             VLOG(0) << "  Mapping File " << mappingFilePath;
             sharedJsonMapping = mappingJson["mappings"];
+
+            setenv("MQTT_MAPPING_JSON", sharedJsonMapping.dump().data(), 1);
         }
     }
 
@@ -247,6 +248,8 @@ int main(int argc, char* argv[]) {
 
     express::tls::in::WebApp mqttWebView("mqttwebview");
 
+    //    mqttWebView.laxRouting();
+
     mqttWebView.get("/test", [] APPLICATION(req, res) {
         res.send("Response From MQTTWebView");
     });
@@ -276,25 +279,29 @@ int main(int argc, char* argv[]) {
         res.send(responseString);
     });
 
-    /*
-    <table>
-        <tr>
-        <th>Company</th>
-        <th>Contact</th>
-        <th>Country</th>
-        </tr>
-        <tr>
-        <td>Alfreds Futterkiste</td>
-        <td>Maria Anders</td>
-        <td>Germany</td>
-        </tr>
-        <tr>
-        <td>Centro comercial Moctezuma</td>
-        <td>Francisco Chang</td>
-        <td>Mexico</td>
-        </tr>
-    </table>
-    */
+    mqttWebView.get("/ws/", [] APPLICATION(req, res) -> void {
+        std::string uri = req.originalUrl;
+
+        VLOG(0) << "OriginalUri: " << uri;
+        VLOG(0) << "Uri: " << req.url;
+
+        VLOG(0) << "Host: " << req.get("host");
+        VLOG(0) << "Connection: " << req.get("connection");
+        VLOG(0) << "Origin: " << req.get("origin");
+        VLOG(0) << "Path: " << req.path;
+        VLOG(0) << "Sec-WebSocket-Protocol: " << req.get("sec-websocket-protocol");
+        VLOG(0) << "sec-web-socket-extensions: " << req.get("sec-websocket-extensions");
+        VLOG(0) << "sec-websocket-key: " << req.get("sec-websocket-key");
+        VLOG(0) << "sec-websocket-version: " << req.get("sec-websocket-version");
+        VLOG(0) << "upgrade: " << req.get("upgrade");
+        VLOG(0) << "user-agent: " << req.get("user-agent");
+
+        if (httputils::ci_contains(req.get("connection"), "Upgrade")) {
+            res.upgrade(req);
+        } else {
+            res.sendStatus(404);
+        }
+    });
 
     mqttWebView.listen([](const express::tls::in::WebApp::SocketAddress& socketAddress, int errnum) mutable -> void {
         if (errnum < 0) {
@@ -306,5 +313,71 @@ int main(int argc, char* argv[]) {
         }
     });
 
+    express::legacy::in::WebApp mqttLegacyWebView("mqttlegacywebview");
+
+    //    mqttLegacyWebView.laxRouting();
+
+    mqttLegacyWebView.get("/test", [] APPLICATION(req, res) {
+        res.send("Response From MQTTWebView");
+    });
+
+    mqttLegacyWebView.get("/clients", [] APPLICATION(req, res) {
+        const std::map<apps::mqttbroker::webfrontend::Mqtt*, iot::mqtt::packets::Connect>& connectionList =
+            apps::mqttbroker::webfrontend::MqttModel::instance().getConnectedClinets();
+
+        std::string responseString = "<html>"
+                                     "  <head>"
+                                     "    <title>Response from MqttWebFrontend</title>"
+                                     "  </head>"
+                                     "  <body>"
+                                     "    <h1>List of all Connected Clients</h1>"
+                                     "    <table>"
+                                     "      <tr><th>ClientId</th><th>Address</th></tr>";
+
+        for (const auto& [mqtt, connectPacket] : connectionList) {
+            responseString +=
+                "<tr><td>" + mqtt->getClientId() + "</td><td>" + mqtt->getSocketConnection()->getRemoteAddress().toString() + "</td></tr>";
+        }
+
+        responseString += "    </table>"
+                          "  </body>"
+                          "</html>";
+
+        res.send(responseString);
+    });
+
+    mqttLegacyWebView.get("/ws/", [] APPLICATION(req, res) -> void {
+        std::string uri = req.originalUrl;
+
+        VLOG(0) << "OriginalUri: " << uri;
+        VLOG(0) << "Uri: " << req.url;
+
+        VLOG(0) << "Host: " << req.get("host");
+        VLOG(0) << "Connection: " << req.get("connection");
+        VLOG(0) << "Origin: " << req.get("origin");
+        VLOG(0) << "Path: " << req.path;
+        VLOG(0) << "Sec-WebSocket-Protocol: " << req.get("sec-websocket-protocol");
+        VLOG(0) << "sec-web-socket-extensions: " << req.get("sec-websocket-extensions");
+        VLOG(0) << "sec-websocket-key: " << req.get("sec-websocket-key");
+        VLOG(0) << "sec-websocket-version: " << req.get("sec-websocket-version");
+        VLOG(0) << "upgrade: " << req.get("upgrade");
+        VLOG(0) << "user-agent: " << req.get("user-agent");
+
+        if (httputils::ci_contains(req.get("connection"), "Upgrade")) {
+            res.upgrade(req);
+        } else {
+            res.sendStatus(404);
+        }
+    });
+
+    mqttLegacyWebView.listen([](const express::legacy::in::WebApp::SocketAddress& socketAddress, int errnum) mutable -> void {
+        if (errnum < 0) {
+            PLOG(ERROR) << "OnError";
+        } else if (errnum > 0) {
+            PLOG(ERROR) << "OnError";
+        } else {
+            VLOG(0) << "MqttWebFrontend listening on " << socketAddress.toString();
+        }
+    });
     return core::SNodeC::start();
 }
