@@ -33,29 +33,19 @@ namespace web::websocket::subprotocol::echo::client {
         : web::websocket::client::SubProtocol(name, PING_INTERVAL, MAX_FLYING_PINGS) {
     }
 
-    std::size_t Echo::receive(char *junk, std::size_t junklen) const
-    {
-
+    std::size_t Echo::receive(char* junk, std::size_t junklen) const {
     }
 
-    void Echo::send(char *junk, std::size_t junklen) const
-    {
-
+    void Echo::send(char* junk, std::size_t junklen) const {
     }
 
-    void Echo::setKeepAlive(const utils::Timeval &timeout)
-    {
-
+    void Echo::setKeepAlive(const utils::Timeval& timeout) {
     }
 
-    void Echo::end(bool fatal)
-    {
-
+    void Echo::end(bool fatal) {
     }
 
-    void Echo::kill()
-    {
-
+    void Echo::kill() {
     }
 
     void Echo::onConnected() {

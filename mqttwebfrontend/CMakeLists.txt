@@ -51,9 +51,8 @@ add_compile_options(
 
 set(MQTTWEBFRONTEND_CPP mqttwebfrontend.cpp Mqtt.cpp MqttModel.cpp)
 
-set(MQTTWEBFRONTEND_H
-    SharedSocketContextFactory.h SharedSocketContextFactory.hpp Mqtt.h
-    MqttModel.h
+set(MQTTWEBFRONTEND_H SharedSocketContextFactory.h
+                      SharedSocketContextFactory.hpp Mqtt.h MqttModel.h
 )
 
 add_executable(mqttwebfrontend ${MQTTWEBFRONTEND_CPP} ${MQTTWEBFRONTEND_H})

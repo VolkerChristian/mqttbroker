@@ -26,9 +26,8 @@ target_include_directories(
 )
 
 set_target_properties(
-    mqttclientsubprotocol
-    PROPERTIES OUTPUT_NAME "snodec-websocket-mqtt"
-               SOVERSION 1 # PREFIX "ssp"
+    mqttclientsubprotocol PROPERTIES OUTPUT_NAME "snodec-websocket-mqtt"
+                                     SOVERSION 1 # PREFIX "ssp"
 )
 
 install(TARGETS mqttclientsubprotocol

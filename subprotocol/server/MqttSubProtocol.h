@@ -19,7 +19,8 @@
 #ifndef WEB_WEBSOCKET_SUBPROTOCOL_SERVER_MQTTSUBPROTOCOL_H
 #define WEB_WEBSOCKET_SUBPROTOCOL_SERVER_MQTTSUBPROTOCOL_H
 
-#include "web/websocket/server/SubProtocol.h"
+#include <core/EventReceiver.h>
+#include <web/websocket/server/SubProtocol.h>
 
 namespace iot::mqtt::server::broker {
     class Broker;
@@ -28,13 +29,18 @@ namespace web::websocket {
     class SubProtocolContext;
 }
 
+namespace core::socket {
+    class SocketConnection;
+}
+
 #include <core/timer/Timer.h>
 #include <iot/mqtt/MqttContext.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 #include <cstdint> // for uint16_t
-#include <memory>  // for shared_ptr
+#include <functional>
+#include <memory> // for shared_ptr
 #include <nlohmann/json_fwd.hpp>
 #include <string>          // for allocator, string
 #include <utils/Timeval.h> // for size_t, Timeval
@@ -43,6 +49,21 @@ namespace web::websocket {
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 namespace web::websocket::subprotocol::echo::server {
+
+    class OnReceivedFromPeerEvent : public core::EventReceiver {
+    public:
+        explicit OnReceivedFromPeerEvent(const std::function<void(void)>& event)
+            : core::EventReceiver("WS-OnData")
+            , event(event) {
+        }
+
+    private:
+        void onEvent([[maybe_unused]] const utils::Timeval& currentTime) {
+            event();
+        }
+
+        std::function<void(void)> event;
+    };
 
     class MqttSubProtocol
         : public web::websocket::server::SubProtocol
@@ -70,6 +91,9 @@ namespace web::websocket::subprotocol::echo::server {
         void onMessageError(uint16_t errnum) override;
         void onDisconnected() override;
         void onExit() override;
+        core::socket::SocketConnection* getSocketConnection() override;
+
+        OnReceivedFromPeerEvent onReceivedFromPeerEvent;
 
         core::timer::Timer keepAliveTimer;
 

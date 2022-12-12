@@ -23,16 +23,19 @@ add_library(
                                  ${MQTTSERVERSUBPROTOCOL_H}
 )
 
-target_link_libraries(mqttserversubprotocol PRIVATE snodec::mqtt-server nlohmann_json::nlohmann_json)
+target_link_libraries(
+    mqttserversubprotocol PRIVATE snodec::mqtt-server
+                                  nlohmann_json::nlohmann_json
+)
 
 target_include_directories(
-    mqttserversubprotocol PUBLIC ${WEBSOCKET_SUBPROTOCOL_SERVER_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}
+    mqttserversubprotocol PUBLIC ${WEBSOCKET_SUBPROTOCOL_SERVER_INCLUDE_DIRS}
+                                 ${PROJECT_SOURCE_DIR}
 )
 
 set_target_properties(
-    mqttserversubprotocol
-    PROPERTIES OUTPUT_NAME "snodec-websocket-mqtt"
-               SOVERSION 1 # PREFIX "ssp"
+    mqttserversubprotocol PROPERTIES OUTPUT_NAME "snodec-websocket-mqtt"
+                                     SOVERSION 1 # PREFIX "ssp"
 )
 
 install(TARGETS mqttserversubprotocol

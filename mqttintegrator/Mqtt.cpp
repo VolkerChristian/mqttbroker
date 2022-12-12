@@ -36,8 +36,7 @@
 
 namespace apps::mqttbroker::integrator {
 
-    Mqtt::Mqtt(const nlohmann::json& connectionJson,
-               const nlohmann::json& mappingJson)
+    Mqtt::Mqtt(const nlohmann::json& connectionJson, const nlohmann::json& mappingJson)
         : apps::mqttbroker::lib::MqttMapper(mappingJson)
         , connectionJson(connectionJson)
         , keepAlive(connectionJson["keep_alive"])

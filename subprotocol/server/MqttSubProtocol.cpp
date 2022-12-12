@@ -20,6 +20,7 @@
 
 #include "mqttwebfrontend/Mqtt.h"
 
+#include <core/socket/SocketContext.h>        // for SocketConnection
 #include <web/websocket/SubProtocolContext.h> // for SubProtocolContext
 #include <web/websocket/server/SubProtocol.h> // for SubProtocol
 
@@ -43,8 +44,10 @@ namespace web::websocket::subprotocol::echo::server {
                                      const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
                                      const nlohmann::json& mappingJson)
         : web::websocket::server::SubProtocol(subProtocolContext, name, PING_INTERVAL, MAX_FLYING_PINGS)
-        , iot::mqtt::MqttContext(new apps::mqttbroker::webfrontend::Mqtt(broker, mappingJson)) {
-        iot::mqtt::MqttContext::setSocketConnection(this->getSocketContextUpgrade()->getSocketConnection());
+        , iot::mqtt::MqttContext(new apps::mqttbroker::webfrontend::Mqtt(broker, mappingJson))
+        , onReceivedFromPeerEvent([this]() -> void {
+            iot::mqtt::MqttContext::onReceiveFromPeer();
+        }) {
     }
 
     MqttSubProtocol::~MqttSubProtocol() {
@@ -60,7 +63,7 @@ namespace web::websocket::subprotocol::echo::server {
         size -= maxReturn;
 
         if (size > 0) {
-            // publish Event
+            onReceivedFromPeerEvent.publish();
         } else {
             buffer.clear();
             cursor = 0;
@@ -92,6 +95,7 @@ namespace web::websocket::subprotocol::echo::server {
 
     void MqttSubProtocol::onConnected() {
         VLOG(0) << "Mqtt connected:";
+        iot::mqtt::MqttContext::onConnected();
     }
 
     void MqttSubProtocol::onMessageStart([[maybe_unused]] int opCode) {
@@ -137,10 +141,16 @@ namespace web::websocket::subprotocol::echo::server {
 
     void MqttSubProtocol::onDisconnected() {
         VLOG(0) << "MQTT disconnected:";
+        iot::mqtt::MqttContext::onDisconnected();
     }
 
     void MqttSubProtocol::onExit() {
         VLOG(0) << "MQTT exit:";
+        iot::mqtt::MqttContext::onExit();
+    }
+
+    core::socket::SocketConnection* MqttSubProtocol::getSocketConnection() {
+        return getSocketContextUpgrade()->getSocketConnection();
     }
 
 } // namespace web::websocket::subprotocol::echo::server

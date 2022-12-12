@@ -30,8 +30,7 @@
 
 namespace apps::mqttbroker::webfrontend {
 
-    Mqtt::Mqtt(const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
-               const nlohmann::json& mappingJson)
+    Mqtt::Mqtt(const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker, const nlohmann::json& mappingJson)
         : iot::mqtt::server::Mqtt(broker)
         , apps::mqttbroker::lib::MqttMapper(mappingJson) {
     }
