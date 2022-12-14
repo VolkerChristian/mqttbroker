@@ -16,15 +16,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WEB_WEBSOCKET_SUBPROTOCOL_SERVER_MQTTSUBPROTOCOL_H
-#define WEB_WEBSOCKET_SUBPROTOCOL_SERVER_MQTTSUBPROTOCOL_H
+#ifndef WEB_WEBSOCKET_SUBPROTOCOL_CLIENT_MQTTSUBPROTOCOL_H
+#define WEB_WEBSOCKET_SUBPROTOCOL_CLIENT_MQTTSUBPROTOCOL_H
 
 #include <core/EventReceiver.h>
-#include <web/websocket/server/SubProtocol.h>
-
-namespace iot::mqtt::server::broker {
-    class Broker;
-}
+#include <web/websocket/client/SubProtocol.h>
 
 namespace web::websocket {
     class SubProtocolContext;
@@ -41,7 +37,6 @@ namespace core::socket {
 
 #include <cstdint> // for uint16_t
 #include <functional>
-#include <memory> // for shared_ptr
 #include <nlohmann/json_fwd.hpp>
 #include <string>          // for allocator, string
 #include <utils/Timeval.h> // for size_t, Timeval
@@ -67,12 +62,12 @@ namespace web::websocket::subprotocol::echo::server {
     };
 
     class MqttSubProtocol
-        : public web::websocket::server::SubProtocol
+        : public web::websocket::client::SubProtocol
         , public iot::mqtt::MqttContext {
     public:
         MqttSubProtocol(SubProtocolContext* subProtocolContext,
                         const std::string& name,
-                        const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
+                        const nlohmann::json& connectionJson,
                         const nlohmann::json& mappingJson);
         ~MqttSubProtocol() override;
 
@@ -106,4 +101,4 @@ namespace web::websocket::subprotocol::echo::server {
 
 } // namespace web::websocket::subprotocol::echo::server
 
-#endif // WEB_WEBSOCKET_SUBPROTOCOL_SERVER_MQTTSUBPROTOCOL_H
+#endif // WEB_WEBSOCKET_SUBPROTOCOL_CLIENT_MQTTSUBPROTOCOL_H

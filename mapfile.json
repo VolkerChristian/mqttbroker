@@ -2,7 +2,7 @@
   "discover_prefix": "iotempower",
   "connection": {
     "keep_alive": 60,
-    "client_id": "Client",
+    "client_id": "MQTT-Integrator",
     "clean_session": true,
     "will_topic": "will/topic",
     "will_message": "Last Will",

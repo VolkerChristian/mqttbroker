@@ -18,6 +18,8 @@
 
 #include "Mqtt.h"
 
+#include "MqttModel.h"
+
 #include <iot/mqtt/packets/Publish.h>
 #include <iot/mqtt/server/broker/Broker.h>
 #include <iot/mqtt/server/broker/Message.h>
@@ -33,6 +35,10 @@ namespace apps::mqttbroker::broker {
         , apps::mqttbroker::lib::MqttMapper(mappingJson) {
     }
 
+    void Mqtt::onConnect(iot::mqtt::packets::Connect& connect) {
+        MqttModel::instance().addConnectedClient(this, connect);
+    }
+
     void Mqtt::onPublish(iot::mqtt::packets::Publish& publish) {
         publishMappings(publish);
     }
@@ -45,6 +51,10 @@ namespace apps::mqttbroker::broker {
         }
 
         publishMappings(iot::mqtt::packets::Publish(getPacketIdentifier(), topic, message, qoS, retain, MQTT_DUP_FALSE));
+    }
+
+    void Mqtt::onDisconnected() {
+        MqttModel::instance().delDisconnectedClient(this);
     }
 
 } // namespace apps::mqttbroker::broker

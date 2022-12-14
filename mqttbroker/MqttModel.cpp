@@ -16,22 +16,33 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "EchoFactory.h"
+#include "MqttModel.h"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+#endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
-#define NAME "echo"
+namespace apps::mqttbroker::broker {
 
-namespace web::websocket::subprotocol::echo::client {
-
-    Echo* EchoFactory::create() {
-        return new Echo(getName());
+    MqttModel::MqttModel() {
     }
 
-} // namespace web::websocket::subprotocol::echo::client
+    MqttModel& MqttModel::instance() {
+        static MqttModel mqttModel;
 
-extern "C" void* echoClientSubProtocolFactory() {
-    return new web::websocket::subprotocol::echo::client::EchoFactory(NAME);
-}
+        return mqttModel;
+    }
+
+    void MqttModel::addConnectedClient(apps::mqttbroker::broker::Mqtt* mqtt, const iot::mqtt::packets::Connect& connect) {
+        connectedClients[mqtt] = connect;
+    }
+
+    void MqttModel::delDisconnectedClient(apps::mqttbroker::broker::Mqtt* mqtt) {
+        connectedClients.erase(mqtt);
+    }
+
+    const std::map<apps::mqttbroker::broker::Mqtt*, iot::mqtt::packets::Connect>& MqttModel::getConnectedClinets() const {
+        return connectedClients;
+    }
+
+} // namespace apps::mqttbroker::broker

@@ -16,8 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef APPS_MQTTBROKER_MQTTBROKER_SOCKETCONTEXTFACTORY_H
-#define APPS_MQTTBROKER_MQTTBROKER_SOCKETCONTEXTFACTORY_H
+#ifndef APPS_MQTTBROKER_BROKER_SOCKETCONTEXTFACTORY_H
+#define APPS_MQTTBROKER_BROKER_SOCKETCONTEXTFACTORY_H
 
 #include <iot/mqtt/server/SharedSocketContextFactory.h>
 
@@ -47,4 +47,4 @@ namespace apps::mqttbroker::broker {
 
 } // namespace apps::mqttbroker::broker
 
-#endif // APPS_MQTTBROKER_MQTTBROKER_SOCKETCONTEXTFACTORY_H
+#endif // APPS_MQTTBROKER_BROKER_SOCKETCONTEXTFACTORY_H

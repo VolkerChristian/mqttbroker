@@ -69,7 +69,7 @@
       ],
       "properties": {
         "topic_level": {
-        "$id": "https://www.vchrist.at/mqttmapper/schemas/topic_level",
+          "$id": "https://www.vchrist.at/mqttmapper/schemas/topic_level",
           "type": "array",
           "items": {
             "type": "object",
@@ -207,7 +207,7 @@
               "type": "array",
               "items": {
                 "type": "object",
-                  "required": [
+                "required": [
                   "message",
                   "mapped_message"
                 ],

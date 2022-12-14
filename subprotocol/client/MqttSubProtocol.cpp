@@ -18,14 +18,10 @@
 
 #include "MqttSubProtocol.h"
 
-#include "mqttbroker/Mqtt.h"
+#include "mqttintegrator/Mqtt.h"
 
 #include <core/socket/SocketContext.h>        // for SocketConnection
-#include <core/timer/Timer.h>                 // for Timer
-#include <iot/mqtt/MqttContext.h>             // for MqttContext
-#include <utils/Timeval.h>                    // for size_t, Timeval
 #include <web/websocket/SubProtocolContext.h> // for SubProtocolContext
-#include <web/websocket/server/SubProtocol.h> // for SubProtocol
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -44,10 +40,10 @@ namespace web::websocket::subprotocol::echo::server {
 
     MqttSubProtocol::MqttSubProtocol(SubProtocolContext* subProtocolContext,
                                      const std::string& name,
-                                     const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
+                                     const nlohmann::json& connectionJson,
                                      const nlohmann::json& mappingJson)
-        : web::websocket::server::SubProtocol(subProtocolContext, name, PING_INTERVAL, MAX_FLYING_PINGS)
-        , iot::mqtt::MqttContext(new apps::mqttbroker::broker::Mqtt(broker, mappingJson))
+        : web::websocket::client::SubProtocol(subProtocolContext, name, PING_INTERVAL, MAX_FLYING_PINGS)
+        , iot::mqtt::MqttContext(new apps::mqttbroker::integrator::Mqtt(connectionJson, mappingJson))
         , onReceivedFromPeerEvent([this]() -> void {
             iot::mqtt::MqttContext::onReceiveFromPeer();
         }) {

@@ -16,8 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef APPS_MQTTBROKER_MQTTBROKER_SOCKETCONTEXT_H
-#define APPS_MQTTBROKER_MQTTBROKER_SOCKETCONTEXT_H
+#ifndef APPS_MQTTBROKER_BROKER_SOCKETCONTEXT_H
+#define APPS_MQTTBROKER_BROKER_SOCKETCONTEXT_H
 
 #include "lib/MqttMapper.h"
 
@@ -25,6 +25,7 @@
 
 namespace iot::mqtt {
     namespace packets {
+        class Connect;
         class Publish;
     } // namespace packets
     namespace server::broker {
@@ -48,11 +49,17 @@ namespace apps::mqttbroker::broker {
         explicit Mqtt(const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker, const nlohmann::json& mappingJson);
 
     private:
+        // inherited from iot::mqtt::server::SocketContext - the plain and base MQTT broker
+        void onConnect(iot::mqtt::packets::Connect& connect) final;
         void onPublish(iot::mqtt::packets::Publish& publish) final;
 
+        // inherited from apps::mqttbroker::lib::MqttMapper
         void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) final;
+
+        // inherited from core::socket::SocketContext (the root class of all SocketContext classes) via iot::mqtt::server::SocketContext
+        void onDisconnected() final;
     };
 
 } // namespace apps::mqttbroker::broker
 
-#endif // APPS_MQTTBROKER_MQTTBROKER_SOCKETCONTEXT_H
+#endif // APPS_MQTTBROKER_BROKER_SOCKETCONTEXT_H

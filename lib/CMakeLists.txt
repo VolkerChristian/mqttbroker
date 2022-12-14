@@ -69,6 +69,7 @@ add_library(
     mqtt-mapping STATIC JsonMappingReader.cpp MqttMapper.cpp
                         JsonMappingReader.h MqttMapper.h mapping-schema.json.h
 )
+set_property(TARGET mqtt-mapping PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories(mqtt-mapping PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(

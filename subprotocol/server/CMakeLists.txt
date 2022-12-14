@@ -24,8 +24,7 @@ add_library(
 )
 
 target_link_libraries(
-    mqttserversubprotocol PRIVATE snodec::mqtt-server
-                                  nlohmann_json::nlohmann_json
+    mqttserversubprotocol PUBLIC mqtt-brokermodel nlohmann_json::nlohmann_json
 )
 
 target_include_directories(
@@ -41,6 +40,10 @@ set_target_properties(
 install(TARGETS mqttserversubprotocol
         LIBRARY DESTINATION ${WEBSOCKET_SUBPROTOCOL_SERVER_INSTALL_LIBDIR}
 )
+
+#set_target_properties(
+#    mqttserversubprotocol PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}"
+#)
 
 if(CHECK_INCLUDES)
     set_property(

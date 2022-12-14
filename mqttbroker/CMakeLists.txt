@@ -8,7 +8,7 @@ find_package(nlohmann_json 3.7.0)
 if(NOT SNODEC_INTREE_BUILD)
     find_package(
         snodec COMPONENTS net-in-stream-legacy net-in-stream-tls
-                          net-un-stream-legacy mqtt-server
+                          net-un-stream-legacy mqtt-server http-server-express
     )
 endif(NOT SNODEC_INTREE_BUILD)
 
@@ -49,13 +49,35 @@ add_compile_options(
     ${ADDITIONAL_OPTIONS}
 )
 
-set(MQTTBROKER_CPP mqttbroker.cpp Mqtt.cpp)
+# set(MQTTWEBFRONTEND_CPP mqttbroker.cpp Mqtt.cpp MqttModel.cpp)
 
-set(MQTTBROKER_H SharedSocketContextFactory.h SharedSocketContextFactory.hpp
-                 Mqtt.h
+# set(MQTTWEBFRONTEND_H SharedSocketContextFactory.h
+# SharedSocketContextFactory.hpp Mqtt.h MqttModel.h )
+
+set(MQTTWEBFRONTEND_CPP mqttbroker.cpp)
+
+set(MQTTWEBFRONTEND_H SharedSocketContextFactory.h
+                      SharedSocketContextFactory.hpp
 )
 
-add_executable(mqttbroker ${MQTTBROKER_CPP} ${MQTTBROKER_H})
+add_library(mqtt-brokermodel SHARED Mqtt.cpp Mqtt.h MqttModel.cpp MqttModel.h)
+
+target_include_directories(
+    mqtt-brokermodel PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+                            ${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_SOURCE_DIR}
+)
+
+target_link_libraries(mqtt-brokermodel PUBLIC snodec::mqtt-server mqtt-mapping)
+
+if(SNODEC_INTREE_BUILD)
+    set_target_properties(
+        mqtt-brokermodel PROPERTIES INSTALL_RPATH "${SNODEC_IOT_MQTT_RPATH}"
+    )
+endif(SNODEC_INTREE_BUILD)
+
+install(TARGETS mqtt-brokermodel RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+add_executable(mqttbroker ${MQTTWEBFRONTEND_CPP} ${MQTTWEBFRONTEND_H})
 
 target_include_directories(
     mqttbroker PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
@@ -64,10 +86,13 @@ target_include_directories(
 
 target_link_libraries(
     mqttbroker
-    PUBLIC snodec::mqtt-server snodec::net-in-stream-legacy
+    PUBLIC snodec::net-in-stream-legacy
            snodec::net-in-stream-tls snodec::net-un-stream-legacy
-    PRIVATE mqtt-mapping
+           snodec::http-server-express
+    PUBLIC mqtt-brokermodel
 )
+
+#set_target_properties(mqttbroker PROPERTIES LINK_FLAGS "-rdynamic")
 
 if(SNODEC_INTREE_BUILD)
     set_target_properties(

@@ -16,35 +16,39 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef APPS_MQTTBROKER_MQTTWETFRONTEND_SOCKETCONTEXTFACTORY_H
-#define APPS_MQTTBROKER_MQTTWETFRONTEND_SOCKETCONTEXTFACTORY_H
+#ifndef APPS_MQTTBROKER_BBROKER_MQTTMODEL_H
+#define APPS_MQTTBROKER_BBROKER_MQTTMODEL_H
 
-#include <iot/mqtt/server/SharedSocketContextFactory.h>
+#include <iot/mqtt/packets/Connect.h>
 
-namespace apps::mqttbroker::webfrontend {
+namespace apps::mqttbroker::broker {
     class Mqtt;
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-#include <nlohmann/json_fwd.hpp>
+#include <map>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
-namespace apps::mqttbroker::webfrontend {
+namespace apps::mqttbroker::broker {
 
-    template <const nlohmann::json& jsonMappingT>
-    class SharedSocketContextFactory : public iot::mqtt::server::SharedSocketContextFactory<Mqtt> {
-    public:
-        SharedSocketContextFactory();
-
-        core::socket::SocketContext* create(core::socket::SocketConnection* socketConnection,
-                                            std::shared_ptr<iot::mqtt::server::broker::Broker>& broker) final;
-
+    class MqttModel {
     private:
-        const nlohmann::json& jsonMapping;
+        MqttModel();
+
+    public:
+        static MqttModel& instance();
+
+        void addConnectedClient(apps::mqttbroker::broker::Mqtt* mqtt, const iot::mqtt::packets::Connect& connect);
+        void delDisconnectedClient(apps::mqttbroker::broker::Mqtt* mqtt);
+
+        const std::map<apps::mqttbroker::broker::Mqtt*, iot::mqtt::packets::Connect>& getConnectedClinets() const;
+
+    protected:
+        std::map<apps::mqttbroker::broker::Mqtt*, iot::mqtt::packets::Connect> connectedClients;
     };
 
-} // namespace apps::mqttbroker::webfrontend
+} // namespace apps::mqttbroker::broker
 
-#endif // APPS_MQTTBROKER_MQTTWETFRONTEND_SOCKETCONTEXTFACTORY_H
+#endif // APPS_MQTTBROKER_BBROKER_MQTTMODEL_H
