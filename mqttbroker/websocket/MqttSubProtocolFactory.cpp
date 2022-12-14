@@ -19,7 +19,7 @@
 #include "MqttSubProtocolFactory.h"
 
 #include <iot/mqtt/server/broker/Broker.h>
-#include <web/websocket/SubProtocolFactory.h> // for SubProtocolFactory
+#include <web/websocket/SubProtocolFactory.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -33,7 +33,7 @@
 
 #define NAME "mqtt"
 
-namespace web::websocket::subprotocol::echo::server {
+namespace apps::mqttbroker::broker::websocket {
 
     MqttSubprotocolFactory::MqttSubprotocolFactory(const std::string& name)
         : web::websocket::SubProtocolFactory<MqttSubProtocol>::SubProtocolFactory(name)
@@ -46,13 +46,13 @@ namespace web::websocket::subprotocol::echo::server {
         }
     }
 
-    MqttSubProtocol* MqttSubprotocolFactory::create(SubProtocolContext* subProtocolContext) {
+    MqttSubProtocol* MqttSubprotocolFactory::create(web::websocket::SubProtocolContext* subProtocolContext) {
         return new MqttSubProtocol(
             subProtocolContext, getName(), iot::mqtt::server::broker::Broker::instance(SUBSCRIBTION_MAX_QOS), mappingJson);
     }
 
-} // namespace web::websocket::subprotocol::echo::server
+} // namespace apps::mqttbroker::broker::websocket
 
 extern "C" void* mqttServerSubProtocolFactory() {
-    return new web::websocket::subprotocol::echo::server::MqttSubprotocolFactory(NAME);
+    return new apps::mqttbroker::broker::websocket::MqttSubprotocolFactory(NAME);
 }

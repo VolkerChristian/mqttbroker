@@ -254,8 +254,8 @@ int main(int argc, char* argv[]) {
     });
 
     mqttWebView.get("/clients", [] APPLICATION(req, res) {
-        const std::map<apps::mqttbroker::broker::Mqtt*, iot::mqtt::packets::Connect>& connectionList =
-            apps::mqttbroker::broker::MqttModel::instance().getConnectedClinets();
+        const std::map<apps::mqttbroker::broker::lib::Mqtt*, iot::mqtt::packets::Connect>& connectionList =
+            apps::mqttbroker::broker::lib::MqttModel::instance().getConnectedClinets();
 
         std::string responseString = "<html>"
                                      "  <head>"
@@ -321,8 +321,8 @@ int main(int argc, char* argv[]) {
     });
 
     mqttLegacyWebView.get("/clients", [] APPLICATION(req, res) {
-        const std::map<apps::mqttbroker::broker::Mqtt*, iot::mqtt::packets::Connect>& connectionList =
-            apps::mqttbroker::broker::MqttModel::instance().getConnectedClinets();
+        const std::map<apps::mqttbroker::broker::lib::Mqtt*, iot::mqtt::packets::Connect>& connectionList =
+            apps::mqttbroker::broker::lib::MqttModel::instance().getConnectedClinets();
 
         std::string responseString = "<html>"
                                      "  <head>"

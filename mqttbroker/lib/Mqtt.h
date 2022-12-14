@@ -40,7 +40,7 @@ namespace iot::mqtt {
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
-namespace apps::mqttbroker::broker {
+namespace apps::mqttbroker::broker::lib {
 
     class Mqtt
         : public iot::mqtt::server::Mqtt
@@ -60,6 +60,6 @@ namespace apps::mqttbroker::broker {
         void onDisconnected() final;
     };
 
-} // namespace apps::mqttbroker::broker
+} // namespace apps::mqttbroker::broker::lib
 
 #endif // APPS_MQTTBROKER_BROKER_SOCKETCONTEXT_H

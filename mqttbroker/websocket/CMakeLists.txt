@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-find_package(snodec COMPONENTS websocket-server mqtt-server)
+find_package(snodec COMPONENTS websocket-server)
 
 find_package(nlohmann_json)
 
@@ -41,9 +41,8 @@ install(TARGETS mqttserversubprotocol
         LIBRARY DESTINATION ${WEBSOCKET_SUBPROTOCOL_SERVER_INSTALL_LIBDIR}
 )
 
-#set_target_properties(
-#    mqttserversubprotocol PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}"
-#)
+# set_target_properties( mqttserversubprotocol PROPERTIES INSTALL_RPATH
+# "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}" )
 
 if(CHECK_INCLUDES)
     set_property(

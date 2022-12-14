@@ -37,7 +37,7 @@ namespace apps::mqttbroker::broker {
     core::socket::SocketContext*
     SharedSocketContextFactory<jsonMappingT>::create(core::socket::SocketConnection* socketConnection,
                                                      std::shared_ptr<iot::mqtt::server::broker::Broker>& broker) {
-        return new iot::mqtt::SocketContext(socketConnection, new Mqtt(broker, jsonMapping));
+        return new iot::mqtt::SocketContext(socketConnection, new apps::mqttbroker::broker::lib::Mqtt(broker, jsonMapping));
     }
 
 } // namespace apps::mqttbroker::broker

@@ -49,7 +49,7 @@ namespace core::socket {
 
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-namespace web::websocket::subprotocol::echo::server {
+namespace apps::mqttbroker::broker::websocket {
 
     class OnReceivedFromPeerEvent : public core::EventReceiver {
     public:
@@ -70,7 +70,7 @@ namespace web::websocket::subprotocol::echo::server {
         : public web::websocket::server::SubProtocol
         , public iot::mqtt::MqttContext {
     public:
-        MqttSubProtocol(SubProtocolContext* subProtocolContext,
+        MqttSubProtocol(web::websocket::SubProtocolContext* subProtocolContext,
                         const std::string& name,
                         const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
                         const nlohmann::json& mappingJson);
@@ -104,6 +104,6 @@ namespace web::websocket::subprotocol::echo::server {
         std::size_t size = 0;
     };
 
-} // namespace web::websocket::subprotocol::echo::server
+} // namespace apps::mqttbroker::broker::websocket
 
 #endif // WEB_WEBSOCKET_SUBPROTOCOL_SERVER_MQTTSUBPROTOCOL_H

@@ -5,13 +5,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(nlohmann_json 3.7.0)
 
-add_subdirectory(lib)
-add_subdirectory(websocket)
-
-find_package(
-    snodec COMPONENTS net-in-stream-legacy net-in-stream-tls
-                      net-un-stream-legacy mqtt-server http-server-express
-)
+if(NOT SNODEC_INTREE_BUILD)
+    find_package(
+        snodec COMPONENTS mqtt-server
+    )
+endif(NOT SNODEC_INTREE_BUILD)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(ADDITIONAL_OPTIONS
@@ -50,32 +48,19 @@ add_compile_options(
     ${ADDITIONAL_OPTIONS}
 )
 
-set(MQTTBROKER_CPP mqttbroker.cpp)
-
-set(MQTTBROKER_H SharedSocketContextFactory.h
-                      SharedSocketContextFactory.hpp
-)
-
-add_executable(mqttbroker ${MQTTBROKER_CPP} ${MQTTBROKER_H})
+add_library(mqtt-brokermodel SHARED Mqtt.cpp Mqtt.h MqttModel.cpp MqttModel.h)
 
 target_include_directories(
-    mqttbroker PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
-                      ${PROJECT_SOURCE_DIR}
+    mqtt-brokermodel PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+                            ${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_SOURCE_DIR}
 )
 
-target_link_libraries(
-    mqttbroker
-    PUBLIC snodec::net-in-stream-legacy snodec::net-in-stream-tls
-           snodec::net-un-stream-legacy snodec::http-server-express
-    PUBLIC mqtt-brokermodel
-)
-
-# set_target_properties(mqttbroker PROPERTIES LINK_FLAGS "-rdynamic")
+target_link_libraries(mqtt-brokermodel PUBLIC snodec::mqtt-server mqtt-mapping)
 
 if(SNODEC_INTREE_BUILD)
     set_target_properties(
-        mqttbroker PROPERTIES INSTALL_RPATH "${SNODEC_IOT_MQTT_RPATH}"
+        mqtt-brokermodel PROPERTIES INSTALL_RPATH "${SNODEC_IOT_MQTT_RPATH}"
     )
 endif(SNODEC_INTREE_BUILD)
 
-install(TARGETS mqttbroker RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS mqtt-brokermodel RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})

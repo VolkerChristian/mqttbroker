@@ -28,7 +28,7 @@
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
-namespace apps::mqttbroker::broker {
+namespace apps::mqttbroker::broker::lib {
 
     Mqtt::Mqtt(const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker, const nlohmann::json& mappingJson)
         : iot::mqtt::server::Mqtt(broker)
@@ -57,4 +57,4 @@ namespace apps::mqttbroker::broker {
         MqttModel::instance().delDisconnectedClient(this);
     }
 
-} // namespace apps::mqttbroker::broker
+} // namespace apps::mqttbroker::broker::lib
