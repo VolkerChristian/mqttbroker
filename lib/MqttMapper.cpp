@@ -27,6 +27,7 @@
 #include "log/Logger.h"
 
 #include <algorithm>
+#include <exception>
 #include <initializer_list>
 #include <map>
 #include <nlohmann/json.hpp>
@@ -103,7 +104,7 @@ namespace apps::mqttbroker::lib {
             uint8_t qoS = templateMapping.value("qos_override", publish.getQoS());
 
             publishMapping(commandTopic, renderedMessage, qoS, retain);
-        } catch (const inja::InjaError& e) {
+        } catch (const std::exception& e) {
             LOG(ERROR) << e.what();
             LOG(ERROR) << "Rendering failed: " << mappingTemplate << " : " << json.dump();
         }

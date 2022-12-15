@@ -83,30 +83,17 @@ namespace apps::mqttbroker::integrator {
     }
 
     void Mqtt::onConnack(iot::mqtt::packets::Connack& connack) {
-        if (connack.getReturnCode() == 0) {
-            if (!connack.getSessionPresent()) {
-                nlohmann::json connectJson;
-                connectJson["keep_alive"] = keepAlive;
-                connectJson["client_id"] = clientId;
-                connectJson["clean_session"] = cleanSession;
-                connectJson["will_topic"] = willTopic;
-                connectJson["will_message"] = willMessage;
-                connectJson["will_qos"] = willQoS;
-                connectJson["will_retain"] = willRetain;
-                connectJson["username"] = username;
-                connectJson["password"] = password;
+        if (connack.getReturnCode() == 0 && !connack.getSessionPresent()) {
+            sendPublish(getPacketIdentifier(), "snode.c/_cfg_/connection", connectionJson.dump(), 0, true);
+            sendPublish(getPacketIdentifier(), "snode.c/_cfg_/mapping", apps::mqttbroker::lib::MqttMapper::dump(), 0, true);
 
-                sendPublish(getPacketIdentifier(), "snode.c/_cfg_/connection", connectJson.dump(), 0, true);
-                sendPublish(getPacketIdentifier(), "snode.c/_cfg_/mapping", apps::mqttbroker::lib::MqttMapper::dump(), 0, true);
+            std::list<iot::mqtt::Topic> topicList = MqttMapper::extractTopics();
 
-                std::list<iot::mqtt::Topic> topicList = MqttMapper::extractTopics();
-
-                for (const iot::mqtt::Topic& topic : topicList) {
-                    LOG(INFO) << "Subscribe Topic: " << topic.getName() << ", qoS: " << static_cast<uint16_t>(topic.getQoS());
-                }
-
-                sendSubscribe(getPacketIdentifier(), topicList);
+            for (const iot::mqtt::Topic& topic : topicList) {
+                LOG(INFO) << "Subscribe Topic: " << topic.getName() << ", qoS: " << static_cast<uint16_t>(topic.getQoS());
             }
+
+            sendSubscribe(getPacketIdentifier(), topicList);
         }
     }
 

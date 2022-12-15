@@ -40,7 +40,7 @@ namespace apps::mqttbroker::broker::lib {
     public:
         static MqttModel& instance();
 
-        void addConnectedClient(apps::mqttbroker::broker::lib::Mqtt* mqtt, const iot::mqtt::packets::Connect& connect);
+        void addConnectedClient(apps::mqttbroker::broker::lib::Mqtt* mqtt, iot::mqtt::packets::Connect& connect);
         void delDisconnectedClient(apps::mqttbroker::broker::lib::Mqtt* mqtt);
 
         const std::map<apps::mqttbroker::broker::lib::Mqtt*, iot::mqtt::packets::Connect>& getConnectedClinets() const;

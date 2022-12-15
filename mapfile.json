@@ -21,7 +21,6 @@
             "subscription": {
               "type": "binary_sensor",
               "qos": 2,
-              "retain_message": false,
               "static": {
                 "mapped_topic": "mapping/value",
                 "message_mappings": [
@@ -61,6 +60,95 @@
                 "retain_message": false
               }
             }
+          }
+        ]
+      },
+      {
+        "name": "temperature",
+        "topic_level": [
+          {
+            "name": "celsius",
+            "topic_level": [
+              {
+                "name": "set",
+                "subscription": {
+                  "qos": 2,
+                  "value": [
+                    {
+                      "mapped_topic": "temperature/celsius",
+                      "mapping_template": "{{ round(float(value), 2) }}",
+                      "retain_message": true
+                    },
+                    {
+                      "mapped_topic": "temperature/kelvin",
+                      "mapping_template": "{{ round((float(value) + 273.15), 2) }}",
+                      "retain_message": true
+                    },
+                    {
+                      "mapped_topic": "temperature/farenheit",
+                      "mapping_template": "{{ round((float(value) * 1.8 + 32), 2) }}",
+                      "retain_message": true
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "kelvin",
+            "topic_level": [
+              {
+                "name": "set",
+                "subscription": {
+                  "qos": 2,
+                  "value": [
+                    {
+                      "mapped_topic": "temperature/celsius",
+                      "mapping_template": "{{ round((float(value) - 273.15), 2) }}",
+                      "retain_message": true
+                    },
+                    {
+                      "mapped_topic": "temperature/kelvin",
+                      "mapping_template": "{{ round(float(value), 2) }}",
+                      "retain_message": true
+                    },
+                    {
+                      "mapped_topic": "temperature/farenheit",
+                      "mapping_template": "{{ round((((float(value) - 273.15) * 1.8) + 32), 2) }}",
+                      "retain_message": true
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "farenheit",
+            "topic_level": [
+              {
+                "name": "set",
+                "subscription": {
+                  "qos": 2,
+                  "value": [
+                    {
+                      "mapped_topic": "temperature/celsius",
+                      "mapping_template": "{{ round(((float(value) - 32) / 1.8), 2) }}",
+                      "retain_message": true
+                    },
+                    {
+                      "mapped_topic": "temperature/kelvin",
+                      "mapping_template": "{{ round(((float(value) - 32) / 1.8 + 273.15), 2) }}",
+                      "retain_message": true
+                    },
+                    {
+                      "mapped_topic": "temperature/farenheit",
+                      "mapping_template": "{{ round(float(value), 2) }}",
+                      "retain_message": true
+                    }
+                  ]
+                }
+              }
+            ]
           }
         ]
       }

@@ -43,6 +43,10 @@ namespace apps::mqttbroker::broker::lib {
         publishMappings(publish);
     }
 
+    void Mqtt::onDisconnected() {
+        MqttModel::instance().delDisconnectedClient(this);
+    }
+
     void Mqtt::publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) {
         broker->publish(topic, message, qoS);
 
@@ -51,10 +55,6 @@ namespace apps::mqttbroker::broker::lib {
         }
 
         publishMappings(iot::mqtt::packets::Publish(getPacketIdentifier(), topic, message, qoS, retain, MQTT_DUP_FALSE));
-    }
-
-    void Mqtt::onDisconnected() {
-        MqttModel::instance().delDisconnectedClient(this);
     }
 
 } // namespace apps::mqttbroker::broker::lib

@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(nlohmann_json 3.7.0)
 
+add_subdirectory(websocket)
+
 if(NOT SNODEC_INTREE_BUILD)
     find_package(
         snodec COMPONENTS net-in-stream-legacy net-in-stream-tls

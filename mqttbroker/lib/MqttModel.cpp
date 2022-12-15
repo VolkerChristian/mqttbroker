@@ -33,7 +33,7 @@ namespace apps::mqttbroker::broker::lib {
         return mqttModel;
     }
 
-    void MqttModel::addConnectedClient(apps::mqttbroker::broker::lib::Mqtt* mqtt, const iot::mqtt::packets::Connect& connect) {
+    void MqttModel::addConnectedClient(apps::mqttbroker::broker::lib::Mqtt* mqtt, iot::mqtt::packets::Connect &connect) {
         connectedClients[mqtt] = connect;
     }
 

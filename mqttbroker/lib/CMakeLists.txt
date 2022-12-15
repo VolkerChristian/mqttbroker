@@ -6,9 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(nlohmann_json 3.7.0)
 
 if(NOT SNODEC_INTREE_BUILD)
-    find_package(
-        snodec COMPONENTS mqtt-server
-    )
+    find_package(snodec COMPONENTS mqtt-server)
 endif(NOT SNODEC_INTREE_BUILD)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
