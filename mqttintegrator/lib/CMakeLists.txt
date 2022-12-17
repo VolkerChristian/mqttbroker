@@ -3,19 +3,20 @@ cmake_minimum_required(VERSION 3.5)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(snodec COMPONENTS mqtt-server)
+find_package(snodec COMPONENTS mqtt-client)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(ADDITIONAL_OPTIONS
         -Weverything
         -Wno-c++98-compat
+        -Wno-c++98-compat-bind-to-temporary-copy
         -Wno-exit-time-destructors
         -Wno-global-constructors
         -Wno-padded
         -Wno-shadow
-        -Wno-shadow-field
         -Wno-used-but-marked-unused
         -Wno-weak-vtables
+        -Wno-shadow-field
     )
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # using GCC
@@ -42,19 +43,13 @@ add_compile_options(
     ${ADDITIONAL_OPTIONS}
 )
 
-add_library(mqtt-brokermodel SHARED Mqtt.cpp Mqtt.h MqttModel.cpp MqttModel.h)
+add_library(mqtt-integrator SHARED Mqtt.cpp Mqtt.h)
 
 target_include_directories(
-    mqtt-brokermodel PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-                            ${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_SOURCE_DIR}
+    mqtt-integrator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+                           ${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_SOURCE_DIR}
 )
 
-target_link_libraries(mqtt-brokermodel PUBLIC snodec::mqtt-server mqtt-mapping)
+target_link_libraries(mqtt-integrator PUBLIC snodec::mqtt-client mqtt-mapping)
 
-if(SNODEC_INTREE_BUILD)
-    set_target_properties(
-        mqtt-brokermodel PROPERTIES INSTALL_RPATH "${SNODEC_IOT_MQTT_RPATH}"
-    )
-endif(SNODEC_INTREE_BUILD)
-
-install(TARGETS mqtt-brokermodel RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS mqtt-integrator RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})

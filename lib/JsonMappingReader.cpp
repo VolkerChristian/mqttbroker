@@ -28,6 +28,7 @@
 #include <log/Logger.h>
 #include <map>
 #include <nlohmann/json.hpp>
+#include <stdexcept>
 #include <vector>
 
 // IWYU pragma: no_include <nlohmann/detail/json_pointer.hpp>
@@ -40,6 +41,9 @@ namespace apps::mqttbroker::lib {
 
     nlohmann::json JsonMappingReader::mappingJsonSchema = nlohmann::json::parse(mappingJsonSchemaString);
 
+    nlohmann::json JsonMappingReader::connectionJson;
+    nlohmann::json JsonMappingReader::mappingJson;
+
     class custom_error_handler : public nlohmann::json_schema::basic_error_handler {
         void error(const nlohmann::json::json_pointer& ptr, const nlohmann::json& instance, const std::string& message) override {
             nlohmann::json_schema::basic_error_handler::error(ptr, instance, message);
@@ -47,16 +51,16 @@ namespace apps::mqttbroker::lib {
         }
     };
 
-    const nlohmann::json JsonMappingReader::readMappingFromFile(const std::string& mappingFilePath) {
-        nlohmann::json mappingJson;
+    const nlohmann::json JsonMappingReader::readMappingFromFile(const std::string& mapFilePath) {
+        nlohmann::json mapFileJson;
 
-        std::ifstream mappingFile(mappingFilePath);
+        std::ifstream mapFile(mapFilePath);
 
-        if (mappingFile.is_open()) {
-            VLOG(0) << "MappingFilePath: " << mappingFilePath;
+        if (mapFile.is_open()) {
+            VLOG(0) << "MappingFilePath: " << mapFilePath;
 
             try {
-                mappingFile >> mappingJson;
+                mapFile >> mapFileJson;
 
                 nlohmann::json_schema::json_validator validator(nullptr, nlohmann::json_schema::default_string_format_check);
 
@@ -64,37 +68,47 @@ namespace apps::mqttbroker::lib {
                     validator.set_root_schema(mappingJsonSchema);
 
                     custom_error_handler err;
-                    nlohmann::json defaultPatch = validator.validate(mappingJson, err);
+                    nlohmann::json defaultPatch = validator.validate(mapFileJson, err);
 
                     if (!err) {
-                        if (!defaultPatch.empty()) {
-                            try {
-                                mappingJson = mappingJson.patch(defaultPatch);
-                            } catch (const std::exception& e) {
-                                LOG(ERROR) << e.what();
-                                LOG(ERROR) << "Patching JSON with default patch failed:\n" << defaultPatch.dump(4);
-                                mappingJson.clear();
-                            }
+                        try {
+                            mapFileJson = mapFileJson.patch(defaultPatch);
+
+                            mappingJson = mapFileJson["mappings"];
+                            connectionJson = mapFileJson["connection"];
+                        } catch (const std::exception& e) {
+                            LOG(ERROR) << e.what();
+                            LOG(ERROR) << "Patching JSON with default patch failed:\n" << defaultPatch.dump(4);
+                            mapFileJson.clear();
                         }
                     } else {
                         LOG(ERROR) << "JSON schema validating failed.";
-                        mappingJson.clear();
+                        mapFileJson.clear();
                     }
 
                 } catch (const std::exception& e) {
                     LOG(ERROR) << e.what();
                     LOG(ERROR) << "Setting root json mapping schema failed:\n" << mappingJsonSchema.dump(4);
-                    mappingJson.clear();
+                    mapFileJson.clear();
                 }
 
-                mappingFile.close();
+                mapFile.close();
             } catch (const std::exception& e) {
-                LOG(ERROR) << "JSON map file parsing failed: " << e.what() << " at " << mappingFile.tellg();
+                LOG(ERROR) << "JSON map file parsing failed: " << e.what() << " at " << mapFile.tellg();
+                mapFileJson.clear();
             }
         } else {
-            VLOG(0) << "MappingFilePath: " << mappingFilePath << " not found";
+            VLOG(0) << "MappingFilePath: " << mapFilePath << " not found";
         }
 
+        return mapFileJson;
+    }
+
+    const nlohmann::json& JsonMappingReader::getConnectionJson() {
+        return connectionJson;
+    }
+
+    const nlohmann::json& JsonMappingReader::getMappingJson() {
         return mappingJson;
     }
 

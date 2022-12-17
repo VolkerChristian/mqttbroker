@@ -18,9 +18,9 @@
 
 #include "MqttSubProtocol.h"
 
-#include "mqttintegrator/Mqtt.h"
+#include "mqttintegrator/lib/Mqtt.h"
 
-#include <core/socket/SocketContext.h>        // for SocketConnection
+#include <core/socket/SocketConnection.h>
 #include <web/websocket/SubProtocolContext.h> // for SubProtocolContext
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -33,12 +33,12 @@
 
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-#define PING_INTERVAL 60
+#define PING_INTERVAL 0
 #define MAX_FLYING_PINGS 3
 
-namespace web::websocket::subprotocol::echo::server {
+namespace apps::mqttbroker::mqttintegrator::websocket {
 
-    MqttSubProtocol::MqttSubProtocol(SubProtocolContext* subProtocolContext,
+    MqttSubProtocol::MqttSubProtocol(web::websocket::SubProtocolContext* subProtocolContext,
                                      const std::string& name,
                                      const nlohmann::json& connectionJson,
                                      const nlohmann::json& mappingJson)
@@ -82,6 +82,8 @@ namespace web::websocket::subprotocol::echo::server {
                 sendClose();
             },
             timeout);
+
+        getSocketConnection()->setTimeout(0);
     }
 
     void MqttSubProtocol::end([[maybe_unused]] bool fatal) {
@@ -97,8 +99,8 @@ namespace web::websocket::subprotocol::echo::server {
         iot::mqtt::MqttContext::onConnected();
     }
 
-    void MqttSubProtocol::onMessageStart([[maybe_unused]] int opCode) {
-        if (opCode != 2) {
+    void MqttSubProtocol::onMessageStart(int opCode) {
+        if (opCode == 1) {
             this->end(true);
         }
     }
@@ -149,7 +151,7 @@ namespace web::websocket::subprotocol::echo::server {
     }
 
     core::socket::SocketConnection* MqttSubProtocol::getSocketConnection() {
-        return getSocketContextUpgrade()->getSocketConnection();
+        return getSubProtocolContext()->getSocketConnection();
     }
 
-} // namespace web::websocket::subprotocol::echo::server
+} // namespace apps::mqttbroker::mqttintegrator::websocket

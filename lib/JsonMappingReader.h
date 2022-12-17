@@ -33,10 +33,15 @@ namespace apps::mqttbroker::lib {
         JsonMappingReader() = delete;
 
     public:
-        static const nlohmann::json readMappingFromFile(const std::string& mappingFilePath);
+        static const nlohmann::json readMappingFromFile(const std::string& mapFilePath);
+
+        static const nlohmann::json& getConnectionJson();
+        static const nlohmann::json& getMappingJson();
 
     private:
         static nlohmann::json mappingJsonSchema;
+        static nlohmann::json connectionJson;
+        static nlohmann::json mappingJson;
     };
 
 } // namespace apps::mqttbroker::lib

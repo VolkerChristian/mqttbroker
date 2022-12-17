@@ -18,45 +18,38 @@
 
 #include "MqttSubProtocolFactory.h"
 
+#include "lib/JsonMappingReader.h"
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 #include <cstdlib>
-#include <initializer_list>
-#include <log/Logger.h>
-#include <map>
-#include <vector>
 
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 #define NAME "mqtt"
 
-namespace web::websocket::subprotocol::echo::server {
+namespace apps::mqttbroker::mqttintegrator::websocket {
 
     MqttSubprotocolFactory::MqttSubprotocolFactory(const std::string& name)
-        : web::websocket::SubProtocolFactory<MqttSubProtocol>::SubProtocolFactory(name)
-        , connectionJson(nlohmann::json())
-        , mappingJson(nlohmann::json()) {
-        char* json = getenv("MQTT_CONNECTION_JSON");
+        : web::websocket::SubProtocolFactory<MqttSubProtocol>::SubProtocolFactory(name) {
+        char* mappingFile = getenv("MQTT_MAPPING_FILE");
 
-        if (json != nullptr) {
-            connectionJson = nlohmann::json::parse(json);
-            VLOG(0) << "Connection-JSON DUMP: " << mappingJson.dump(4);
-        }
+        if (mappingFile != nullptr) {
+            nlohmann::json mappingJson = apps::mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFile);
 
-        json = getenv("MQTT_MAPPING_JSON");
-
-        if (json != nullptr) {
-            mappingJson = nlohmann::json::parse(json);
-            VLOG(0) << "Mapping-JSON DUMP: " << mappingJson.dump(4);
+            if (!mappingJson.empty()) {
+                connection = mappingJson["connection"];
+                jsonMapping = mappingJson["mappings"];
+            }
         }
     }
 
-    MqttSubProtocol* MqttSubprotocolFactory::create(SubProtocolContext* subProtocolContext) {
-        return new MqttSubProtocol(subProtocolContext, getName(), connectionJson, mappingJson);
+    MqttSubProtocol* MqttSubprotocolFactory::create(web::websocket::SubProtocolContext* subProtocolContext) {
+        return new MqttSubProtocol(subProtocolContext, getName(), connection, jsonMapping);
     }
 
-} // namespace web::websocket::subprotocol::echo::server
+} // namespace apps::mqttbroker::mqttintegrator::websocket
 
-extern "C" void* mqttServerSubProtocolFactory() {
-    return new web::websocket::subprotocol::echo::server::MqttSubprotocolFactory(NAME);
+extern "C" void* mqttClientSubProtocolFactory() {
+    return new apps::mqttbroker::mqttintegrator::websocket::MqttSubprotocolFactory(NAME);
 }

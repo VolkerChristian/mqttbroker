@@ -50,9 +50,9 @@ add_compile_options(
     ${ADDITIONAL_OPTIONS}
 )
 
-set(MQTTBROKER_CPP mqttbroker.cpp)
+set(MQTTBROKER_CPP mqttbroker.cpp SharedSocketContextFactory.cpp)
 
-set(MQTTBROKER_H SharedSocketContextFactory.h SharedSocketContextFactory.hpp)
+set(MQTTBROKER_H SharedSocketContextFactory.h)
 
 add_executable(mqttbroker ${MQTTBROKER_CPP} ${MQTTBROKER_H})
 
@@ -65,7 +65,7 @@ target_link_libraries(
     mqttbroker
     PUBLIC snodec::net-in-stream-legacy snodec::net-in-stream-tls
            snodec::net-un-stream-legacy snodec::http-server-express
-    PUBLIC mqtt-brokermodel
+           mqtt-brokermodel
 )
 
 # set_target_properties(mqttbroker PROPERTIES LINK_FLAGS "-rdynamic")

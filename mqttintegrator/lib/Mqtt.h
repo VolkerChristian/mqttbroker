@@ -24,12 +24,10 @@
 #include <core/timer/Timer.h> // IWYU pragma: export
 #include <iot/mqtt/client/Mqtt.h>
 
-namespace iot::mqtt {
-    namespace packets {
-        class Publish;
-        class Connack;
-    } // namespace packets
-} // namespace iot::mqtt
+namespace iot::mqtt::packets {
+    class Publish;
+    class Connack;
+} // namespace iot::mqtt::packets
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 

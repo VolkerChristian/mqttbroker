@@ -19,17 +19,22 @@
 #ifndef APPS_MQTTBROKER_MQTTINTEGRATOR_SOCKETCONTEXTFACTORY_H
 #define APPS_MQTTBROKER_MQTTINTEGRATOR_SOCKETCONTEXTFACTORY_H
 
+#include <core/socket/SocketContext.h> // for SocketContext
 #include <core/socket/SocketContextFactory.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-#include <nlohmann/json_fwd.hpp>
+#include <nlohmann/json.hpp>
+// IWYU pragma: no_include <nlohmann/json_fwd.hpp>
+
+namespace core::socket {
+    class SocketConnection;
+}
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
 namespace apps::mqttbroker::integrator {
 
-    template <const nlohmann::json& connectionT, const nlohmann::json& jsonMappingT>
     class SocketContextFactory : public core::socket::SocketContextFactory {
     public:
         SocketContextFactory();
@@ -37,8 +42,8 @@ namespace apps::mqttbroker::integrator {
         core::socket::SocketContext* create(core::socket::SocketConnection* socketConnection) final;
 
     private:
-        const nlohmann::json& connection;
-        const nlohmann::json& jsonMapping;
+        nlohmann::json connection;
+        nlohmann::json jsonMapping;
     };
 
 } // namespace apps::mqttbroker::integrator

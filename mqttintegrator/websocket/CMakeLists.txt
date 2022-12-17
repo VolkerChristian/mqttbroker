@@ -24,8 +24,7 @@ add_library(
 )
 
 target_link_libraries(
-    mqttclientsubprotocol PRIVATE snodec::mqtt-client
-                                  nlohmann_json::nlohmann_json
+    mqttclientsubprotocol PUBLIC mqtt-integrator nlohmann_json::nlohmann_json
 )
 
 target_include_directories(

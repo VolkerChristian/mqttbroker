@@ -43,6 +43,10 @@ set_target_properties(
                                               SOVERSION 1
 )
 
+set_property(
+    TARGET nlohmann_json_schema_validator PROPERTY POSITION_INDEPENDENT_CODE ON
+)
+
 # disable tests and examples if project is not super project
 if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
     # I am top-level project.

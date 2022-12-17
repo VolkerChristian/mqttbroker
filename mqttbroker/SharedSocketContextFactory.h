@@ -19,21 +19,31 @@
 #ifndef APPS_MQTTBROKER_BROKER_SOCKETCONTEXTFACTORY_H
 #define APPS_MQTTBROKER_BROKER_SOCKETCONTEXTFACTORY_H
 
+#include <core/socket/SocketContext.h> // for SocketContext
 #include <iot/mqtt/server/SharedSocketContextFactory.h>
 
 namespace apps::mqttbroker::broker {
     class Mqtt;
+} // namespace apps::mqttbroker::broker
+
+namespace core::socket {
+    class SocketConnection;
+} // namespace core::socket
+
+namespace iot::mqtt::server::broker {
+    class Broker;
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
+#include <memory> // for shared_ptr
+#include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
 #endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
 namespace apps::mqttbroker::broker {
 
-    template <const nlohmann::json& jsonMappingT>
     class SharedSocketContextFactory : public iot::mqtt::server::SharedSocketContextFactory<Mqtt> {
     public:
         SharedSocketContextFactory();
@@ -42,7 +52,7 @@ namespace apps::mqttbroker::broker {
                                             std::shared_ptr<iot::mqtt::server::broker::Broker>& broker) final;
 
     private:
-        const nlohmann::json& jsonMapping;
+        nlohmann::json jsonMapping;
     };
 
 } // namespace apps::mqttbroker::broker

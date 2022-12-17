@@ -16,9 +16,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Mqtt.h"                       // IWYU pragma: export
 #include "SharedSocketContextFactory.h" // IWYU pragma: export
 
+#include "Mqtt.h" // IWYU pragma: export
+#include "lib/JsonMappingReader.h"
+
+#include <cstdlib>
 #include <iot/mqtt/SocketContext.h>
 #include <iot/mqtt/server/SharedSocketContextFactory.hpp>
 
@@ -28,15 +31,20 @@
 
 namespace apps::mqttbroker::broker {
 
-    template <const nlohmann::json& jsonMappingT>
-    SharedSocketContextFactory<jsonMappingT>::SharedSocketContextFactory()
-        : jsonMapping(jsonMappingT) {
+    SharedSocketContextFactory::SharedSocketContextFactory() {
+        char* mappingFile = getenv("MQTT_MAPPING_FILE");
+
+        if (mappingFile != nullptr) {
+            nlohmann::json mappingJson = apps::mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFile);
+
+            if (!mappingJson.empty()) {
+                jsonMapping = mappingJson["mappings"];
+            }
+        }
     }
 
-    template <const nlohmann::json& jsonMappingT>
-    core::socket::SocketContext*
-    SharedSocketContextFactory<jsonMappingT>::create(core::socket::SocketConnection* socketConnection,
-                                                     std::shared_ptr<iot::mqtt::server::broker::Broker>& broker) {
+    core::socket::SocketContext* SharedSocketContextFactory::create(core::socket::SocketConnection* socketConnection,
+                                                                    std::shared_ptr<iot::mqtt::server::broker::Broker>& broker) {
         return new iot::mqtt::SocketContext(socketConnection, new apps::mqttbroker::broker::lib::Mqtt(broker, jsonMapping));
     }
 

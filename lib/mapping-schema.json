@@ -97,13 +97,19 @@
 
               },
               "subscription": {
-                "qos": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 2,
-                  "default": 0
+                "properties": {
+                  "qos": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2,
+                    "default": 0
+                  },
+                  "type": {
+                    "type": "string",
+                    "default": ""
+                  }
                 },
-                "anyOf": [
+                "oneOf": [
                   {
                     "$ref": "#/$defs/mapping_static"
                   },
@@ -113,13 +119,7 @@
                   {
                     "$ref": "#/$defs/mapping_json"
                   }
-                ],
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "default": ""
-                  }
-                }
+                ]
               }
             }
           },
@@ -130,32 +130,22 @@
                 "static"
               ],
               "properties": {
-                "qos": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 2,
-                  "default": 0
-                },
                 "static": {
                   "type": "object",
-                  "allOf": [
-                    {
-                      "$ref": "#/$defs/mapping_commons"
-                    }
-                  ],
+                  "$ref": "#/$defs/mapping_commons",
                   "properties": {
                     "message_mappings": {
-                    "anyOf": [
-                      {
-                        "$ref": "#/$defs/message_mappings"
-                      },
-                      {
-                        "type": "array",
-                        "items": {
+                      "oneOf": [
+                        {
                           "$ref": "#/$defs/message_mappings"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/$defs/message_mappings"
+                          }
                         }
-                      }
-                    ]
+                      ]
                     }
                   }
                 }
@@ -168,7 +158,7 @@
               ],
               "properties": {
                 "value": {
-                  "anyOf": [
+                  "oneOf": [
                     {
                       "$ref": "#/$defs/template_mapping"
                     },
@@ -189,7 +179,7 @@
               ],
               "properties": {
                 "json": {
-                  "anyOf": [
+                  "oneOf": [
                     {
                       "$ref": "#/$defs/template_mapping"
                     },
@@ -228,11 +218,7 @@
               "required": [
                 "mapping_template"
               ],
-              "allOf": [
-                {
-                  "$ref": "#/$defs/mapping_commons"
-                }
-              ],
+              "$ref": "#/$defs/mapping_commons",
               "properties": {
                 "mapping_template": {
                   "type": "string",

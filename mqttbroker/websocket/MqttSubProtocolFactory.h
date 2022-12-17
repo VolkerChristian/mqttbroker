@@ -44,7 +44,7 @@ namespace apps::mqttbroker::broker::websocket {
     private:
         MqttSubProtocol* create(web::websocket::SubProtocolContext* subProtocolContext) override;
 
-        nlohmann::json mappingJson;
+        nlohmann::json jsonMapping;
     };
 
 } // namespace apps::mqttbroker::broker::websocket

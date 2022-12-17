@@ -5,12 +5,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(nlohmann_json 3.7.0)
 
+add_subdirectory(lib)
 add_subdirectory(websocket)
 
 if(NOT SNODEC_INTREE_BUILD)
     find_package(
         snodec COMPONENTS net-in-stream-legacy net-in-stream-tls
-                          net-un-stream-legacy mqtt-client
+                          net-un-stream-legacy mqtt-client http-client
     )
 endif(NOT SNODEC_INTREE_BUILD)
 
@@ -52,9 +53,9 @@ add_compile_options(
     ${ADDITIONAL_OPTIONS}
 )
 
-set(MQTTINTEGRATOR_CPP mqttintegrator.cpp Mqtt.cpp)
+set(MQTTINTEGRATOR_CPP mqttintegrator.cpp SocketContextFactory.cpp)
 
-set(MQTTINTEGRATOR_H Mqtt.h SocketContextFactory.h SocketContextFactory.hpp)
+set(MQTTINTEGRATOR_H SocketContextFactory.h)
 
 add_executable(mqttintegrator ${MQTTINTEGRATOR_CPP} ${MQTTINTEGRATOR_H})
 
@@ -66,7 +67,7 @@ target_link_libraries(
     mqttintegrator
     PUBLIC snodec::mqtt-client snodec::net-in-stream-legacy
            snodec::net-in-stream-tls snodec::net-un-stream-legacy
-    PRIVATE mqtt-mapping
+           mqtt-integrator
 )
 
 if(SNODEC_INTREE_BUILD)
@@ -76,3 +77,22 @@ if(SNODEC_INTREE_BUILD)
 endif(SNODEC_INTREE_BUILD)
 
 install(TARGETS mqttintegrator RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+set(WSMQTTINTEGRATOR_CPP wsmqttintegrator.cpp)
+
+# set(WSMQTTINTEGRATOR_H SocketContextFactory.h SocketContextFactory.hpp)
+
+add_executable(wsmqttintegrator ${WSMQTTINTEGRATOR_CPP} ${WSMQTTINTEGRATOR_H})
+
+target_include_directories(
+    wsmqttintegrator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+                            ${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_SOURCE_DIR}
+)
+target_link_libraries(
+    wsmqttintegrator
+    PUBLIC snodec::mqtt-client snodec::net-in-stream-legacy
+           snodec::net-in-stream-tls snodec::net-un-stream-legacy
+           snodec::http-client mqtt-integrator
+)
+
+install(TARGETS wsmqttintegrator RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

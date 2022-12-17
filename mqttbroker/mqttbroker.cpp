@@ -17,8 +17,9 @@
  */
 
 #include "MqttModel.h"
-#include "SharedSocketContextFactory.hpp" // IWYU pragma: keep
+#include "SharedSocketContextFactory.h" // IWYU pragma: keep
 #include "lib/JsonMappingReader.h"
+#include "lib/Mqtt.h"
 
 #include <core/SNodeC.h>
 #include <core/socket/SocketAddress.h>
@@ -64,19 +65,10 @@ int main(int argc, char* argv[]) {
     static nlohmann::json sharedJsonMapping;
 
     if (!mappingFilePath.empty()) {
-        nlohmann::json mappingJson = apps::mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFilePath);
-
-        if (!mappingJson.empty()) {
-            VLOG(0) << "Activating mqttintegrator";
-            VLOG(0) << "  Mapping File " << mappingFilePath;
-            sharedJsonMapping = mappingJson["mappings"];
-
-            setenv("MQTT_MAPPING_JSON", sharedJsonMapping.dump().data(), 1);
-        }
+        setenv("MQTT_MAPPING_FILE", mappingFilePath.data(), 0);
     }
 
-    using MQTTLegacyInServer =
-        net::in::stream::legacy::SocketServer<apps::mqttbroker::broker::SharedSocketContextFactory<sharedJsonMapping>>;
+    using MQTTLegacyInServer = net::in::stream::legacy::SocketServer<apps::mqttbroker::broker::SharedSocketContextFactory>;
 
     using LegacyInSocketConnection = MQTTLegacyInServer::SocketConnection;
 
@@ -116,7 +108,7 @@ int main(int argc, char* argv[]) {
         }
     });
 
-    using MQTTTLSInServer = net::in::stream::tls::SocketServer<apps::mqttbroker::broker::SharedSocketContextFactory<sharedJsonMapping>>;
+    using MQTTTLSInServer = net::in::stream::tls::SocketServer<apps::mqttbroker::broker::SharedSocketContextFactory>;
     using TLSInSocketConnection = MQTTTLSInServer::SocketConnection;
 
     MQTTTLSInServer mqttTLSInServer(
@@ -203,8 +195,7 @@ int main(int argc, char* argv[]) {
         }
     });
 
-    using MQTTLegacyUnServer =
-        net::un::stream::legacy::SocketServer<apps::mqttbroker::broker::SharedSocketContextFactory<sharedJsonMapping>>;
+    using MQTTLegacyUnServer = net::un::stream::legacy::SocketServer<apps::mqttbroker::broker::SharedSocketContextFactory>;
     using LegacyUnSocketConnection = MQTTLegacyUnServer::SocketConnection;
 
     MQTTLegacyUnServer mqttLegacyUnServer(

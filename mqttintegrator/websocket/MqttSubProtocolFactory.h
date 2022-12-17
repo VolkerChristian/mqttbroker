@@ -19,7 +19,7 @@
 #ifndef WEB_WEBSOCKET_SUBPROTOCOL_SERVER_MQTTSUBPROTOCOLFACTORY_H
 #define WEB_WEBSOCKET_SUBPROTOCOL_SERVER_MQTTSUBPROTOCOLFACTORY_H
 
-#include "subprotocol/client/MqttSubProtocol.h" // IWYU pragma: export
+#include "mqttintegrator/websocket/MqttSubProtocol.h"
 
 #include <web/websocket/SubProtocolFactory.h>
 
@@ -35,7 +35,7 @@ namespace web::websocket {
 
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-namespace web::websocket::subprotocol::echo::server {
+namespace apps::mqttbroker::mqttintegrator::websocket {
 
     class MqttSubprotocolFactory : public web::websocket::SubProtocolFactory<MqttSubProtocol> {
     public:
@@ -44,12 +44,12 @@ namespace web::websocket::subprotocol::echo::server {
     private:
         MqttSubProtocol* create(web::websocket::SubProtocolContext* subProtocolContext) override;
 
-        nlohmann::json connectionJson;
-        nlohmann::json mappingJson;
+        nlohmann::json connection;
+        nlohmann::json jsonMapping;
     };
 
-} // namespace web::websocket::subprotocol::echo::server
+} // namespace apps::mqttbroker::mqttintegrator::websocket
 
-extern "C" void* mqttServerSubProtocolFactory();
+extern "C" void* mqttClientSubProtocolFactory();
 
 #endif // WEB_WEBSOCKET_SUBPROTOCOL_SERVER_MQTTSUBPROTOCOLFACTORY_H

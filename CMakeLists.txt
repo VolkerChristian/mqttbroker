@@ -21,6 +21,5 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(GNUInstallDirs)
 
 add_subdirectory(lib)
-add_subdirectory(subprotocol)
 add_subdirectory(mqttbroker)
 add_subdirectory(mqttintegrator)

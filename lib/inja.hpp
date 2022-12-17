@@ -151,9 +151,7 @@ namespace inja {
             Super,
             Join,
             Callback,
-            ParenLeft,
-            ParenRight,
-            None
+            None,
         };
 
         struct FunctionData {
@@ -415,9 +413,6 @@ namespace inja {
      */
     class AstNode {
     public:
-        AstNode(const AstNode&) = default;
-        AstNode& operator=(const AstNode&) = default;
-
         virtual void accept(NodeVisitor& v) const = 0;
 
         size_t pos;
@@ -437,7 +432,7 @@ namespace inja {
             : AstNode(0) {
         }
 
-        void accept(NodeVisitor& v) const override {
+        void accept(NodeVisitor& v) const {
             v.visit(*this);
         }
     };
@@ -451,7 +446,7 @@ namespace inja {
             , length(length) {
         }
 
-        void accept(NodeVisitor& v) const override {
+        void accept(NodeVisitor& v) const {
             v.visit(*this);
         }
     };
@@ -462,7 +457,7 @@ namespace inja {
             : AstNode(pos) {
         }
 
-        void accept(NodeVisitor& v) const override {
+        void accept(NodeVisitor& v) const {
             v.visit(*this);
         }
     };
@@ -476,7 +471,7 @@ namespace inja {
             , value(json::parse(data_text)) {
         }
 
-        void accept(NodeVisitor& v) const override {
+        void accept(NodeVisitor& v) const {
             v.visit(*this);
         }
     };
@@ -503,7 +498,7 @@ namespace inja {
             , ptr(json::json_pointer(convert_dot_to_ptr(ptr_name))) {
         }
 
-        void accept(NodeVisitor& v) const override {
+        void accept(NodeVisitor& v) const {
             v.visit(*this);
         }
     };
@@ -512,7 +507,10 @@ namespace inja {
         using Op = FunctionStorage::Operation;
 
     public:
-        enum class Associativity { Left, Right };
+        enum class Associativity {
+            Left,
+            Right,
+        };
 
         unsigned int precedence;
         Associativity associativity;
@@ -530,7 +528,7 @@ namespace inja {
             , associativity(Associativity::Left)
             , operation(Op::Callback)
             , name(name)
-            , number_args(1) {
+            , number_args(0) {
         }
         explicit FunctionNode(Op operation, size_t pos)
             : ExpressionNode(pos)
@@ -629,7 +627,7 @@ namespace inja {
             }
         }
 
-        void accept(NodeVisitor& v) const override {
+        void accept(NodeVisitor& v) const {
             v.visit(*this);
         }
     };
@@ -645,7 +643,7 @@ namespace inja {
             : AstNode(pos) {
         }
 
-        void accept(NodeVisitor& v) const override {
+        void accept(NodeVisitor& v) const {
             v.visit(*this);
         }
     };
@@ -656,7 +654,7 @@ namespace inja {
             : AstNode(pos) {
         }
 
-        void accept(NodeVisitor& v) const override = 0;
+        virtual void accept(NodeVisitor& v) const = 0;
     };
 
     class ForStatementNode : public StatementNode {
@@ -670,7 +668,7 @@ namespace inja {
             , parent(parent) {
         }
 
-        void accept(NodeVisitor& v) const override = 0;
+        virtual void accept(NodeVisitor& v) const = 0;
     };
 
     class ForArrayStatementNode : public ForStatementNode {
@@ -682,7 +680,7 @@ namespace inja {
             , value(value) {
         }
 
-        void accept(NodeVisitor& v) const override {
+        void accept(NodeVisitor& v) const {
             v.visit(*this);
         }
     };
@@ -698,7 +696,7 @@ namespace inja {
             , value(value) {
         }
 
-        void accept(NodeVisitor& v) const override {
+        void accept(NodeVisitor& v) const {
             v.visit(*this);
         }
     };
@@ -724,7 +722,7 @@ namespace inja {
             , is_nested(is_nested) {
         }
 
-        void accept(NodeVisitor& v) const override {
+        void accept(NodeVisitor& v) const {
             v.visit(*this);
         }
     };
@@ -738,7 +736,7 @@ namespace inja {
             , file(file) {
         }
 
-        void accept(NodeVisitor& v) const override {
+        void accept(NodeVisitor& v) const {
             v.visit(*this);
         }
     };
@@ -752,9 +750,9 @@ namespace inja {
             , file(file) {
         }
 
-        void accept(NodeVisitor& v) const override {
+        void accept(NodeVisitor& v) const {
             v.visit(*this);
-        }
+        };
     };
 
     class BlockStatementNode : public StatementNode {
@@ -769,9 +767,9 @@ namespace inja {
             , parent(parent) {
         }
 
-        void accept(NodeVisitor& v) const override {
+        void accept(NodeVisitor& v) const {
             v.visit(*this);
-        }
+        };
     };
 
     class SetStatementNode : public StatementNode {
@@ -784,7 +782,7 @@ namespace inja {
             , key(key) {
         }
 
-        void accept(NodeVisitor& v) const override {
+        void accept(NodeVisitor& v) const {
             v.visit(*this);
         }
     };
@@ -805,65 +803,65 @@ namespace inja {
      * \brief A class for counting statistics on a Template.
      */
     class StatisticsVisitor : public NodeVisitor {
-        void visit(const BlockNode& node) override {
+        void visit(const BlockNode& node) {
             for (auto& n : node.nodes) {
                 n->accept(*this);
             }
         }
 
-        void visit(const TextNode&) override {
+        void visit(const TextNode&) {
         }
-        void visit(const ExpressionNode&) override {
+        void visit(const ExpressionNode&) {
         }
-        void visit(const LiteralNode&) override {
+        void visit(const LiteralNode&) {
         }
 
-        void visit(const DataNode&) override {
+        void visit(const DataNode&) {
             variable_counter += 1;
         }
 
-        void visit(const FunctionNode& node) override {
+        void visit(const FunctionNode& node) {
             for (auto& n : node.arguments) {
                 n->accept(*this);
             }
         }
 
-        void visit(const ExpressionListNode& node) override {
+        void visit(const ExpressionListNode& node) {
             node.root->accept(*this);
         }
 
-        void visit(const StatementNode&) override {
+        void visit(const StatementNode&) {
         }
-        void visit(const ForStatementNode&) override {
+        void visit(const ForStatementNode&) {
         }
 
-        void visit(const ForArrayStatementNode& node) override {
+        void visit(const ForArrayStatementNode& node) {
             node.condition.accept(*this);
             node.body.accept(*this);
         }
 
-        void visit(const ForObjectStatementNode& node) override {
+        void visit(const ForObjectStatementNode& node) {
             node.condition.accept(*this);
             node.body.accept(*this);
         }
 
-        void visit(const IfStatementNode& node) override {
+        void visit(const IfStatementNode& node) {
             node.condition.accept(*this);
             node.true_statement.accept(*this);
             node.false_statement.accept(*this);
         }
 
-        void visit(const IncludeStatementNode&) override {
+        void visit(const IncludeStatementNode&) {
         }
 
-        void visit(const ExtendsStatementNode&) override {
+        void visit(const ExtendsStatementNode&) {
         }
 
-        void visit(const BlockStatementNode& node) override {
+        void visit(const BlockStatementNode& node) {
             node.block.accept(*this);
         }
 
-        void visit(const SetStatementNode&) override {
+        void visit(const SetStatementNode&) {
         }
 
     public:
@@ -898,7 +896,7 @@ namespace inja {
         int count_variables() {
             auto statistic_visitor = StatisticsVisitor();
             root.accept(statistic_visitor);
-            return static_cast<int>(statistic_visitor.variable_counter);
+            return statistic_visitor.variable_counter;
         }
     };
 
@@ -1057,7 +1055,7 @@ namespace inja {
             LessThan,           // <
             LessEqual,          // <=
             Unknown,
-            Eof
+            Eof,
         };
 
         Kind kind{Kind::Unknown};
@@ -1108,10 +1106,13 @@ namespace inja {
             StatementBody,
             CommentStart,
             CommentStartForceLstrip,
-            CommentBody
+            CommentBody,
         };
 
-        enum class MinusState { Operator, Number };
+        enum class MinusState {
+            Operator,
+            Number,
+        };
 
         const LexerConfig& config;
 
@@ -1385,7 +1386,6 @@ namespace inja {
 
             switch (state) {
                 default:
-                    [[fallthrough]];
                 case State::Text: {
                     // fast-scan to first open character
                     const size_t open_start = m_in.substr(pos).find_first_of(config.open_chars);
@@ -1535,6 +1535,9 @@ namespace inja {
      * \brief Class for parsing an inja Template.
      */
     class Parser {
+        using Arguments = std::vector<std::shared_ptr<ExpressionNode>>;
+        using OperatorStack = std::stack<std::shared_ptr<FunctionNode>>;
+
         const ParserConfig& config;
 
         Lexer lexer;
@@ -1544,23 +1547,16 @@ namespace inja {
         Token tok, peek_tok;
         bool have_peek_tok{false};
 
-        size_t current_paren_level{0};
-        size_t current_bracket_level{0};
-        size_t current_brace_level{0};
-
         std::string_view literal_start;
 
         BlockNode* current_block{nullptr};
         ExpressionListNode* current_expression_list{nullptr};
-        std::stack<std::pair<FunctionNode*, size_t>> function_stack;
-        std::vector<std::shared_ptr<ExpressionNode>> arguments;
 
-        std::stack<std::shared_ptr<FunctionNode>> operator_stack;
         std::stack<IfStatementNode*> if_statement_stack;
         std::stack<ForStatementNode*> for_statement_stack;
         std::stack<BlockStatementNode*> block_statement_stack;
 
-        [[noreturn]] inline void throw_parser_error(const std::string& message) const {
+        inline void throw_parser_error(const std::string& message) const {
             INJA_THROW(ParserError(message, lexer.current_position()));
         }
 
@@ -1580,13 +1576,12 @@ namespace inja {
             }
         }
 
-        inline void add_literal(const char* content_ptr) {
-            std::string_view data_text(literal_start.data(),
-                                       static_cast<std::string_view::size_type>(tok.text.data() - literal_start.data()) + tok.text.size());
+        inline void add_literal(Arguments& arguments, const char* content_ptr) {
+            std::string_view data_text(literal_start.data(), tok.text.data() - literal_start.data() + tok.text.size());
             arguments.emplace_back(std::make_shared<LiteralNode>(data_text, data_text.data() - content_ptr));
         }
 
-        inline void add_operator() {
+        inline void add_operator(Arguments& arguments, OperatorStack& operator_stack) {
             auto function = operator_stack.top();
             operator_stack.pop();
 
@@ -1654,19 +1649,29 @@ namespace inja {
         }
 
         bool parse_expression(Template& tmpl, Token::Kind closing) {
-            while (tok.kind != closing && tok.kind != Token::Kind::Eof) {
+            current_expression_list->root = parse_expression(tmpl);
+            return tok.kind == closing;
+        }
+
+        std::shared_ptr<ExpressionNode> parse_expression(Template& tmpl) {
+            size_t current_bracket_level{0};
+            size_t current_brace_level{0};
+            Arguments arguments;
+            OperatorStack operator_stack;
+
+            while (tok.kind != Token::Kind::Eof) {
                 // Literals
                 switch (tok.kind) {
                     case Token::Kind::String: {
                         if (current_brace_level == 0 && current_bracket_level == 0) {
                             literal_start = tok.text;
-                            add_literal(tmpl.content.c_str());
+                            add_literal(arguments, tmpl.content.c_str());
                         }
                     } break;
                     case Token::Kind::Number: {
                         if (current_brace_level == 0 && current_bracket_level == 0) {
                             literal_start = tok.text;
-                            add_literal(tmpl.content.c_str());
+                            add_literal(arguments, tmpl.content.c_str());
                         }
                     } break;
                     case Token::Kind::LeftBracket: {
@@ -1688,7 +1693,7 @@ namespace inja {
 
                         current_bracket_level -= 1;
                         if (current_brace_level == 0 && current_bracket_level == 0) {
-                            add_literal(tmpl.content.c_str());
+                            add_literal(arguments, tmpl.content.c_str());
                         }
                     } break;
                     case Token::Kind::RightBrace: {
@@ -1698,7 +1703,7 @@ namespace inja {
 
                         current_brace_level -= 1;
                         if (current_brace_level == 0 && current_bracket_level == 0) {
-                            add_literal(tmpl.content.c_str());
+                            add_literal(arguments, tmpl.content.c_str());
                         }
                     } break;
                     case Token::Kind::Id: {
@@ -1709,7 +1714,7 @@ namespace inja {
                             tok.text == static_cast<decltype(tok.text)>("null")) {
                             if (current_brace_level == 0 && current_bracket_level == 0) {
                                 literal_start = tok.text;
-                                add_literal(tmpl.content.c_str());
+                                add_literal(arguments, tmpl.content.c_str());
                             }
 
                             // Operator
@@ -1718,9 +1723,30 @@ namespace inja {
 
                             // Functions
                         } else if (peek_tok.kind == Token::Kind::LeftParen) {
-                            operator_stack.emplace(
-                                std::make_shared<FunctionNode>(static_cast<std::string>(tok.text), tok.text.data() - tmpl.content.c_str()));
-                            function_stack.emplace(operator_stack.top().get(), current_paren_level);
+                            auto func = std::make_shared<FunctionNode>(tok.text, tok.text.data() - tmpl.content.c_str());
+                            get_next_token();
+                            do {
+                                get_next_token();
+                                auto expr = parse_expression(tmpl);
+                                if (!expr) {
+                                    break;
+                                }
+                                func->number_args += 1;
+                                func->arguments.emplace_back(expr);
+                            } while (tok.kind == Token::Kind::Comma);
+                            if (tok.kind != Token::Kind::RightParen) {
+                                throw_parser_error("expected right parenthesis, got '" + tok.describe() + "'");
+                            }
+
+                            auto function_data = function_storage.find_function(func->name, func->number_args);
+                            if (function_data.operation == FunctionStorage::Operation::None) {
+                                throw_parser_error("unknown function " + func->name);
+                            }
+                            func->operation = function_data.operation;
+                            if (function_data.operation == FunctionStorage::Operation::Callback) {
+                                func->callback = function_data.callback;
+                            }
+                            arguments.emplace_back(func);
 
                             // Variables
                         } else {
@@ -1804,23 +1830,17 @@ namespace inja {
                         }
                         auto function_node = std::make_shared<FunctionNode>(operation, tok.text.data() - tmpl.content.c_str());
 
-                        while (!operator_stack.empty() &&
-                               ((operator_stack.top()->precedence > function_node->precedence) ||
-                                (operator_stack.top()->precedence == function_node->precedence &&
-                                 function_node->associativity == FunctionNode::Associativity::Left)) &&
-                               (operator_stack.top()->operation != FunctionStorage::Operation::ParenLeft)) {
-                            add_operator();
+                        while (!operator_stack.empty() && ((operator_stack.top()->precedence > function_node->precedence) ||
+                                                           (operator_stack.top()->precedence == function_node->precedence &&
+                                                            function_node->associativity == FunctionNode::Associativity::Left))) {
+                            add_operator(arguments, operator_stack);
                         }
 
                         operator_stack.emplace(function_node);
                     } break;
                     case Token::Kind::Comma: {
                         if (current_brace_level == 0 && current_bracket_level == 0) {
-                            if (function_stack.empty()) {
-                                throw_parser_error("unexpected ','");
-                            }
-
-                            function_stack.top().first->number_args += 1;
+                            goto break_loop;
                         }
                     } break;
                     case Token::Kind::Colon: {
@@ -1829,66 +1849,36 @@ namespace inja {
                         }
                     } break;
                     case Token::Kind::LeftParen: {
-                        current_paren_level += 1;
-                        operator_stack.emplace(
-                            std::make_shared<FunctionNode>(FunctionStorage::Operation::ParenLeft, tok.text.data() - tmpl.content.c_str()));
-
-                        get_peek_token();
-                        if (peek_tok.kind == Token::Kind::RightParen) {
-                            if (!function_stack.empty() && function_stack.top().second == current_paren_level - 1) {
-                                function_stack.top().first->number_args = 0;
-                            }
+                        get_next_token();
+                        auto expr = parse_expression(tmpl);
+                        if (tok.kind != Token::Kind::RightParen) {
+                            throw_parser_error("expected right parenthesis, got '" + tok.describe() + "'");
                         }
+                        if (!expr) {
+                            throw_parser_error("empty expression in parentheses");
+                        }
+                        arguments.emplace_back(expr);
                     } break;
-                    case Token::Kind::RightParen: {
-                        current_paren_level -= 1;
-                        while (!operator_stack.empty() && operator_stack.top()->operation != FunctionStorage::Operation::ParenLeft) {
-                            add_operator();
-                        }
-
-                        if (!operator_stack.empty() && operator_stack.top()->operation == FunctionStorage::Operation::ParenLeft) {
-                            operator_stack.pop();
-                        }
-
-                        if (!function_stack.empty() && function_stack.top().second == current_paren_level) {
-                            auto func = function_stack.top().first;
-                            auto function_data = function_storage.find_function(func->name, func->number_args);
-                            if (function_data.operation == FunctionStorage::Operation::None) {
-                                throw_parser_error("unknown function " + func->name);
-                            }
-                            func->operation = function_data.operation;
-                            if (function_data.operation == FunctionStorage::Operation::Callback) {
-                                func->callback = function_data.callback;
-                            }
-
-                            if (operator_stack.empty()) {
-                                throw_parser_error("internal error at function " + func->name);
-                            }
-
-                            add_operator();
-                            function_stack.pop();
-                        }
-                    }
-                        [[fallthrough]];
                     default:
-                        break;
+                        goto break_loop;
                 }
 
                 get_next_token();
             }
 
+        break_loop:
             while (!operator_stack.empty()) {
-                add_operator();
+                add_operator(arguments, operator_stack);
             }
 
+            std::shared_ptr<ExpressionNode> expr;
             if (arguments.size() == 1) {
-                current_expression_list->root = arguments[0];
+                expr = arguments[0];
                 arguments = {};
             } else if (arguments.size() > 1) {
                 throw_parser_error("malformed expression");
             }
-
-            return true;
+            return expr;
         }
 
         bool parse_statement(Template& tmpl, Token::Kind closing, std::string_view path) {
@@ -2128,10 +2118,6 @@ namespace inja {
                         current_expression_list = expression_list_node.get();
 
                         if (!parse_expression(tmpl, Token::Kind::ExpressionClose)) {
-                            throw_parser_error("expected expression, got '" + tok.describe() + "'");
-                        }
-
-                        if (tok.kind != Token::Kind::ExpressionClose) {
                             throw_parser_error("expected expression close, got '" + tok.describe() + "'");
                         }
                     } break;
@@ -2288,7 +2274,7 @@ namespace inja {
             return std::make_shared<json>(*result);
         }
 
-        [[noreturn]] void throw_renderer_error(const std::string& message, const AstNode& node) {
+        void throw_renderer_error(const std::string& message, const AstNode& node) {
             SourceLocation loc = get_source_location(current_template->content, node.pos);
             INJA_THROW(RenderError(message, loc));
         }
@@ -2364,7 +2350,7 @@ namespace inja {
             return result;
         }
 
-        void visit(const BlockNode& node) override {
+        void visit(const BlockNode& node) {
             for (auto& n : node.nodes) {
                 n->accept(*this);
 
@@ -2374,18 +2360,18 @@ namespace inja {
             }
         }
 
-        void visit(const TextNode& node) override {
-            output_stream->write(current_template->content.c_str() + node.pos, static_cast<std::streamsize>(node.length));
+        void visit(const TextNode& node) {
+            output_stream->write(current_template->content.c_str() + node.pos, node.length);
         }
 
-        void visit(const ExpressionNode&) override {
+        void visit(const ExpressionNode&) {
         }
 
-        void visit(const LiteralNode& node) override {
+        void visit(const LiteralNode& node) {
             data_eval_stack.push(&node.value);
         }
 
-        void visit(const DataNode& node) override {
+        void visit(const DataNode& node) {
             if (additional_data.contains(node.ptr)) {
                 data_eval_stack.push(&(additional_data[node.ptr]));
             } else if (data_input->contains(node.ptr)) {
@@ -2405,7 +2391,7 @@ namespace inja {
             }
         }
 
-        void visit(const FunctionNode& node) override {
+        void visit(const FunctionNode& node) {
             switch (node.operation) {
                 case Op::Not: {
                     const auto args = get_arguments<1>(node);
@@ -2473,8 +2459,7 @@ namespace inja {
                 } break;
                 case Op::Division: {
                     const auto args = get_arguments<2>(node);
-
-                    if (args[1]->get<const json::number_float_t>() == 0) { // NOLINT
+                    if (args[1]->get<const json::number_float_t>() == 0) {
                         throw_renderer_error("division by zero", node);
                     }
                     make_result(args[0]->get<const json::number_float_t>() / args[1]->get<const json::number_float_t>());
@@ -2511,7 +2496,7 @@ namespace inja {
                     if (args[0]->is_object()) {
                         data_eval_stack.push(&args[0]->at(args[1]->get<std::string>()));
                     } else {
-                        data_eval_stack.push(&args[0]->at(static_cast<nlohmann::json::size_type>(args[1]->get<int>())));
+                        data_eval_stack.push(&args[0]->at(args[1]->get<int>()));
                     }
                 } break;
                 case Op::Default: {
@@ -2578,8 +2563,7 @@ namespace inja {
                     make_result(get_arguments<1>(node)[0]->get<const json::number_integer_t>() % 2 != 0);
                 } break;
                 case Op::Range: {
-                    std::vector<int> result(
-                        static_cast<std::vector<int>::size_type>(get_arguments<1>(node)[0]->get<const json::number_integer_t>()));
+                    std::vector<int> result(get_arguments<1>(node)[0]->get<const json::number_integer_t>());
                     std::iota(result.begin(), result.end(), 0);
                     make_result(std::move(result));
                 } break;
@@ -2635,7 +2619,7 @@ namespace inja {
                 case Op::Super: {
                     const auto args = get_argument_vector(node);
                     const size_t old_level = current_level;
-                    const size_t level_diff = (args.size() == 1) ? static_cast<size_t>(args[0]->get<int>()) : 1;
+                    const size_t level_diff = (args.size() == 1) ? args[0]->get<int>() : 1;
                     const size_t level = current_level + level_diff;
 
                     if (block_statement_stack.empty()) {
@@ -2679,24 +2663,22 @@ namespace inja {
                     }
                     make_result(os.str());
                 } break;
-                case Op::ParenLeft:
-                case Op::ParenRight:
                 case Op::None:
                     break;
             }
         }
 
-        void visit(const ExpressionListNode& node) override {
+        void visit(const ExpressionListNode& node) {
             print_data(eval_expression_list(node));
         }
 
-        void visit(const StatementNode&) override {
+        void visit(const StatementNode&) {
         }
 
-        void visit(const ForStatementNode&) override {
+        void visit(const ForStatementNode&) {
         }
 
-        void visit(const ForArrayStatementNode& node) override {
+        void visit(const ForArrayStatementNode& node) {
             const auto result = eval_expression_list(node.condition);
             if (!result->is_array()) {
                 throw_renderer_error("object must be an array", node);
@@ -2735,7 +2717,7 @@ namespace inja {
             }
         }
 
-        void visit(const ForObjectStatementNode& node) override {
+        void visit(const ForObjectStatementNode& node) {
             const auto result = eval_expression_list(node.condition);
             if (!result->is_object()) {
                 throw_renderer_error("object must be an object", node);
@@ -2774,7 +2756,7 @@ namespace inja {
             }
         }
 
-        void visit(const IfStatementNode& node) override {
+        void visit(const IfStatementNode& node) {
             const auto result = eval_expression_list(node.condition);
             if (truthy(result.get())) {
                 node.true_statement.accept(*this);
@@ -2783,7 +2765,7 @@ namespace inja {
             }
         }
 
-        void visit(const IncludeStatementNode& node) override {
+        void visit(const IncludeStatementNode& node) {
             auto sub_renderer = Renderer(config, template_storage, function_storage);
             const auto included_template_it = template_storage.find(node.file);
             if (included_template_it != template_storage.end()) {
@@ -2793,7 +2775,7 @@ namespace inja {
             }
         }
 
-        void visit(const ExtendsStatementNode& node) override {
+        void visit(const ExtendsStatementNode& node) {
             const auto included_template_it = template_storage.find(node.file);
             if (included_template_it != template_storage.end()) {
                 const Template* parent_template = &included_template_it->second;
@@ -2804,7 +2786,7 @@ namespace inja {
             }
         }
 
-        void visit(const BlockStatementNode& node) override {
+        void visit(const BlockStatementNode& node) {
             const size_t old_level = current_level;
             current_level = 0;
             current_template = template_stack.front();
@@ -2818,7 +2800,7 @@ namespace inja {
             current_template = template_stack.back();
         }
 
-        void visit(const SetStatementNode& node) override {
+        void visit(const SetStatementNode& node) {
             std::string ptr = node.key;
             replace_substring(ptr, ".", "/");
             ptr = "/" + ptr;

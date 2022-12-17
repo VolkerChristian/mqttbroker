@@ -20,7 +20,8 @@
 
 #include "mqttbroker/lib/Mqtt.h"
 
-#include <core/socket/SocketContext.h>        // for SocketConnection
+#include <core/socket/SocketConnection.h>
+//#include <core/socket/SocketContext.h>        // for SocketConnection
 #include <core/timer/Timer.h>                 // for Timer
 #include <iot/mqtt/MqttContext.h>             // for MqttContext
 #include <utils/Timeval.h>                    // for size_t, Timeval
@@ -36,7 +37,7 @@
 
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-#define PING_INTERVAL 60
+#define PING_INTERVAL 0
 #define MAX_FLYING_PINGS 3
 
 namespace apps::mqttbroker::broker::websocket {
@@ -85,6 +86,8 @@ namespace apps::mqttbroker::broker::websocket {
                 sendClose();
             },
             timeout);
+
+        getSocketConnection()->setTimeout(0);
     }
 
     void MqttSubProtocol::end([[maybe_unused]] bool fatal) {
@@ -100,8 +103,8 @@ namespace apps::mqttbroker::broker::websocket {
         iot::mqtt::MqttContext::onConnected();
     }
 
-    void MqttSubProtocol::onMessageStart([[maybe_unused]] int opCode) {
-        if (opCode != 2) {
+    void MqttSubProtocol::onMessageStart(int opCode) {
+        if (opCode == 1) {
             this->end(true);
         }
     }
@@ -152,7 +155,7 @@ namespace apps::mqttbroker::broker::websocket {
     }
 
     core::socket::SocketConnection* MqttSubProtocol::getSocketConnection() {
-        return getSocketContextUpgrade()->getSocketConnection();
+        return getSubProtocolContext()->getSocketConnection();
     }
 
 } // namespace apps::mqttbroker::broker::websocket
