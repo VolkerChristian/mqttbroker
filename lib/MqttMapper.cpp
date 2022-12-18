@@ -187,10 +187,10 @@ namespace mqtt::lib {
 
     void MqttMapper::publishMappings(const iot::mqtt::packets::Publish& publish) {
         if (!mappingJson.empty()) {
-            nlohmann::json matchedTopicLevel = findMatchingTopicLevel(mappingJson["topic_level"], publish.getTopic());
+            nlohmann::json matchingTopicLevel = findMatchingTopicLevel(mappingJson["topic_level"], publish.getTopic());
 
-            if (!matchedTopicLevel.empty()) {
-                const nlohmann::json& mapping = matchedTopicLevel["subscription"];
+            if (!matchingTopicLevel.empty()) {
+                const nlohmann::json& mapping = matchingTopicLevel["subscription"];
 
                 if (mapping.contains("static")) {
                     publishMappedMessages(mapping["static"], publish);
@@ -222,7 +222,7 @@ namespace mqtt::lib {
                     if (!json.empty()) {
                         publishMappedTemplates(templateMapping, json, publish);
                     } else {
-                        LOG(INFO) << "No valid mapping section found: " << matchedTopicLevel.dump();
+                        LOG(INFO) << "No valid mapping section found: " << matchingTopicLevel.dump();
                     }
                 }
             }
