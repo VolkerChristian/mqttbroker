@@ -73,7 +73,7 @@ namespace mqtt::lib {
                         try {
                             mapFileJson = mapFileJson.patch(defaultPatch);
 
-                            mappingJson = mapFileJson["mappings"];
+                            mappingJson = mapFileJson["mapping"];
                             connectionJson = mapFileJson["connection"];
                         } catch (const std::exception& e) {
                             LOG(ERROR) << e.what();

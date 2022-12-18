@@ -145,7 +145,7 @@ namespace mqtt::lib {
     }
 
     void MqttMapper::publishMappedMessages(const nlohmann::json& staticMapping, const iot::mqtt::packets::Publish& publish) {
-        const nlohmann::json& messageMappingArray = staticMapping["message_mappings"];
+        const nlohmann::json& messageMappingArray = staticMapping["message_mapping"];
 
         if (messageMappingArray.begin() != messageMappingArray.end()) {
             if (messageMappingArray.begin()->is_object()) {
@@ -172,15 +172,23 @@ namespace mqtt::lib {
             if (matchedTopicLevel.contains("topic_level")) {
                 const nlohmann::json& topicLevels = matchedTopicLevel["topic_level"];
 
-                nlohmann::json::const_iterator matchedTopicLevelIterator = std::find_if(
-                    topicLevels.begin(), topicLevels.end(), [&topicLevelName](const nlohmann::json& topicLevelCandidat) -> bool {
-                        return topicLevelCandidat["name"] == topicLevelName;
-                    });
-
-                if (matchedTopicLevelIterator != topicLevels.end()) {
-                    matchedTopicLevel = *matchedTopicLevelIterator;
+                if (topicLevels.is_object()) {
+                    if (topicLevels["name"] == topicLevelName) {
+                        matchedTopicLevel = topicLevels;
+                    } else {
+                        matchedTopicLevel.clear();
+                    }
                 } else {
-                    matchedTopicLevel.clear();
+                    nlohmann::json::const_iterator matchedTopicLevelIterator = std::find_if(
+                        topicLevels.begin(), topicLevels.end(), [&topicLevelName](const nlohmann::json& topicLevelCandidat) -> bool {
+                            return topicLevelCandidat["name"] == topicLevelName;
+                        });
+
+                    if (matchedTopicLevelIterator != topicLevels.end()) {
+                        matchedTopicLevel = *matchedTopicLevelIterator;
+                    } else {
+                        matchedTopicLevel.clear();
+                    }
                 }
             } else {
                 matchedTopicLevel.clear();

@@ -1,7 +1,7 @@
 {
   "type": "object",
   "required": [
-    "mappings"
+    "mapping"
   ],
   "properties": {
     "discover_prefix": {
@@ -62,7 +62,7 @@
         "password": ""
       }
     },
-    "mappings": {
+    "mapping": {
       "type": "object",
       "required": [
         "topic_level"
@@ -70,60 +70,69 @@
       "properties": {
         "topic_level": {
           "$id": "https://www.vchrist.at/mqttmapper/schemas/topic_level",
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": [
-              "name"
-            ],
-            "anyOf": [
-              {
-                "required": [
-                  "topic_level"
-                ]
-              },
-              {
-                "required": [
-                  "subscription"
-                ]
-              }
-            ],
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "topic_level": {
-                  "$ref": "#"
-
-              },
-              "subscription": {
-                "properties": {
-                  "qos": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 2,
-                    "default": 0
-                  },
-                  "type": {
-                    "type": "string",
-                    "default": ""
-                  }
-                },
-                "oneOf": [
-                  {
-                    "$ref": "#/$defs/mapping_static"
-                  },
-                  {
-                    "$ref": "#/$defs/mapping_value"
-                  },
-                  {
-                    "$ref": "#/$defs/mapping_json"
-                  }
-                ]
+          "oneOf": [
+            {
+              "$ref": "#/$defs/topic_level"
+            }, {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/topic_level"
               }
             }
-          },
+          ],
           "$defs": {
+            "topic_level": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "anyOf": [
+                {
+                  "required": [
+                    "topic_level"
+                  ]
+                },
+                {
+                  "required": [
+                    "subscription"
+                  ]
+                }
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "topic_level": {
+                    "$ref": "#"
+
+                },
+                "subscription": {
+                  "properties": {
+                    "qos": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 2,
+                      "default": 0
+                    },
+                    "type": {
+                      "type": "string",
+                      "default": ""
+                    }
+                  },
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/mapping_static"
+                    },
+                    {
+                      "$ref": "#/$defs/mapping_value"
+                    },
+                    {
+                      "$ref": "#/$defs/mapping_json"
+                    }
+                  ]
+                }
+              }
+            },
             "mapping_static": {
               "type": "object",
               "required": [
@@ -134,15 +143,15 @@
                   "type": "object",
                   "$ref": "#/$defs/mapping_commons",
                   "properties": {
-                    "message_mappings": {
+                    "message_mapping": {
                       "oneOf": [
                         {
-                          "$ref": "#/$defs/message_mappings"
+                          "$ref": "#/$defs/message_mapping"
                         },
                         {
                           "type": "array",
                           "items": {
-                            "$ref": "#/$defs/message_mappings"
+                            "$ref": "#/$defs/message_mapping"
                           }
                         }
                       ]
@@ -193,7 +202,7 @@
                 }
               }
             },
-            "message_mappings": {
+            "message_mapping": {
               "type": "array",
               "items": {
                 "type": "object",

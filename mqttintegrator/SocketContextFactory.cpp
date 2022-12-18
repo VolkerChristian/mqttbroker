@@ -41,7 +41,7 @@ namespace mqtt::mqttintegrator {
 
             if (!mappingJson.empty()) {
                 connection = mappingJson["connection"];
-                jsonMapping = mappingJson["mappings"];
+                jsonMapping = mappingJson["mapping"];
             }
         }
     }

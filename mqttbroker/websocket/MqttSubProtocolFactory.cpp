@@ -38,7 +38,7 @@ namespace mqtt::mqttbroker::websocket {
             nlohmann::json mappingJson = mqtt::lib::JsonMappingReader::readMappingFromFile(mappingFile);
 
             if (!mappingJson.empty()) {
-                jsonMapping = mappingJson["mappings"];
+                jsonMapping = mappingJson["mapping"];
             }
         }
     }

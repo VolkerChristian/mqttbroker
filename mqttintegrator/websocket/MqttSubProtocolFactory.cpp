@@ -37,7 +37,7 @@ namespace mqtt::mqttintegrator::websocket {
 
             if (!mappingJson.empty()) {
                 connection = mappingJson["connection"];
-                jsonMapping = mappingJson["mappings"];
+                jsonMapping = mappingJson["mapping"];
             }
         }
     }
