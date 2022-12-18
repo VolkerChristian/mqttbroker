@@ -77,7 +77,7 @@ namespace mqtt::lib {
         std::list<iot::mqtt::Topic> topicList;
 
         try {
-            MqttMapper::extractTopics(mappingJson, "", topicList);
+            extractTopics(mappingJson, "", topicList);
         } catch (const nlohmann::json::exception& e) {
             LOG(ERROR) << e.what();
             LOG(ERROR) << "Extracting topics failed.";
@@ -158,87 +158,72 @@ namespace mqtt::lib {
         }
     }
 
-    nlohmann::json MqttMapper::findMatchingTopicLevel(const iot::mqtt::packets::Publish& publish) {
-        std::string remainingTopic = publish.getTopic();
+    nlohmann::json MqttMapper::findMatchingTopicLevel(const nlohmann::json& topicLevel, const std::string& topic) {
+        nlohmann::json foundTopicLevel;
 
-        nlohmann::json matchedTopicLevel = mappingJson;
+        if (topicLevel.is_object()) {
+            std::string::size_type slashPosition = topic.find("/");
+            std::string topicLevelName = topic.substr(0, slashPosition);
 
-        do {
-            std::string::size_type slashPosition = remainingTopic.find("/");
-
-            std::string topicLevelName = remainingTopic.substr(0, slashPosition);
-            remainingTopic.erase(0, topicLevelName.size() + 1);
-
-            if (matchedTopicLevel.contains("topic_level")) {
-                const nlohmann::json& topicLevels = matchedTopicLevel["topic_level"];
-
-                if (topicLevels.is_object()) {
-                    if (topicLevels["name"] == topicLevelName) {
-                        matchedTopicLevel = topicLevels;
-                    } else {
-                        matchedTopicLevel.clear();
-                    }
-                } else {
-                    nlohmann::json::const_iterator matchedTopicLevelIterator = std::find_if(
-                        topicLevels.begin(), topicLevels.end(), [&topicLevelName](const nlohmann::json& topicLevelCandidat) -> bool {
-                            return topicLevelCandidat["name"] == topicLevelName;
-                        });
-
-                    if (matchedTopicLevelIterator != topicLevels.end()) {
-                        matchedTopicLevel = *matchedTopicLevelIterator;
-                    } else {
-                        matchedTopicLevel.clear();
-                    }
+            if (topicLevel["name"] == topicLevelName) {
+                if (slashPosition == std::string::npos) {
+                    foundTopicLevel = topicLevel;
+                } else if (topicLevel.contains("topic_level")) {
+                    foundTopicLevel = findMatchingTopicLevel(topicLevel["topic_level"], topic.substr(slashPosition + 1));
                 }
-            } else {
-                matchedTopicLevel.clear();
             }
-        } while ((!remainingTopic.empty()) && !matchedTopicLevel.empty());
+        } else if (topicLevel.is_array()) {
+            for (const nlohmann::json& topicLevelEntry : topicLevel) {
+                foundTopicLevel = findMatchingTopicLevel(topicLevelEntry, topic);
 
-        if (!matchedTopicLevel.contains("subscription")) {
-            matchedTopicLevel.clear();
+                if (!foundTopicLevel.empty()) {
+                    break;
+                }
+            }
         }
 
-        return matchedTopicLevel;
+        return foundTopicLevel;
     }
 
     void MqttMapper::publishMappings(const iot::mqtt::packets::Publish& publish) {
-        nlohmann::json matchedTopicLevel = findMatchingTopicLevel(publish);
+        if (!mappingJson.empty()) {
+            nlohmann::json matchedTopicLevel = findMatchingTopicLevel(mappingJson["topic_level"], publish.getTopic());
 
-        if (!matchedTopicLevel.empty()) {
-            const nlohmann::json& mapping = matchedTopicLevel["subscription"];
+            if (!matchedTopicLevel.empty()) {
+                const nlohmann::json& mapping = matchedTopicLevel["subscription"];
 
-            if (mapping.contains("static")) {
-                publishMappedMessages(mapping["static"], publish);
-            } else {
-                nlohmann::json json;
-                nlohmann::json templateMapping;
-
-                if (mapping.contains("value")) {
-                    LOG(INFO) << "Topic mapping (value) found:";
-
-                    templateMapping = mapping["value"];
-
-                    json["value"] = publish.getMessage();
-
-                } else if (mapping.contains("json")) {
-                    LOG(INFO) << "Topic mapping (json) found:";
-
-                    templateMapping = mapping["json"];
-
-                    try {
-                        json = nlohmann::json::parse(publish.getMessage());
-                    } catch (const nlohmann::json::exception& e) {
-                        LOG(ERROR) << e.what();
-                        LOG(ERROR) << "Parsing message into json failed: " << publish.getMessage();
-                        json.clear();
-                    }
-                }
-
-                if (!json.empty()) {
-                    publishMappedTemplates(templateMapping, json, publish);
+                if (mapping.contains("static")) {
+                    publishMappedMessages(mapping["static"], publish);
                 } else {
-                    LOG(INFO) << "No valid mapping section found: " << matchedTopicLevel.dump();
+                    nlohmann::json json;
+                    nlohmann::json templateMapping;
+
+                    if (mapping.contains("value")) {
+                        LOG(INFO) << "Topic mapping (value) found:";
+
+                        templateMapping = mapping["value"];
+
+                        json["value"] = publish.getMessage();
+
+                    } else if (mapping.contains("json")) {
+                        LOG(INFO) << "Topic mapping (json) found:";
+
+                        templateMapping = mapping["json"];
+
+                        try {
+                            json = nlohmann::json::parse(publish.getMessage());
+                        } catch (const nlohmann::json::exception& e) {
+                            LOG(ERROR) << e.what();
+                            LOG(ERROR) << "Parsing message into json failed: " << publish.getMessage();
+                            json.clear();
+                        }
+                    }
+
+                    if (!json.empty()) {
+                        publishMappedTemplates(templateMapping, json, publish);
+                    } else {
+                        LOG(INFO) << "No valid mapping section found: " << matchedTopicLevel.dump();
+                    }
                 }
             }
         }

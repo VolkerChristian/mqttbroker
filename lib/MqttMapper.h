@@ -49,7 +49,7 @@ namespace mqtt::lib {
         static void extractTopic(const nlohmann::json& json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList);
         static void extractTopics(const nlohmann::json& json, const std::string& topic, std::list<iot::mqtt::Topic>& topicList);
 
-        nlohmann::json findMatchingTopicLevel(const iot::mqtt::packets::Publish& publish);
+        nlohmann::json findMatchingTopicLevel(const nlohmann::json& topicLevel, const std::string& topic);
 
         void
         publishMappedTemplate(const nlohmann::json& mappingSubJson, const nlohmann::json& json, const iot::mqtt::packets::Publish& publish);
