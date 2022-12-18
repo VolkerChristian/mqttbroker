@@ -26,14 +26,14 @@
 
 #define NAME "mqtt"
 
-namespace mqttbroker::mqttintegrator::websocket {
+namespace mqtt::mqttintegrator::websocket {
 
     MqttSubprotocolFactory::MqttSubprotocolFactory(const std::string& name)
         : web::websocket::SubProtocolFactory<MqttSubProtocol>::SubProtocolFactory(name) {
         char* mappingFile = getenv("MQTT_MAPPING_FILE");
 
         if (mappingFile != nullptr) {
-            nlohmann::json mappingJson = mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFile);
+            nlohmann::json mappingJson = mqtt::lib::JsonMappingReader::readMappingFromFile(mappingFile);
 
             if (!mappingJson.empty()) {
                 connection = mappingJson["connection"];
@@ -46,8 +46,8 @@ namespace mqttbroker::mqttintegrator::websocket {
         return new MqttSubProtocol(subProtocolContext, getName(), connection, jsonMapping);
     }
 
-} // namespace mqttbroker::mqttintegrator::websocket
+} // namespace mqtt::mqttintegrator::websocket
 
 extern "C" void* mqttClientSubProtocolFactory() {
-    return new mqttbroker::mqttintegrator::websocket::MqttSubprotocolFactory(NAME);
+    return new mqtt::mqttintegrator::websocket::MqttSubprotocolFactory(NAME);
 }

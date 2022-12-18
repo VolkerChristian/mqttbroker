@@ -42,19 +42,13 @@ add_compile_options(
     ${ADDITIONAL_OPTIONS}
 )
 
-add_library(mqtt-brokermodel SHARED Mqtt.cpp Mqtt.h MqttModel.cpp MqttModel.h)
+add_library(mqtt-broker SHARED Mqtt.cpp Mqtt.h MqttModel.cpp MqttModel.h)
 
 target_include_directories(
-    mqtt-brokermodel PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-                            ${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_SOURCE_DIR}
+    mqtt-broker PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
+                       ${PROJECT_SOURCE_DIR}
 )
 
-target_link_libraries(mqtt-brokermodel PUBLIC snodec::mqtt-server mqtt-mapping)
+target_link_libraries(mqtt-broker PUBLIC snodec::mqtt-server mqtt-mapping)
 
-if(SNODEC_INTREE_BUILD)
-    set_target_properties(
-        mqtt-brokermodel PROPERTIES INSTALL_RPATH "${SNODEC_IOT_MQTT_RPATH}"
-    )
-endif(SNODEC_INTREE_BUILD)
-
-install(TARGETS mqtt-brokermodel RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS mqtt-broker RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})

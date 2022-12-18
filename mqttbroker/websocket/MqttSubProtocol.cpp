@@ -36,14 +36,14 @@
 #define PING_INTERVAL 0
 #define MAX_FLYING_PINGS 3
 
-namespace mqttbroker::broker::websocket {
+namespace mqtt::mqttbroker::websocket {
 
     MqttSubProtocol::MqttSubProtocol(web::websocket::SubProtocolContext* subProtocolContext,
                                      const std::string& name,
                                      const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
                                      const nlohmann::json& mappingJson)
         : web::websocket::server::SubProtocol(subProtocolContext, name, PING_INTERVAL, MAX_FLYING_PINGS)
-        , iot::mqtt::MqttContext(new mqttbroker::broker::lib::Mqtt(broker, mappingJson))
+        , iot::mqtt::MqttContext(new mqtt::mqttbroker::lib::Mqtt(broker, mappingJson))
         , onReceivedFromPeerEvent([this]() -> void {
             iot::mqtt::MqttContext::onReceiveFromPeer();
         }) {
@@ -154,4 +154,4 @@ namespace mqttbroker::broker::websocket {
         return getSubProtocolContext()->getSocketConnection();
     }
 
-} // namespace mqttbroker::broker::websocket
+} // namespace mqtt::mqttbroker::websocket

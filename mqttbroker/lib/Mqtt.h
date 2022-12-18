@@ -38,11 +38,11 @@ namespace iot::mqtt {
 #include <memory>
 #include <string>
 
-namespace mqttbroker::broker::lib {
+namespace mqtt::mqttbroker::lib {
 
     class Mqtt
         : public iot::mqtt::server::Mqtt
-        , public mqttbroker::lib::MqttMapper {
+        , public mqtt::lib::MqttMapper {
     public:
         explicit Mqtt(const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker, const nlohmann::json& mappingJson);
 
@@ -54,10 +54,10 @@ namespace mqttbroker::broker::lib {
         // inherited from core::socket::SocketContext (the root class of all SocketContext classes) via iot::mqtt::server::SocketContext
         void onDisconnected() final;
 
-        // inherited from apps::mqttbroker::lib::MqttMapper
+        // inherited from apps::mqtt::lib::MqttMapper
         void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) final;
     };
 
-} // namespace mqttbroker::broker::lib
+} // namespace mqtt::mqttbroker::lib
 
 #endif // MQTTBROKER_LIB_MQTT_H

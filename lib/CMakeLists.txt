@@ -4,10 +4,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(nlohmann_json 3.7.0)
-
-if(NOT SNODEC_INTREE_BUILD)
-    find_package(snodec COMPONENTS mqtt)
-endif(NOT SNODEC_INTREE_BUILD)
+find_package(snodec COMPONENTS mqtt)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(ADDITIONAL_OPTIONS
@@ -69,9 +66,11 @@ add_library(
     mqtt-mapping STATIC JsonMappingReader.cpp MqttMapper.cpp
                         JsonMappingReader.h MqttMapper.h mapping-schema.json.h
 )
+
 set_property(TARGET mqtt-mapping PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories(mqtt-mapping PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
 target_link_libraries(
     mqtt-mapping PRIVATE snodec::mqtt nlohmann_json_schema_validator
 )

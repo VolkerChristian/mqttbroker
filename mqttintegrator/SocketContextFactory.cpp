@@ -31,13 +31,13 @@ namespace core::socket {
 
 #include <cstdlib>
 
-namespace mqttbroker::integrator {
+namespace mqtt::mqttintegrator {
 
     SocketContextFactory::SocketContextFactory() {
         char* mappingFile = getenv("MQTT_MAPPING_FILE");
 
         if (mappingFile != nullptr) {
-            nlohmann::json mappingJson = mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFile);
+            nlohmann::json mappingJson = mqtt::lib::JsonMappingReader::readMappingFromFile(mappingFile);
 
             if (!mappingJson.empty()) {
                 connection = mappingJson["connection"];
@@ -47,7 +47,7 @@ namespace mqttbroker::integrator {
     }
 
     core::socket::SocketContext* SocketContextFactory::create(core::socket::SocketConnection* socketConnection) {
-        return new iot::mqtt::SocketContext(socketConnection, new Mqtt(connection, jsonMapping));
+        return new iot::mqtt::SocketContext(socketConnection, new mqtt::mqttintegrator::lib::Mqtt(connection, jsonMapping));
     }
 
-} // namespace mqttbroker::integrator
+} // namespace mqtt::mqttintegrator

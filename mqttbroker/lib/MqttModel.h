@@ -19,7 +19,7 @@
 #ifndef MQTTBROKER_LIB_MQTTMODEL_H
 #define MQTTBROKER_LIB_MQTTMODEL_H
 
-namespace mqttbroker::broker::lib {
+namespace mqtt::mqttbroker::lib {
     class Mqtt;
 }
 
@@ -29,7 +29,7 @@ namespace mqttbroker::broker::lib {
 
 #include <map>
 
-namespace mqttbroker::broker::lib {
+namespace mqtt::mqttbroker::lib {
 
     class MqttModel {
     private:
@@ -38,15 +38,15 @@ namespace mqttbroker::broker::lib {
     public:
         static MqttModel& instance();
 
-        void addConnectedClient(mqttbroker::broker::lib::Mqtt* mqtt, iot::mqtt::packets::Connect& connect);
-        void delDisconnectedClient(mqttbroker::broker::lib::Mqtt* mqtt);
+        void addConnectedClient(mqtt::mqttbroker::lib::Mqtt* mqtt, iot::mqtt::packets::Connect& connect);
+        void delDisconnectedClient(mqtt::mqttbroker::lib::Mqtt* mqtt);
 
-        const std::map<mqttbroker::broker::lib::Mqtt*, iot::mqtt::packets::Connect>& getConnectedClinets() const;
+        const std::map<mqtt::mqttbroker::lib::Mqtt*, iot::mqtt::packets::Connect>& getConnectedClinets() const;
 
     protected:
-        std::map<mqttbroker::broker::lib::Mqtt*, iot::mqtt::packets::Connect> connectedClients;
+        std::map<mqtt::mqttbroker::lib::Mqtt*, iot::mqtt::packets::Connect> connectedClients;
     };
 
-} // namespace mqttbroker::broker::lib
+} // namespace mqtt::mqttbroker::lib
 
 #endif // MQTTBROKER_LIB_MQTTMODEL_H

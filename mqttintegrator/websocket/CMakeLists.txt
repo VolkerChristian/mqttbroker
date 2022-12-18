@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-find_package(snodec COMPONENTS websocket-client mqtt-client)
+find_package(snodec COMPONENTS websocket-client)
 
 find_package(nlohmann_json)
 
@@ -40,10 +40,3 @@ set_target_properties(
 install(TARGETS mqttclientsubprotocol
         LIBRARY DESTINATION ${WEBSOCKET_SUBPROTOCOL_CLIENT_INSTALL_LIBDIR}
 )
-
-if(CHECK_INCLUDES)
-    set_property(
-        TARGET mqttclientsubprotocol PROPERTY CXX_INCLUDE_WHAT_YOU_USE
-                                              ${iwyu_path_and_options}
-    )
-endif(CHECK_INCLUDES)

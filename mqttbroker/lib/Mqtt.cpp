@@ -18,16 +18,16 @@
 
 #include "Mqtt.h"
 
-#include "MqttModel.h"
+#include "mqttbroker/lib/MqttModel.h"
 
 #include <iot/mqtt/packets/Publish.h>
 #include <iot/mqtt/server/broker/Broker.h>
 
-namespace mqttbroker::broker::lib {
+namespace mqtt::mqttbroker::lib {
 
     Mqtt::Mqtt(const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker, const nlohmann::json& mappingJson)
         : iot::mqtt::server::Mqtt(broker)
-        , mqttbroker::lib::MqttMapper(mappingJson) {
+        , mqtt::lib::MqttMapper(mappingJson) {
     }
 
     void Mqtt::onConnect(iot::mqtt::packets::Connect& connect) {
@@ -52,4 +52,4 @@ namespace mqttbroker::broker::lib {
         publishMappings(iot::mqtt::packets::Publish(getPacketIdentifier(), topic, message, qoS, retain, false));
     }
 
-} // namespace mqttbroker::broker::lib
+} // namespace mqtt::mqttbroker::lib

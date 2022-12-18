@@ -31,7 +31,7 @@ namespace iot::mqtt {
 #include <nlohmann/json_fwd.hpp> // IWYU pragma: export
 #include <string>
 
-namespace mqttbroker::lib {
+namespace mqtt::lib {
 
     class MqttMapper {
     public:
@@ -69,6 +69,6 @@ namespace mqttbroker::lib {
         const nlohmann::json& mappingJson;
     };
 
-} // namespace mqttbroker::lib
+} // namespace mqtt::lib
 
 #endif // MQTTBROKER_LIB_MQTTMAPPER_H

@@ -28,13 +28,13 @@
 
 #include <cstdlib>
 
-namespace mqttbroker::broker {
+namespace mqtt::mqttbroker {
 
     SharedSocketContextFactory::SharedSocketContextFactory() {
         char* mappingFile = getenv("MQTT_MAPPING_FILE");
 
         if (mappingFile != nullptr) {
-            nlohmann::json mappingJson = mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFile);
+            nlohmann::json mappingJson = mqtt::lib::JsonMappingReader::readMappingFromFile(mappingFile);
 
             if (!mappingJson.empty()) {
                 jsonMapping = mappingJson["mappings"];
@@ -44,7 +44,7 @@ namespace mqttbroker::broker {
 
     core::socket::SocketContext* SharedSocketContextFactory::create(core::socket::SocketConnection* socketConnection,
                                                                     std::shared_ptr<iot::mqtt::server::broker::Broker>& broker) {
-        return new iot::mqtt::SocketContext(socketConnection, new mqttbroker::broker::lib::Mqtt(broker, jsonMapping));
+        return new iot::mqtt::SocketContext(socketConnection, new mqtt::mqttbroker::lib::Mqtt(broker, jsonMapping));
     }
 
-} // namespace mqttbroker::broker
+} // namespace mqtt::mqttbroker

@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
         setenv("MQTT_MAPPING_FILE", mappingFilePath.data(), 0);
     }
 
-    using MQTTLegacyInServer = net::in::stream::legacy::SocketServer<mqttbroker::broker::SharedSocketContextFactory>;
+    using MQTTLegacyInServer = net::in::stream::legacy::SocketServer<mqtt::mqttbroker::SharedSocketContextFactory>;
 
     using LegacyInSocketConnection = MQTTLegacyInServer::SocketConnection;
 
@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
         }
     });
 
-    using MQTTTLSInServer = net::in::stream::tls::SocketServer<mqttbroker::broker::SharedSocketContextFactory>;
+    using MQTTTLSInServer = net::in::stream::tls::SocketServer<mqtt::mqttbroker::SharedSocketContextFactory>;
     using TLSInSocketConnection = MQTTTLSInServer::SocketConnection;
 
     MQTTTLSInServer mqttTLSInServer(
@@ -194,7 +194,7 @@ int main(int argc, char* argv[]) {
         }
     });
 
-    using MQTTLegacyUnServer = net::un::stream::legacy::SocketServer<mqttbroker::broker::SharedSocketContextFactory>;
+    using MQTTLegacyUnServer = net::un::stream::legacy::SocketServer<mqtt::mqttbroker::SharedSocketContextFactory>;
     using LegacyUnSocketConnection = MQTTLegacyUnServer::SocketConnection;
 
     MQTTLegacyUnServer mqttLegacyUnServer(
@@ -244,8 +244,8 @@ int main(int argc, char* argv[]) {
     });
 
     mqttWebView.get("/clients", [] APPLICATION(req, res) {
-        const std::map<mqttbroker::broker::lib::Mqtt*, iot::mqtt::packets::Connect>& connectionList =
-            mqttbroker::broker::lib::MqttModel::instance().getConnectedClinets();
+        const std::map<mqtt::mqttbroker::lib::Mqtt*, iot::mqtt::packets::Connect>& connectionList =
+            mqtt::mqttbroker::lib::MqttModel::instance().getConnectedClinets();
 
         std::string responseString = "<html>"
                                      "  <head>"
@@ -311,8 +311,8 @@ int main(int argc, char* argv[]) {
     });
 
     mqttLegacyWebView.get("/clients", [] APPLICATION(req, res) {
-        const std::map<mqttbroker::broker::lib::Mqtt*, iot::mqtt::packets::Connect>& connectionList =
-            mqttbroker::broker::lib::MqttModel::instance().getConnectedClinets();
+        const std::map<mqtt::mqttbroker::lib::Mqtt*, iot::mqtt::packets::Connect>& connectionList =
+            mqtt::mqttbroker::lib::MqttModel::instance().getConnectedClinets();
 
         std::string responseString = "<html>"
                                      "  <head>"

@@ -22,7 +22,7 @@
 #include <nlohmann/json_fwd.hpp>
 #include <string>
 
-namespace mqttbroker::lib {
+namespace mqtt::lib {
 
     class JsonMappingReader {
     private:
@@ -40,6 +40,6 @@ namespace mqttbroker::lib {
         static nlohmann::json mappingJson;
     };
 
-} // namespace mqttbroker::lib
+} // namespace mqtt::lib
 
 #endif // MQTTBROKER_LIB_JSONMAPPINGREADER_H

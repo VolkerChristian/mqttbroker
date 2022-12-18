@@ -37,7 +37,7 @@
 // IWYU pragma: no_include <nlohmann/detail/json_pointer.hpp>
 // IWYU pragma: no_include <nlohmann/detail/iterators/iter_impl.hpp>
 
-namespace mqttbroker::lib {
+namespace mqtt::lib {
 
     MqttMapper::MqttMapper(const nlohmann::json& mappingJson)
         : mappingJson(mappingJson) {
@@ -276,4 +276,4 @@ namespace mqttbroker::lib {
     }
     */
 
-} // namespace mqttbroker::lib
+} // namespace mqtt::lib

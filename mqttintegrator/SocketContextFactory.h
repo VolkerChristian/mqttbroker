@@ -31,7 +31,7 @@ namespace core::socket {
     class SocketConnection;
 }
 
-namespace mqttbroker::integrator {
+namespace mqtt::mqttintegrator {
 
     class SocketContextFactory : public core::socket::SocketContextFactory {
     public:
@@ -44,6 +44,6 @@ namespace mqttbroker::integrator {
         nlohmann::json jsonMapping;
     };
 
-} // namespace mqttbroker::integrator
+} // namespace mqtt::mqttintegrator
 
 #endif // APPS_MQTTBROKER_MQTTINTEGRATOR_SOCKETCONTEXTFACTORY_H

@@ -31,10 +31,10 @@
 
 // IWYU pragma: no_include <nlohmann/detail/json_pointer.hpp>
 
-namespace mqttbroker::integrator {
+namespace mqtt::mqttintegrator::lib {
 
     Mqtt::Mqtt(const nlohmann::json& connectionJson, const nlohmann::json& mappingJson)
-        : mqttbroker::lib::MqttMapper(mappingJson)
+        : mqtt::lib::MqttMapper(mappingJson)
         , connectionJson(connectionJson)
         , keepAlive(connectionJson["keep_alive"])
         , clientId(connectionJson["client_id"])
@@ -82,7 +82,7 @@ namespace mqttbroker::integrator {
     void Mqtt::onConnack(iot::mqtt::packets::Connack& connack) {
         if (connack.getReturnCode() == 0 && !connack.getSessionPresent()) {
             sendPublish(getPacketIdentifier(), "snode.c/_cfg_/connection", connectionJson.dump(), 0, true);
-            sendPublish(getPacketIdentifier(), "snode.c/_cfg_/mapping", mqttbroker::lib::MqttMapper::dump(), 0, true);
+            sendPublish(getPacketIdentifier(), "snode.c/_cfg_/mapping", mqtt::lib::MqttMapper::dump(), 0, true);
 
             std::list<iot::mqtt::Topic> topicList = MqttMapper::extractTopics();
 
@@ -102,4 +102,4 @@ namespace mqttbroker::integrator {
         sendPublish(getPacketIdentifier(), topic, message, qoS, retain);
     }
 
-} // namespace mqttbroker::integrator
+} // namespace mqtt::mqttintegrator::lib

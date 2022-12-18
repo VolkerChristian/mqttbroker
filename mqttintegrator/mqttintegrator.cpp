@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
     if (!mappingFilePath.empty()) {
         setenv("MQTT_MAPPING_FILE", mappingFilePath.data(), 0);
 
-        using InMqttTlsIntegratorClient = net::in::stream::tls::SocketClient<mqttbroker::integrator::SocketContextFactory>;
+        using InMqttTlsIntegratorClient = net::in::stream::tls::SocketClient<mqtt::mqttintegrator::SocketContextFactory>;
 
         using TLSInSocketConnection = InMqttTlsIntegratorClient::SocketConnection;
 

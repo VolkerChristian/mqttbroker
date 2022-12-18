@@ -43,7 +43,7 @@ namespace web::websocket {
 #include <string>
 #include <vector>
 
-namespace mqttbroker::broker::websocket {
+namespace mqtt::mqttbroker::websocket {
 
     class OnReceivedFromPeerEvent : public core::EventReceiver {
     public:
@@ -99,6 +99,6 @@ namespace mqttbroker::broker::websocket {
         std::size_t size = 0;
     };
 
-} // namespace mqttbroker::broker::websocket
+} // namespace mqtt::mqttbroker::websocket
 
 #endif // WEB_WEBSOCKET_SUBPROTOCOL_SERVER_MQTTSUBPROTOCOL_H

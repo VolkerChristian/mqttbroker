@@ -18,7 +18,7 @@
 
 #include "MqttModel.h"
 
-namespace mqttbroker::broker::lib {
+namespace mqtt::mqttbroker::lib {
 
     MqttModel::MqttModel() {
     }
@@ -29,16 +29,16 @@ namespace mqttbroker::broker::lib {
         return mqttModel;
     }
 
-    void MqttModel::addConnectedClient(mqttbroker::broker::lib::Mqtt* mqtt, iot::mqtt::packets::Connect& connect) {
+    void MqttModel::addConnectedClient(mqtt::mqttbroker::lib::Mqtt* mqtt, iot::mqtt::packets::Connect& connect) {
         connectedClients[mqtt] = connect;
     }
 
-    void MqttModel::delDisconnectedClient(mqttbroker::broker::lib::Mqtt* mqtt) {
+    void MqttModel::delDisconnectedClient(mqtt::mqttbroker::lib::Mqtt* mqtt) {
         connectedClients.erase(mqtt);
     }
 
-    const std::map<mqttbroker::broker::lib::Mqtt*, iot::mqtt::packets::Connect>& MqttModel::getConnectedClinets() const {
+    const std::map<mqtt::mqttbroker::lib::Mqtt*, iot::mqtt::packets::Connect>& MqttModel::getConnectedClinets() const {
         return connectedClients;
     }
 
-} // namespace mqttbroker::broker::lib
+} // namespace mqtt::mqttbroker::lib

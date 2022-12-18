@@ -19,9 +19,9 @@
 #ifndef APPS_MQTTBROKER_BROKER_SOCKETCONTEXTFACTORY_H
 #define APPS_MQTTBROKER_BROKER_SOCKETCONTEXTFACTORY_H
 
-namespace mqttbroker::broker {
+namespace mqtt::mqttbroker {
     class Mqtt;
-} // namespace mqttbroker::broker
+} // namespace mqtt::mqttbroker
 
 namespace core::socket {
     class SocketConnection;
@@ -40,7 +40,7 @@ namespace iot::mqtt::server::broker {
 #include <nlohmann/json.hpp>
 // IWYU pragma: no_include <nlohmann/json_fwd.hpp>
 
-namespace mqttbroker::broker {
+namespace mqtt::mqttbroker {
 
     class SharedSocketContextFactory : public iot::mqtt::server::SharedSocketContextFactory<Mqtt> {
     public:
@@ -53,6 +53,6 @@ namespace mqttbroker::broker {
         nlohmann::json jsonMapping;
     };
 
-} // namespace mqttbroker::broker
+} // namespace mqtt::mqttbroker
 
 #endif // APPS_MQTTBROKER_BROKER_SOCKETCONTEXTFACTORY_H

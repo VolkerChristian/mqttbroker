@@ -34,7 +34,7 @@
 
 // IWYU pragma: no_include <nlohmann/detail/json_pointer.hpp>
 
-namespace mqttbroker::lib {
+namespace mqtt::lib {
 
 #include "mapping-schema.json.h" // definition of mappingJsonSchemaString
 
@@ -111,4 +111,4 @@ namespace mqttbroker::lib {
         return mappingJson;
     }
 
-} // namespace mqttbroker::lib
+} // namespace mqtt::lib

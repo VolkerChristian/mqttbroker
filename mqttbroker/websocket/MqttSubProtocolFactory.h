@@ -33,7 +33,7 @@ namespace web::websocket {
 #include <string>
 // IWYU pragma: no_include <nlohmann/json_fwd.hpp>
 
-namespace mqttbroker::broker::websocket {
+namespace mqtt::mqttbroker::websocket {
 
     class MqttSubprotocolFactory : public web::websocket::SubProtocolFactory<MqttSubProtocol> {
     public:
@@ -45,7 +45,7 @@ namespace mqttbroker::broker::websocket {
         nlohmann::json jsonMapping;
     };
 
-} // namespace mqttbroker::broker::websocket
+} // namespace mqtt::mqttbroker::websocket
 
 extern "C" void* mqttServerSubProtocolFactory();
 

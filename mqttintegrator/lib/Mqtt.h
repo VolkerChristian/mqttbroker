@@ -33,11 +33,11 @@ namespace iot::mqtt::packets {
 
 #include <string>
 
-namespace mqttbroker::integrator {
+namespace mqtt::mqttintegrator::lib {
 
     class Mqtt
         : public iot::mqtt::client::Mqtt
-        , public mqttbroker::lib::MqttMapper {
+        , public mqtt::lib::MqttMapper {
     public:
         explicit Mqtt(const nlohmann::json& connectionJson, const nlohmann::json& mappingJson);
 
@@ -67,6 +67,6 @@ namespace mqttbroker::integrator {
         std::string password;
     };
 
-} // namespace mqttbroker::integrator
+} // namespace mqtt::mqttintegrator::lib
 
 #endif // APPS_MQTTBROKER_MQTTINTEGRATOR_SOCKETCONTEXT_H

@@ -28,14 +28,14 @@
 
 #define NAME "mqtt"
 
-namespace mqttbroker::broker::websocket {
+namespace mqtt::mqttbroker::websocket {
 
     MqttSubprotocolFactory::MqttSubprotocolFactory(const std::string& name)
         : web::websocket::SubProtocolFactory<MqttSubProtocol>::SubProtocolFactory(name) {
         char* mappingFile = getenv("MQTT_MAPPING_FILE");
 
         if (mappingFile != nullptr) {
-            nlohmann::json mappingJson = mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFile);
+            nlohmann::json mappingJson = mqtt::lib::JsonMappingReader::readMappingFromFile(mappingFile);
 
             if (!mappingJson.empty()) {
                 jsonMapping = mappingJson["mappings"];
@@ -48,8 +48,8 @@ namespace mqttbroker::broker::websocket {
             subProtocolContext, getName(), iot::mqtt::server::broker::Broker::instance(SUBSCRIBTION_MAX_QOS), jsonMapping);
     }
 
-} // namespace mqttbroker::broker::websocket
+} // namespace mqtt::mqttbroker::websocket
 
 extern "C" void* mqttServerSubProtocolFactory() {
-    return new mqttbroker::broker::websocket::MqttSubprotocolFactory(NAME);
+    return new mqtt::mqttbroker::websocket::MqttSubprotocolFactory(NAME);
 }
