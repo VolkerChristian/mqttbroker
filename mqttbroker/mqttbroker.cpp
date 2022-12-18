@@ -68,7 +68,6 @@ int main(int argc, char* argv[]) {
     }
 
     using MQTTLegacyInServer = net::in::stream::legacy::SocketServer<mqtt::mqttbroker::SharedSocketContextFactory>;
-
     using LegacyInSocketConnection = MQTTLegacyInServer::SocketConnection;
 
     MQTTLegacyInServer mqttLegacyInServer(
