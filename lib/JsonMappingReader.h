@@ -16,17 +16,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef APPS_MQTTBROKER_LIB_JSONMAPPINGREADER_H
-#define APPS_MQTTBROKER_LIB_JSONMAPPINGREADER_H
+#ifndef MQTTBROKER_LIB_JSONMAPPINGREADER_H
+#define MQTTBROKER_LIB_JSONMAPPINGREADER_H
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-#include <nlohmann/json_fwd.hpp> // IWYU pragma: export
+#include <nlohmann/json_fwd.hpp>
 #include <string>
 
-#endif // DOXYGEN_SHOUÖD_SKIP_THIS
-
-namespace apps::mqttbroker::lib {
+namespace mqttbroker::lib {
 
     class JsonMappingReader {
     private:
@@ -44,6 +40,6 @@ namespace apps::mqttbroker::lib {
         static nlohmann::json mappingJson;
     };
 
-} // namespace apps::mqttbroker::lib
+} // namespace mqttbroker::lib
 
-#endif // APPS_MQTTBROKER_LIB_JSONMAPPINGREADER_H
+#endif // MQTTBROKER_LIB_JSONMAPPINGREADER_H

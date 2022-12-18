@@ -16,12 +16,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef APPS_MQTTBROKER_BROKER_SOCKETCONTEXT_H
-#define APPS_MQTTBROKER_BROKER_SOCKETCONTEXT_H
+#ifndef MQTTBROKER_LIB_MQTT_H
+#define MQTTBROKER_LIB_MQTT_H
 
 #include "lib/MqttMapper.h"
-
-#include <iot/mqtt/server/Mqtt.h>
 
 namespace iot::mqtt {
     namespace packets {
@@ -33,18 +31,18 @@ namespace iot::mqtt {
     } // namespace server::broker
 } // namespace iot::mqtt
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#include <iot/mqtt/server/Mqtt.h>
+
+//
 
 #include <memory>
 #include <string>
 
-#endif // DOXYGEN_SHOUÖD_SKIP_THIS
-
-namespace apps::mqttbroker::broker::lib {
+namespace mqttbroker::broker::lib {
 
     class Mqtt
         : public iot::mqtt::server::Mqtt
-        , public apps::mqttbroker::lib::MqttMapper {
+        , public mqttbroker::lib::MqttMapper {
     public:
         explicit Mqtt(const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker, const nlohmann::json& mappingJson);
 
@@ -60,6 +58,6 @@ namespace apps::mqttbroker::broker::lib {
         void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) final;
     };
 
-} // namespace apps::mqttbroker::broker::lib
+} // namespace mqttbroker::broker::lib
 
-#endif // APPS_MQTTBROKER_BROKER_SOCKETCONTEXT_H
+#endif // MQTTBROKER_LIB_MQTT_H

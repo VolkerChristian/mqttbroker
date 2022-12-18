@@ -21,21 +21,19 @@
 
 #include "mqttbroker/websocket/MqttSubProtocol.h"
 
-#include <web/websocket/SubProtocolFactory.h>
-
 namespace web::websocket {
     class SubProtocolContext;
 }
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#include <web/websocket/SubProtocolFactory.h>
+
+//
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 #include <string>
+// IWYU pragma: no_include <nlohmann/json_fwd.hpp>
 
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
-
-namespace apps::mqttbroker::broker::websocket {
+namespace mqttbroker::broker::websocket {
 
     class MqttSubprotocolFactory : public web::websocket::SubProtocolFactory<MqttSubProtocol> {
     public:
@@ -47,7 +45,7 @@ namespace apps::mqttbroker::broker::websocket {
         nlohmann::json jsonMapping;
     };
 
-} // namespace apps::mqttbroker::broker::websocket
+} // namespace mqttbroker::broker::websocket
 
 extern "C" void* mqttServerSubProtocolFactory();
 

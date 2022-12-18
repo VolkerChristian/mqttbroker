@@ -18,14 +18,15 @@
 
 #include "JsonMappingReader.h"
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
 #include "nlohmann/json-schema.hpp"
+
+#include <log/Logger.h>
+
+//
 
 #include <exception>
 #include <fstream>
 #include <initializer_list>
-#include <log/Logger.h>
 #include <map>
 #include <nlohmann/json.hpp>
 #include <stdexcept>
@@ -33,9 +34,7 @@
 
 // IWYU pragma: no_include <nlohmann/detail/json_pointer.hpp>
 
-#endif // DOXYGEN_SHOUÖD_SKIP_THIS
-
-namespace apps::mqttbroker::lib {
+namespace mqttbroker::lib {
 
 #include "mapping-schema.json.h" // definition of mappingJsonSchemaString
 
@@ -112,4 +111,4 @@ namespace apps::mqttbroker::lib {
         return mappingJson;
     }
 
-} // namespace apps::mqttbroker::lib
+} // namespace mqttbroker::lib

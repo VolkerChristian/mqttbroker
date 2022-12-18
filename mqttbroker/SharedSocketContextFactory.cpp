@@ -21,21 +21,20 @@
 #include "Mqtt.h" // IWYU pragma: export
 #include "lib/JsonMappingReader.h"
 
-#include <cstdlib>
 #include <iot/mqtt/SocketContext.h>
 #include <iot/mqtt/server/SharedSocketContextFactory.hpp>
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//
 
-#endif // DOXYGEN_SHOUÖD_SKIP_THIS
+#include <cstdlib>
 
-namespace apps::mqttbroker::broker {
+namespace mqttbroker::broker {
 
     SharedSocketContextFactory::SharedSocketContextFactory() {
         char* mappingFile = getenv("MQTT_MAPPING_FILE");
 
         if (mappingFile != nullptr) {
-            nlohmann::json mappingJson = apps::mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFile);
+            nlohmann::json mappingJson = mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFile);
 
             if (!mappingJson.empty()) {
                 jsonMapping = mappingJson["mappings"];
@@ -45,7 +44,7 @@ namespace apps::mqttbroker::broker {
 
     core::socket::SocketContext* SharedSocketContextFactory::create(core::socket::SocketConnection* socketConnection,
                                                                     std::shared_ptr<iot::mqtt::server::broker::Broker>& broker) {
-        return new iot::mqtt::SocketContext(socketConnection, new apps::mqttbroker::broker::lib::Mqtt(broker, jsonMapping));
+        return new iot::mqtt::SocketContext(socketConnection, new mqttbroker::broker::lib::Mqtt(broker, jsonMapping));
     }
 
-} // namespace apps::mqttbroker::broker
+} // namespace mqttbroker::broker

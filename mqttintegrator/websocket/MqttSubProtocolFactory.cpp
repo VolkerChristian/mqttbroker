@@ -20,22 +20,20 @@
 
 #include "lib/JsonMappingReader.h"
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//
 
 #include <cstdlib>
 
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
-
 #define NAME "mqtt"
 
-namespace apps::mqttbroker::mqttintegrator::websocket {
+namespace mqttbroker::mqttintegrator::websocket {
 
     MqttSubprotocolFactory::MqttSubprotocolFactory(const std::string& name)
         : web::websocket::SubProtocolFactory<MqttSubProtocol>::SubProtocolFactory(name) {
         char* mappingFile = getenv("MQTT_MAPPING_FILE");
 
         if (mappingFile != nullptr) {
-            nlohmann::json mappingJson = apps::mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFile);
+            nlohmann::json mappingJson = mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFile);
 
             if (!mappingJson.empty()) {
                 connection = mappingJson["connection"];
@@ -48,8 +46,8 @@ namespace apps::mqttbroker::mqttintegrator::websocket {
         return new MqttSubProtocol(subProtocolContext, getName(), connection, jsonMapping);
     }
 
-} // namespace apps::mqttbroker::mqttintegrator::websocket
+} // namespace mqttbroker::mqttintegrator::websocket
 
 extern "C" void* mqttClientSubProtocolFactory() {
-    return new apps::mqttbroker::mqttintegrator::websocket::MqttSubprotocolFactory(NAME);
+    return new mqttbroker::mqttintegrator::websocket::MqttSubprotocolFactory(NAME);
 }

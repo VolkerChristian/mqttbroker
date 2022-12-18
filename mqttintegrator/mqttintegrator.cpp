@@ -20,14 +20,14 @@
 
 #include <core/SNodeC.h>
 #include <core/timer/Timer.h>
-#include <net/in/stream/tls/SocketClient.h>
-#include <utils/Config.h>
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
 #include <log/Logger.h>
+#include <net/in/stream/tls/SocketClient.h>
+
+//
+
 #include <openssl/opensslv.h>
 #include <openssl/ssl3.h>
+#include <utils/Config.h>
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 #include <openssl/types.h>
 #elif OPENSSL_VERSION_NUMBER >= 0x10100000L
@@ -40,8 +40,6 @@
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 
-#endif // DOXYGEN_SHOUÖD_SKIP_THIS
-
 int main(int argc, char* argv[]) {
     std::string mappingFilePath;
     utils::Config::add_option(
@@ -52,7 +50,7 @@ int main(int argc, char* argv[]) {
     if (!mappingFilePath.empty()) {
         setenv("MQTT_MAPPING_FILE", mappingFilePath.data(), 0);
 
-        using InMqttTlsIntegratorClient = net::in::stream::tls::SocketClient<apps::mqttbroker::integrator::SocketContextFactory>;
+        using InMqttTlsIntegratorClient = net::in::stream::tls::SocketClient<mqttbroker::integrator::SocketContextFactory>;
 
         using TLSInSocketConnection = InMqttTlsIntegratorClient::SocketConnection;
 

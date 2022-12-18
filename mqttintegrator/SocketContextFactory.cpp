@@ -16,30 +16,28 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "SocketContextFactory.h" // IWYU pragma: export
+#include "SocketContextFactory.h"
 
-#include "Mqtt.h" // IWYU pragma: export
+#include "Mqtt.h"
 #include "lib/JsonMappingReader.h"
-
-#include <iot/mqtt/SocketContext.h>
 
 namespace core::socket {
     class SocketConnection;
 }
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#include <iot/mqtt/SocketContext.h>
 
-#include <cstdlib> // for getenv
+//
 
-#endif // DOXYGEN_SHOUÖD_SKIP_THIS
+#include <cstdlib>
 
-namespace apps::mqttbroker::integrator {
+namespace mqttbroker::integrator {
 
     SocketContextFactory::SocketContextFactory() {
         char* mappingFile = getenv("MQTT_MAPPING_FILE");
 
         if (mappingFile != nullptr) {
-            nlohmann::json mappingJson = apps::mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFile);
+            nlohmann::json mappingJson = mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFile);
 
             if (!mappingJson.empty()) {
                 connection = mappingJson["connection"];
@@ -52,4 +50,4 @@ namespace apps::mqttbroker::integrator {
         return new iot::mqtt::SocketContext(socketConnection, new Mqtt(connection, jsonMapping));
     }
 
-} // namespace apps::mqttbroker::integrator
+} // namespace mqttbroker::integrator

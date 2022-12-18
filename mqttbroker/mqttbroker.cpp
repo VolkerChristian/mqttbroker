@@ -18,8 +18,11 @@
 
 #include "MqttModel.h"
 #include "SharedSocketContextFactory.h" // IWYU pragma: keep
-#include "lib/JsonMappingReader.h"
 #include "lib/Mqtt.h"
+
+namespace iot::mqtt::packets {
+    class Connect;
+}
 
 #include <core/SNodeC.h>
 #include <core/socket/SocketAddress.h>
@@ -32,7 +35,7 @@
 #include <utils/Config.h>
 #include <web/http/http_utils.h>
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//
 
 #include <nlohmann/json.hpp>
 #include <openssl/asn1.h>
@@ -49,11 +52,7 @@
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 
-namespace iot::mqtt::packets {
-    class Connect;
-}
-
-#endif // DOXYGEN_SHOUÖD_SKIP_THIS
+// IWYU pragma: no_include <nlohmann/json_fwd.hpp>
 
 int main(int argc, char* argv[]) {
     std::string mappingFilePath;
@@ -68,7 +67,7 @@ int main(int argc, char* argv[]) {
         setenv("MQTT_MAPPING_FILE", mappingFilePath.data(), 0);
     }
 
-    using MQTTLegacyInServer = net::in::stream::legacy::SocketServer<apps::mqttbroker::broker::SharedSocketContextFactory>;
+    using MQTTLegacyInServer = net::in::stream::legacy::SocketServer<mqttbroker::broker::SharedSocketContextFactory>;
 
     using LegacyInSocketConnection = MQTTLegacyInServer::SocketConnection;
 
@@ -108,7 +107,7 @@ int main(int argc, char* argv[]) {
         }
     });
 
-    using MQTTTLSInServer = net::in::stream::tls::SocketServer<apps::mqttbroker::broker::SharedSocketContextFactory>;
+    using MQTTTLSInServer = net::in::stream::tls::SocketServer<mqttbroker::broker::SharedSocketContextFactory>;
     using TLSInSocketConnection = MQTTTLSInServer::SocketConnection;
 
     MQTTTLSInServer mqttTLSInServer(
@@ -195,7 +194,7 @@ int main(int argc, char* argv[]) {
         }
     });
 
-    using MQTTLegacyUnServer = net::un::stream::legacy::SocketServer<apps::mqttbroker::broker::SharedSocketContextFactory>;
+    using MQTTLegacyUnServer = net::un::stream::legacy::SocketServer<mqttbroker::broker::SharedSocketContextFactory>;
     using LegacyUnSocketConnection = MQTTLegacyUnServer::SocketConnection;
 
     MQTTLegacyUnServer mqttLegacyUnServer(
@@ -245,8 +244,8 @@ int main(int argc, char* argv[]) {
     });
 
     mqttWebView.get("/clients", [] APPLICATION(req, res) {
-        const std::map<apps::mqttbroker::broker::lib::Mqtt*, iot::mqtt::packets::Connect>& connectionList =
-            apps::mqttbroker::broker::lib::MqttModel::instance().getConnectedClinets();
+        const std::map<mqttbroker::broker::lib::Mqtt*, iot::mqtt::packets::Connect>& connectionList =
+            mqttbroker::broker::lib::MqttModel::instance().getConnectedClinets();
 
         std::string responseString = "<html>"
                                      "  <head>"
@@ -312,8 +311,8 @@ int main(int argc, char* argv[]) {
     });
 
     mqttLegacyWebView.get("/clients", [] APPLICATION(req, res) {
-        const std::map<apps::mqttbroker::broker::lib::Mqtt*, iot::mqtt::packets::Connect>& connectionList =
-            apps::mqttbroker::broker::lib::MqttModel::instance().getConnectedClinets();
+        const std::map<mqttbroker::broker::lib::Mqtt*, iot::mqtt::packets::Connect>& connectionList =
+            mqttbroker::broker::lib::MqttModel::instance().getConnectedClinets();
 
         std::string responseString = "<html>"
                                      "  <head>"
@@ -337,6 +336,30 @@ int main(int argc, char* argv[]) {
     });
 
     mqttLegacyWebView.get("/ws/", [] APPLICATION(req, res) -> void {
+        std::string uri = req.originalUrl;
+
+        VLOG(0) << "OriginalUri: " << uri;
+        VLOG(0) << "Uri: " << req.url;
+
+        VLOG(0) << "Host: " << req.get("host");
+        VLOG(0) << "Connection: " << req.get("connection");
+        VLOG(0) << "Origin: " << req.get("origin");
+        VLOG(0) << "Path: " << req.path;
+        VLOG(0) << "Sec-WebSocket-Protocol: " << req.get("sec-websocket-protocol");
+        VLOG(0) << "sec-web-socket-extensions: " << req.get("sec-websocket-extensions");
+        VLOG(0) << "sec-websocket-key: " << req.get("sec-websocket-key");
+        VLOG(0) << "sec-websocket-version: " << req.get("sec-websocket-version");
+        VLOG(0) << "upgrade: " << req.get("upgrade");
+        VLOG(0) << "user-agent: " << req.get("user-agent");
+
+        if (httputils::ci_contains(req.get("connection"), "Upgrade")) {
+            res.upgrade(req);
+        } else {
+            res.sendStatus(404);
+        }
+    });
+
+    mqttLegacyWebView.get("/", [] APPLICATION(req, res) -> void {
         std::string uri = req.originalUrl;
 
         VLOG(0) << "OriginalUri: " << uri;

@@ -19,12 +19,9 @@
 #ifndef APPS_MQTTBROKER_BROKER_SOCKETCONTEXTFACTORY_H
 #define APPS_MQTTBROKER_BROKER_SOCKETCONTEXTFACTORY_H
 
-#include <core/socket/SocketContext.h> // for SocketContext
-#include <iot/mqtt/server/SharedSocketContextFactory.h>
-
-namespace apps::mqttbroker::broker {
+namespace mqttbroker::broker {
     class Mqtt;
-} // namespace apps::mqttbroker::broker
+} // namespace mqttbroker::broker
 
 namespace core::socket {
     class SocketConnection;
@@ -34,15 +31,16 @@ namespace iot::mqtt::server::broker {
     class Broker;
 }
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#include <core/socket/SocketContext.h>
+#include <iot/mqtt/server/SharedSocketContextFactory.h>
 
-#include <memory> // for shared_ptr
+//
+
+#include <memory>
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
+// IWYU pragma: no_include <nlohmann/json_fwd.hpp>
 
-#endif // DOXYGEN_SHOUÖD_SKIP_THIS
-
-namespace apps::mqttbroker::broker {
+namespace mqttbroker::broker {
 
     class SharedSocketContextFactory : public iot::mqtt::server::SharedSocketContextFactory<Mqtt> {
     public:
@@ -55,6 +53,6 @@ namespace apps::mqttbroker::broker {
         nlohmann::json jsonMapping;
     };
 
-} // namespace apps::mqttbroker::broker
+} // namespace mqttbroker::broker
 
 #endif // APPS_MQTTBROKER_BROKER_SOCKETCONTEXTFACTORY_H

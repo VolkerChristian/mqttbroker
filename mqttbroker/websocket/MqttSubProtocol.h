@@ -19,9 +19,6 @@
 #ifndef WEB_WEBSOCKET_SUBPROTOCOL_SERVER_MQTTSUBPROTOCOL_H
 #define WEB_WEBSOCKET_SUBPROTOCOL_SERVER_MQTTSUBPROTOCOL_H
 
-#include <core/EventReceiver.h>
-#include <web/websocket/server/SubProtocol.h>
-
 namespace iot::mqtt::server::broker {
     class Broker;
 }
@@ -30,26 +27,23 @@ namespace web::websocket {
     class SubProtocolContext;
 }
 
-namespace core::socket {
-    class SocketConnection;
-}
+#include <core/EventReceiver.h>
+#include <core/socket/SocketConnection.h>
+#include <iot/mqtt/MqttContext.h>
+#include <utils/Timeval.h>
+#include <web/websocket/server/SubProtocol.h>
+
+//
 
 #include <core/timer/Timer.h>
-#include <iot/mqtt/MqttContext.h>
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-#include <cstdint> // for uint16_t
+#include <cstdint>
 #include <functional>
-#include <memory> // for shared_ptr
+#include <memory>
 #include <nlohmann/json_fwd.hpp>
-#include <string>          // for allocator, string
-#include <utils/Timeval.h> // for size_t, Timeval
+#include <string>
 #include <vector>
 
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
-
-namespace apps::mqttbroker::broker::websocket {
+namespace mqttbroker::broker::websocket {
 
     class OnReceivedFromPeerEvent : public core::EventReceiver {
     public:
@@ -92,6 +86,7 @@ namespace apps::mqttbroker::broker::websocket {
         void onMessageError(uint16_t errnum) override;
         void onDisconnected() override;
         void onExit() override;
+
         core::socket::SocketConnection* getSocketConnection() override;
 
         OnReceivedFromPeerEvent onReceivedFromPeerEvent;
@@ -104,6 +99,6 @@ namespace apps::mqttbroker::broker::websocket {
         std::size_t size = 0;
     };
 
-} // namespace apps::mqttbroker::broker::websocket
+} // namespace mqttbroker::broker::websocket
 
 #endif // WEB_WEBSOCKET_SUBPROTOCOL_SERVER_MQTTSUBPROTOCOL_H

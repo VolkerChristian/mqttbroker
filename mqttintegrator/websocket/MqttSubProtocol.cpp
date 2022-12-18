@@ -20,30 +20,26 @@
 
 #include "mqttintegrator/lib/Mqtt.h"
 
-#include <core/socket/SocketConnection.h>
-#include <web/websocket/SubProtocolContext.h> // for SubProtocolContext
+#include <log/Logger.h>
+#include <web/websocket/SubProtocolContext.h>
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-#include "log/Logger.h"
+//
 
 #include <algorithm>
 #include <iomanip>
 #include <ostream>
 
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
-
 #define PING_INTERVAL 0
 #define MAX_FLYING_PINGS 3
 
-namespace apps::mqttbroker::mqttintegrator::websocket {
+namespace mqttbroker::mqttintegrator::websocket {
 
     MqttSubProtocol::MqttSubProtocol(web::websocket::SubProtocolContext* subProtocolContext,
                                      const std::string& name,
                                      const nlohmann::json& connectionJson,
                                      const nlohmann::json& mappingJson)
         : web::websocket::client::SubProtocol(subProtocolContext, name, PING_INTERVAL, MAX_FLYING_PINGS)
-        , iot::mqtt::MqttContext(new apps::mqttbroker::integrator::Mqtt(connectionJson, mappingJson))
+        , iot::mqtt::MqttContext(new mqttbroker::integrator::Mqtt(connectionJson, mappingJson))
         , onReceivedFromPeerEvent([this]() -> void {
             iot::mqtt::MqttContext::onReceiveFromPeer();
         }) {
@@ -154,4 +150,4 @@ namespace apps::mqttbroker::mqttintegrator::websocket {
         return getSubProtocolContext()->getSocketConnection();
     }
 
-} // namespace apps::mqttbroker::mqttintegrator::websocket
+} // namespace mqttbroker::mqttintegrator::websocket

@@ -18,11 +18,7 @@
 
 #include "MqttModel.h"
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-#endif // DOXYGEN_SHOUÖD_SKIP_THIS
-
-namespace apps::mqttbroker::broker::lib {
+namespace mqttbroker::broker::lib {
 
     MqttModel::MqttModel() {
     }
@@ -33,16 +29,16 @@ namespace apps::mqttbroker::broker::lib {
         return mqttModel;
     }
 
-    void MqttModel::addConnectedClient(apps::mqttbroker::broker::lib::Mqtt* mqtt, iot::mqtt::packets::Connect& connect) {
+    void MqttModel::addConnectedClient(mqttbroker::broker::lib::Mqtt* mqtt, iot::mqtt::packets::Connect& connect) {
         connectedClients[mqtt] = connect;
     }
 
-    void MqttModel::delDisconnectedClient(apps::mqttbroker::broker::lib::Mqtt* mqtt) {
+    void MqttModel::delDisconnectedClient(mqttbroker::broker::lib::Mqtt* mqtt) {
         connectedClients.erase(mqtt);
     }
 
-    const std::map<apps::mqttbroker::broker::lib::Mqtt*, iot::mqtt::packets::Connect>& MqttModel::getConnectedClinets() const {
+    const std::map<mqttbroker::broker::lib::Mqtt*, iot::mqtt::packets::Connect>& MqttModel::getConnectedClinets() const {
         return connectedClients;
     }
 
-} // namespace apps::mqttbroker::broker::lib
+} // namespace mqttbroker::broker::lib

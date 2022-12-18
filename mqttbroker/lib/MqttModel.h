@@ -16,22 +16,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef APPS_MQTTBROKER_BBROKER_MQTTMODEL_H
-#define APPS_MQTTBROKER_BBROKER_MQTTMODEL_H
+#ifndef MQTTBROKER_LIB_MQTTMODEL_H
+#define MQTTBROKER_LIB_MQTTMODEL_H
 
-#include <iot/mqtt/packets/Connect.h>
-
-namespace apps::mqttbroker::broker::lib {
+namespace mqttbroker::broker::lib {
     class Mqtt;
 }
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#include <iot/mqtt/packets/Connect.h>
+
+//
 
 #include <map>
 
-#endif // DOXYGEN_SHOUÖD_SKIP_THIS
-
-namespace apps::mqttbroker::broker::lib {
+namespace mqttbroker::broker::lib {
 
     class MqttModel {
     private:
@@ -40,15 +38,15 @@ namespace apps::mqttbroker::broker::lib {
     public:
         static MqttModel& instance();
 
-        void addConnectedClient(apps::mqttbroker::broker::lib::Mqtt* mqtt, iot::mqtt::packets::Connect& connect);
-        void delDisconnectedClient(apps::mqttbroker::broker::lib::Mqtt* mqtt);
+        void addConnectedClient(mqttbroker::broker::lib::Mqtt* mqtt, iot::mqtt::packets::Connect& connect);
+        void delDisconnectedClient(mqttbroker::broker::lib::Mqtt* mqtt);
 
-        const std::map<apps::mqttbroker::broker::lib::Mqtt*, iot::mqtt::packets::Connect>& getConnectedClinets() const;
+        const std::map<mqttbroker::broker::lib::Mqtt*, iot::mqtt::packets::Connect>& getConnectedClinets() const;
 
     protected:
-        std::map<apps::mqttbroker::broker::lib::Mqtt*, iot::mqtt::packets::Connect> connectedClients;
+        std::map<mqttbroker::broker::lib::Mqtt*, iot::mqtt::packets::Connect> connectedClients;
     };
 
-} // namespace apps::mqttbroker::broker::lib
+} // namespace mqttbroker::broker::lib
 
-#endif // APPS_MQTTBROKER_BBROKER_MQTTMODEL_H
+#endif // MQTTBROKER_LIB_MQTTMODEL_H

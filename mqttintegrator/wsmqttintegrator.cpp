@@ -18,17 +18,15 @@
 
 #include <core/SNodeC.h>
 #include <core/timer/Timer.h>
+#include <log/Logger.h>
 #include <utils/Config.h>
 #include <web/http/client/Request.h>
 #include <web/http/client/Response.h>
 #include <web/http/legacy/in/Client.h>
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//
 
 #include <cstdlib>
-#include <log/Logger.h>
-
-#endif // DOXYGEN_SHOUÖD_SKIP_THIS
 
 int main(int argc, char* argv[]) {
     std::string mappingFilePath;

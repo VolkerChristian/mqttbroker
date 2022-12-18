@@ -21,10 +21,9 @@
 #include <iot/mqtt/MqttContext.h>
 #include <iot/mqtt/Topic.h>
 #include <iot/mqtt/packets/Connack.h>
+#include <log/Logger.h>
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-#include "log/Logger.h"
+//
 
 #include <list>
 #include <map>
@@ -32,12 +31,10 @@
 
 // IWYU pragma: no_include <nlohmann/detail/json_pointer.hpp>
 
-#endif // DOXYGEN_SHOUÖD_SKIP_THIS
-
-namespace apps::mqttbroker::integrator {
+namespace mqttbroker::integrator {
 
     Mqtt::Mqtt(const nlohmann::json& connectionJson, const nlohmann::json& mappingJson)
-        : apps::mqttbroker::lib::MqttMapper(mappingJson)
+        : mqttbroker::lib::MqttMapper(mappingJson)
         , connectionJson(connectionJson)
         , keepAlive(connectionJson["keep_alive"])
         , clientId(connectionJson["client_id"])
@@ -85,7 +82,7 @@ namespace apps::mqttbroker::integrator {
     void Mqtt::onConnack(iot::mqtt::packets::Connack& connack) {
         if (connack.getReturnCode() == 0 && !connack.getSessionPresent()) {
             sendPublish(getPacketIdentifier(), "snode.c/_cfg_/connection", connectionJson.dump(), 0, true);
-            sendPublish(getPacketIdentifier(), "snode.c/_cfg_/mapping", apps::mqttbroker::lib::MqttMapper::dump(), 0, true);
+            sendPublish(getPacketIdentifier(), "snode.c/_cfg_/mapping", mqttbroker::lib::MqttMapper::dump(), 0, true);
 
             std::list<iot::mqtt::Topic> topicList = MqttMapper::extractTopics();
 
@@ -105,4 +102,4 @@ namespace apps::mqttbroker::integrator {
         sendPublish(getPacketIdentifier(), topic, message, qoS, retain);
     }
 
-} // namespace apps::mqttbroker::integrator
+} // namespace mqttbroker::integrator

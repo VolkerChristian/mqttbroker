@@ -22,22 +22,20 @@
 
 #include <iot/mqtt/server/broker/Broker.h>
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//
 
 #include <cstdlib>
 
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
-
 #define NAME "mqtt"
 
-namespace apps::mqttbroker::broker::websocket {
+namespace mqttbroker::broker::websocket {
 
     MqttSubprotocolFactory::MqttSubprotocolFactory(const std::string& name)
         : web::websocket::SubProtocolFactory<MqttSubProtocol>::SubProtocolFactory(name) {
         char* mappingFile = getenv("MQTT_MAPPING_FILE");
 
         if (mappingFile != nullptr) {
-            nlohmann::json mappingJson = apps::mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFile);
+            nlohmann::json mappingJson = mqttbroker::lib::JsonMappingReader::readMappingFromFile(mappingFile);
 
             if (!mappingJson.empty()) {
                 jsonMapping = mappingJson["mappings"];
@@ -50,8 +48,8 @@ namespace apps::mqttbroker::broker::websocket {
             subProtocolContext, getName(), iot::mqtt::server::broker::Broker::instance(SUBSCRIBTION_MAX_QOS), jsonMapping);
     }
 
-} // namespace apps::mqttbroker::broker::websocket
+} // namespace mqttbroker::broker::websocket
 
 extern "C" void* mqttServerSubProtocolFactory() {
-    return new apps::mqttbroker::broker::websocket::MqttSubprotocolFactory(NAME);
+    return new mqttbroker::broker::websocket::MqttSubprotocolFactory(NAME);
 }

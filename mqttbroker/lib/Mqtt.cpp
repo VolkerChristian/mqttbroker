@@ -22,17 +22,12 @@
 
 #include <iot/mqtt/packets/Publish.h>
 #include <iot/mqtt/server/broker/Broker.h>
-#include <iot/mqtt/server/broker/Message.h>
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-#endif // DOXYGEN_SHOUÖD_SKIP_THIS
-
-namespace apps::mqttbroker::broker::lib {
+namespace mqttbroker::broker::lib {
 
     Mqtt::Mqtt(const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker, const nlohmann::json& mappingJson)
         : iot::mqtt::server::Mqtt(broker)
-        , apps::mqttbroker::lib::MqttMapper(mappingJson) {
+        , mqttbroker::lib::MqttMapper(mappingJson) {
     }
 
     void Mqtt::onConnect(iot::mqtt::packets::Connect& connect) {
@@ -54,7 +49,7 @@ namespace apps::mqttbroker::broker::lib {
             broker->retainMessage(topic, message, qoS);
         }
 
-        publishMappings(iot::mqtt::packets::Publish(getPacketIdentifier(), topic, message, qoS, retain, MQTT_DUP_FALSE));
+        publishMappings(iot::mqtt::packets::Publish(getPacketIdentifier(), topic, message, qoS, retain, false));
     }
 
-} // namespace apps::mqttbroker::broker::lib
+} // namespace mqttbroker::broker::lib

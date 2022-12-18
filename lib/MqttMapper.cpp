@@ -18,13 +18,13 @@
 
 #include "MqttMapper.h"
 
+#include "inja.hpp"
+
 #include <iot/mqtt/Topic.h>
 #include <iot/mqtt/packets/Publish.h>
+#include <log/Logger.h>
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-#include "inja.hpp"
-#include "log/Logger.h"
+//
 
 #include <algorithm>
 #include <exception>
@@ -37,9 +37,7 @@
 // IWYU pragma: no_include <nlohmann/detail/json_pointer.hpp>
 // IWYU pragma: no_include <nlohmann/detail/iterators/iter_impl.hpp>
 
-#endif // DOXYGEN_SHOUÖD_SKIP_THIS
-
-namespace apps::mqttbroker::lib {
+namespace mqttbroker::lib {
 
     MqttMapper::MqttMapper(const nlohmann::json& mappingJson)
         : mappingJson(mappingJson) {
@@ -278,4 +276,4 @@ namespace apps::mqttbroker::lib {
     }
     */
 
-} // namespace apps::mqttbroker::lib
+} // namespace mqttbroker::lib

@@ -21,25 +21,23 @@
 
 #include "lib/MqttMapper.h"
 
-#include <core/timer/Timer.h> // IWYU pragma: export
-#include <iot/mqtt/client/Mqtt.h>
-
 namespace iot::mqtt::packets {
     class Publish;
     class Connack;
 } // namespace iot::mqtt::packets
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#include <core/timer/Timer.h> // IWYU pragma: export
+#include <iot/mqtt/client/Mqtt.h>
+
+//
 
 #include <string>
 
-#endif // DOXYGEN_SHOUÖD_SKIP_THIS
-
-namespace apps::mqttbroker::integrator {
+namespace mqttbroker::integrator {
 
     class Mqtt
         : public iot::mqtt::client::Mqtt
-        , public apps::mqttbroker::lib::MqttMapper {
+        , public mqttbroker::lib::MqttMapper {
     public:
         explicit Mqtt(const nlohmann::json& connectionJson, const nlohmann::json& mappingJson);
 
@@ -69,6 +67,6 @@ namespace apps::mqttbroker::integrator {
         std::string password;
     };
 
-} // namespace apps::mqttbroker::integrator
+} // namespace mqttbroker::integrator
 
 #endif // APPS_MQTTBROKER_MQTTINTEGRATOR_SOCKETCONTEXT_H

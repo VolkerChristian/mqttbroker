@@ -16,8 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef APPS_MQTTBROKER_LIB_MQTTMAPPER_H
-#define APPS_MQTTBROKER_LIB_MQTTMAPPER_H
+#ifndef MQTTBROKER_LIB_MQTTMAPPER_H
+#define MQTTBROKER_LIB_MQTTMAPPER_H
 
 namespace iot::mqtt {
     class Topic;
@@ -26,16 +26,12 @@ namespace iot::mqtt {
     }
 } // namespace iot::mqtt
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
 #include <cstdint>
 #include <list>
 #include <nlohmann/json_fwd.hpp> // IWYU pragma: export
 #include <string>
 
-#endif // DOXYGEN_SHOUÖD_SKIP_THIS
-
-namespace apps::mqttbroker::lib {
+namespace mqttbroker::lib {
 
     class MqttMapper {
     public:
@@ -73,6 +69,6 @@ namespace apps::mqttbroker::lib {
         const nlohmann::json& mappingJson;
     };
 
-} // namespace apps::mqttbroker::lib
+} // namespace mqttbroker::lib
 
-#endif // APPS_MQTTBROKER_LIB_MQTTMAPPER_H
+#endif // MQTTBROKER_LIB_MQTTMAPPER_H
