@@ -47,8 +47,8 @@ namespace mqtt::mqttintegrator::lib {
         void onConnected() final;
         void onExit() final;
 
-        void onConnack(iot::mqtt::packets::Connack& connack) final;
-        void onPublish(iot::mqtt::packets::Publish& publish) final;
+        void onConnack(const iot::mqtt::packets::Connack& connack) final;
+        void onPublish(const iot::mqtt::packets::Publish& publish) final;
 
         void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) final;
 

@@ -48,8 +48,8 @@ namespace mqtt::mqttbroker::lib {
 
     private:
         // inherited from iot::mqtt::server::SocketContext - the plain and base MQTT broker
-        void onConnect(iot::mqtt::packets::Connect& connect) final;
-        void onPublish(iot::mqtt::packets::Publish& publish) final;
+        void onConnect(const iot::mqtt::packets::Connect& connect) final;
+        void onPublish(const iot::mqtt::packets::Publish& publish) final;
 
         // inherited from core::socket::SocketContext (the root class of all SocketContext classes) via iot::mqtt::server::SocketContext
         void onDisconnected() final;

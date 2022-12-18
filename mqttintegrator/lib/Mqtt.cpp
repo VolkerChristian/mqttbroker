@@ -79,7 +79,7 @@ namespace mqtt::mqttintegrator::lib {
         sendDisconnect();
     }
 
-    void Mqtt::onConnack(iot::mqtt::packets::Connack& connack) {
+    void Mqtt::onConnack(const iot::mqtt::packets::Connack& connack) {
         if (connack.getReturnCode() == 0 && !connack.getSessionPresent()) {
             sendPublish(getPacketIdentifier(), "snode.c/_cfg_/connection", connectionJson.dump(), 0, true);
             sendPublish(getPacketIdentifier(), "snode.c/_cfg_/mapping", mqtt::lib::MqttMapper::dump(), 0, true);
@@ -94,7 +94,7 @@ namespace mqtt::mqttintegrator::lib {
         }
     }
 
-    void Mqtt::onPublish(iot::mqtt::packets::Publish& publish) {
+    void Mqtt::onPublish(const iot::mqtt::packets::Publish& publish) {
         publishMappings(publish);
     }
 

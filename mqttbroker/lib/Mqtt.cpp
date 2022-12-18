@@ -30,11 +30,11 @@ namespace mqtt::mqttbroker::lib {
         , mqtt::lib::MqttMapper(mappingJson) {
     }
 
-    void Mqtt::onConnect(iot::mqtt::packets::Connect& connect) {
+    void Mqtt::onConnect(const iot::mqtt::packets::Connect& connect) {
         MqttModel::instance().addConnectedClient(this, connect);
     }
 
-    void Mqtt::onPublish(iot::mqtt::packets::Publish& publish) {
+    void Mqtt::onPublish(const iot::mqtt::packets::Publish& publish) {
         publishMappings(publish);
     }
 
