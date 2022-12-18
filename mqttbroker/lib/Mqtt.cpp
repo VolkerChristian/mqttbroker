@@ -49,7 +49,7 @@ namespace mqtt::mqttbroker::lib {
             broker->retainMessage(topic, message, qoS);
         }
 
-        publishMappings(iot::mqtt::packets::Publish(getPacketIdentifier(), topic, message, qoS, retain, false));
+        publishMappings(iot::mqtt::packets::Publish(getPacketIdentifier(), topic, message, qoS, false, retain));
     }
 
 } // namespace mqtt::mqttbroker::lib
