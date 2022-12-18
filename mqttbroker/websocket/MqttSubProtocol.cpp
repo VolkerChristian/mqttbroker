@@ -78,7 +78,8 @@ namespace mqtt::mqttbroker::websocket {
 
     void MqttSubProtocol::setKeepAlive(const utils::Timeval& timeout) {
         keepAliveTimer = core::timer::Timer::singleshotTimer(
-            [this]() -> void {
+            [this, timeout]() -> void {
+                LOG(TRACE) << "Keep-alive timer expired. Interval was: " << timeout;
                 sendClose();
             },
             timeout);
@@ -95,12 +96,13 @@ namespace mqtt::mqttbroker::websocket {
     }
 
     void MqttSubProtocol::onConnected() {
-        VLOG(0) << "Mqtt connected:";
+        VLOG(0) << "WS: Mqtt connected:";
         iot::mqtt::MqttContext::onConnected();
     }
 
     void MqttSubProtocol::onMessageStart(int opCode) {
         if (opCode == 1) {
+            VLOG(0) << "WS: Wrong Opcode: " << opCode;
             this->end(true);
         }
     }

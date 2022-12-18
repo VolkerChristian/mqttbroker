@@ -74,7 +74,8 @@ namespace mqtt::mqttintegrator::websocket {
 
     void MqttSubProtocol::setKeepAlive(const utils::Timeval& timeout) {
         keepAliveTimer = core::timer::Timer::singleshotTimer(
-            [this]() -> void {
+            [this, timeout]() -> void {
+                LOG(TRACE) << "Keep-alive timer expired. Interval was: " << timeout;
                 sendClose();
             },
             timeout);
