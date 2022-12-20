@@ -18,8 +18,7 @@
 
 #include "MqttSubProtocol.h"
 
-#include "mqttintegrator/lib/Mqtt.h"
-
+#include <iot/mqtt/client/Mqtt.h>
 #include <log/Logger.h>
 #include <web/websocket/SubProtocolContext.h>
 
@@ -30,16 +29,14 @@
 #include <ostream>
 
 #define PING_INTERVAL 0
-#define MAX_FLYING_PINGS 3
 
 namespace mqtt::mqttintegrator::websocket {
 
     MqttSubProtocol::MqttSubProtocol(web::websocket::SubProtocolContext* subProtocolContext,
                                      const std::string& name,
-                                     const nlohmann::json& mappingJson,
-                                     const nlohmann::json& connectionJson)
-        : web::websocket::client::SubProtocol(subProtocolContext, name, PING_INTERVAL, MAX_FLYING_PINGS)
-        , iot::mqtt::MqttContext(new mqtt::mqttintegrator::lib::Mqtt(connectionJson, mappingJson))
+                                     iot::mqtt::client::Mqtt* mqtt)
+        : web::websocket::client::SubProtocol(subProtocolContext, name, PING_INTERVAL)
+        , iot::mqtt::MqttContext(mqtt)
         , onReceivedFromPeerEvent([this]() -> void {
             iot::mqtt::MqttContext::onReceiveFromPeer();
         }) {

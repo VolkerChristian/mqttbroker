@@ -27,6 +27,10 @@ namespace utils {
     class Timeval;
 }
 
+namespace iot::mqtt::client {
+    class Mqtt;
+}
+
 #include <core/EventReceiver.h>
 #include <core/socket/SocketConnection.h>
 #include <iot/mqtt/MqttContext.h>
@@ -37,7 +41,6 @@ namespace utils {
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <nlohmann/json_fwd.hpp>
 #include <string>
 #include <vector>
 
@@ -62,10 +65,7 @@ namespace mqtt::mqttintegrator::websocket {
         : public web::websocket::client::SubProtocol
         , public iot::mqtt::MqttContext {
     public:
-        MqttSubProtocol(web::websocket::SubProtocolContext* subProtocolContext,
-                        const std::string& name,
-                        const nlohmann::json& mappingJson,
-                        const nlohmann::json& connectionJson);
+        MqttSubProtocol(web::websocket::SubProtocolContext* subProtocolContext, const std::string& name, iot::mqtt::client::Mqtt* mqtt);
         ~MqttSubProtocol() override = default;
 
         std::size_t receive(char* junk, std::size_t junklen) override;

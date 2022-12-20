@@ -19,6 +19,7 @@
 #include "MqttSubProtocolFactory.h"
 
 #include "lib/JsonMappingReader.h"
+#include "mqttintegrator/lib/Mqtt.h"
 
 //
 
@@ -41,7 +42,7 @@ namespace mqtt::mqttintegrator::websocket {
     }
 
     MqttSubProtocol* MqttSubprotocolFactory::create(web::websocket::SubProtocolContext* subProtocolContext) {
-        return new MqttSubProtocol(subProtocolContext, getName(), jsonMapping, connection);
+        return new MqttSubProtocol(subProtocolContext, getName(), new mqtt::mqttintegrator::lib::Mqtt(connection, jsonMapping));
     }
 
 } // namespace mqtt::mqttintegrator::websocket
