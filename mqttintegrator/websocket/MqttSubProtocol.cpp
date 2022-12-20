@@ -36,17 +36,13 @@ namespace mqtt::mqttintegrator::websocket {
 
     MqttSubProtocol::MqttSubProtocol(web::websocket::SubProtocolContext* subProtocolContext,
                                      const std::string& name,
-                                     const nlohmann::json& connectionJson,
-                                     const nlohmann::json& mappingJson)
+                                     const nlohmann::json& mappingJson,
+                                     const nlohmann::json& connectionJson)
         : web::websocket::client::SubProtocol(subProtocolContext, name, PING_INTERVAL, MAX_FLYING_PINGS)
         , iot::mqtt::MqttContext(new mqtt::mqttintegrator::lib::Mqtt(connectionJson, mappingJson))
         , onReceivedFromPeerEvent([this]() -> void {
             iot::mqtt::MqttContext::onReceiveFromPeer();
         }) {
-    }
-
-    MqttSubProtocol::~MqttSubProtocol() {
-        keepAliveTimer.cancel();
     }
 
     std::size_t MqttSubProtocol::receive(char* junk, std::size_t junklen) {
@@ -72,17 +68,6 @@ namespace mqtt::mqttintegrator::websocket {
         sendMessage(junk, junklen);
     }
 
-    void MqttSubProtocol::setKeepAlive(const utils::Timeval& timeout) {
-        keepAliveTimer = core::timer::Timer::singleshotTimer(
-            [this, timeout]() -> void {
-                LOG(TRACE) << "Keep-alive timer expired. Interval was: " << timeout;
-                sendClose();
-            },
-            timeout);
-
-        getSocketConnection()->setTimeout(0);
-    }
-
     void MqttSubProtocol::end([[maybe_unused]] bool fatal) {
         sendClose();
     }
@@ -98,6 +83,7 @@ namespace mqtt::mqttintegrator::websocket {
 
     void MqttSubProtocol::onMessageStart(int opCode) {
         if (opCode == 1) {
+            VLOG(0) << "WS: Wrong Opcode: " << opCode;
             this->end(true);
         }
     }
@@ -129,8 +115,6 @@ namespace mqtt::mqttintegrator::websocket {
         if (buffer.size() > 0) {
             iot::mqtt::MqttContext::onReceiveFromPeer();
         }
-
-        keepAliveTimer.restart();
     }
 
     void MqttSubProtocol::onMessageError(uint16_t errnum) {
@@ -148,7 +132,7 @@ namespace mqtt::mqttintegrator::websocket {
     }
 
     core::socket::SocketConnection* MqttSubProtocol::getSocketConnection() {
-        return getSubProtocolContext()->getSocketConnection();
+        return subProtocolContext->getSocketConnection();
     }
 
 } // namespace mqtt::mqttintegrator::websocket

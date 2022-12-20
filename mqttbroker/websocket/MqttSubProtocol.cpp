@@ -20,12 +20,8 @@
 
 #include "mqttbroker/lib/Mqtt.h"
 
-#include <core/timer/Timer.h>
-#include <iot/mqtt/MqttContext.h>
 #include <log/Logger.h>
-#include <utils/Timeval.h>
 #include <web/websocket/SubProtocolContext.h>
-#include <web/websocket/server/SubProtocol.h>
 
 //
 
@@ -40,17 +36,13 @@ namespace mqtt::mqttbroker::websocket {
 
     MqttSubProtocol::MqttSubProtocol(web::websocket::SubProtocolContext* subProtocolContext,
                                      const std::string& name,
-                                     const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
-                                     const nlohmann::json& mappingJson)
+                                     const nlohmann::json& mappingJson,
+                                     const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker)
         : web::websocket::server::SubProtocol(subProtocolContext, name, PING_INTERVAL, MAX_FLYING_PINGS)
         , iot::mqtt::MqttContext(new mqtt::mqttbroker::lib::Mqtt(broker, mappingJson))
         , onReceivedFromPeerEvent([this]() -> void {
             iot::mqtt::MqttContext::onReceiveFromPeer();
         }) {
-    }
-
-    MqttSubProtocol::~MqttSubProtocol() {
-        keepAliveTimer.cancel();
     }
 
     std::size_t MqttSubProtocol::receive(char* junk, std::size_t junklen) {
@@ -74,17 +66,6 @@ namespace mqtt::mqttbroker::websocket {
 
     void MqttSubProtocol::send(const char* junk, std::size_t junklen) {
         sendMessage(junk, junklen);
-    }
-
-    void MqttSubProtocol::setKeepAlive(const utils::Timeval& timeout) {
-        keepAliveTimer = core::timer::Timer::singleshotTimer(
-            [this, timeout]() -> void {
-                LOG(TRACE) << "Keep-alive timer expired. Interval was: " << timeout;
-                sendClose();
-            },
-            timeout);
-
-        getSocketConnection()->setTimeout(0);
     }
 
     void MqttSubProtocol::end([[maybe_unused]] bool fatal) {
@@ -134,8 +115,6 @@ namespace mqtt::mqttbroker::websocket {
         if (buffer.size() > 0) {
             iot::mqtt::MqttContext::onReceiveFromPeer();
         }
-
-        keepAliveTimer.restart();
     }
 
     void MqttSubProtocol::onMessageError(uint16_t errnum) {
@@ -153,7 +132,7 @@ namespace mqtt::mqttbroker::websocket {
     }
 
     core::socket::SocketConnection* MqttSubProtocol::getSocketConnection() {
-        return getSubProtocolContext()->getSocketConnection();
+        return subProtocolContext->getSocketConnection();
     }
 
 } // namespace mqtt::mqttbroker::websocket

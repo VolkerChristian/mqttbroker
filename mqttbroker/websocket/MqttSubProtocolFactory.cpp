@@ -26,8 +26,6 @@
 
 #include <cstdlib>
 
-#define NAME "mqtt"
-
 namespace mqtt::mqttbroker::websocket {
 
     MqttSubprotocolFactory::MqttSubprotocolFactory(const std::string& name)
@@ -45,10 +43,12 @@ namespace mqtt::mqttbroker::websocket {
 
     MqttSubProtocol* MqttSubprotocolFactory::create(web::websocket::SubProtocolContext* subProtocolContext) {
         return new MqttSubProtocol(
-            subProtocolContext, getName(), iot::mqtt::server::broker::Broker::instance(SUBSCRIBTION_MAX_QOS), jsonMapping);
+            subProtocolContext, getName(), jsonMapping, iot::mqtt::server::broker::Broker::instance(SUBSCRIBTION_MAX_QOS));
     }
 
 } // namespace mqtt::mqttbroker::websocket
+
+#define NAME "mqtt"
 
 extern "C" void* mqttServerSubProtocolFactory() {
     return new mqtt::mqttbroker::websocket::MqttSubprotocolFactory(NAME);

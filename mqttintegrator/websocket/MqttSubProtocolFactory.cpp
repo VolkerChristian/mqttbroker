@@ -24,8 +24,6 @@
 
 #include <cstdlib>
 
-#define NAME "mqtt"
-
 namespace mqtt::mqttintegrator::websocket {
 
     MqttSubprotocolFactory::MqttSubprotocolFactory(const std::string& name)
@@ -43,10 +41,12 @@ namespace mqtt::mqttintegrator::websocket {
     }
 
     MqttSubProtocol* MqttSubprotocolFactory::create(web::websocket::SubProtocolContext* subProtocolContext) {
-        return new MqttSubProtocol(subProtocolContext, getName(), connection, jsonMapping);
+        return new MqttSubProtocol(subProtocolContext, getName(), jsonMapping, connection);
     }
 
 } // namespace mqtt::mqttintegrator::websocket
+
+#define NAME "mqtt"
 
 extern "C" void* mqttClientSubProtocolFactory() {
     return new mqtt::mqttintegrator::websocket::MqttSubprotocolFactory(NAME);

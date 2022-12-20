@@ -26,7 +26,6 @@ namespace iot::mqtt::packets {
     class Connack;
 } // namespace iot::mqtt::packets
 
-#include <core/timer/Timer.h> // IWYU pragma: export
 #include <iot/mqtt/client/Mqtt.h>
 
 //
@@ -41,8 +40,6 @@ namespace mqtt::mqttintegrator::lib {
     public:
         explicit Mqtt(const nlohmann::json& connectionJson, const nlohmann::json& mappingJson);
 
-        ~Mqtt() override;
-
     private:
         void onConnected() final;
         void onExit() final;
@@ -53,8 +50,6 @@ namespace mqtt::mqttintegrator::lib {
         void publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) final;
 
         const nlohmann::json& connectionJson;
-
-        core::timer::Timer pingTimer;
 
         uint16_t keepAlive;
         std::string clientId;

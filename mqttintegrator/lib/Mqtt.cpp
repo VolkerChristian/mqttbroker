@@ -18,7 +18,6 @@
 
 #include "Mqtt.h"
 
-#include <iot/mqtt/MqttContext.h>
 #include <iot/mqtt/Topic.h>
 #include <iot/mqtt/packets/Connack.h>
 #include <log/Logger.h>
@@ -56,22 +55,10 @@ namespace mqtt::mqttintegrator::lib {
         LOG(TRACE) << "Password: " << password;
     }
 
-    Mqtt::~Mqtt() {
-        pingTimer.cancel();
-    }
-
     void Mqtt::onConnected() {
         VLOG(0) << "On Connected";
 
         sendConnect(keepAlive, clientId, cleanSession, willTopic, willMessage, willQoS, willRetain, username, password);
-
-        mqttContext->setKeepAlive(keepAlive * 1.5);
-
-        pingTimer = core::timer::Timer::intervalTimer(
-            [this](void) -> void {
-                sendPingreq();
-            },
-            keepAlive);
     }
 
     void Mqtt::onExit() {

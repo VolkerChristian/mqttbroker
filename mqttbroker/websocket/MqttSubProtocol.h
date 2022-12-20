@@ -27,15 +27,18 @@ namespace web::websocket {
     class SubProtocolContext;
 }
 
+namespace utils {
+    class Timeval;
+}
+
 #include <core/EventReceiver.h>
 #include <core/socket/SocketConnection.h>
 #include <iot/mqtt/MqttContext.h>
-#include <utils/Timeval.h>
 #include <web/websocket/server/SubProtocol.h>
 
 //
 
-#include <core/timer/Timer.h>
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -66,14 +69,12 @@ namespace mqtt::mqttbroker::websocket {
     public:
         MqttSubProtocol(web::websocket::SubProtocolContext* subProtocolContext,
                         const std::string& name,
-                        const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker,
-                        const nlohmann::json& mappingJson);
-        ~MqttSubProtocol() override;
+                        const nlohmann::json& mappingJson,
+                        const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker);
+        ~MqttSubProtocol() override = default;
 
         std::size_t receive(char* junk, std::size_t junklen) override;
         void send(const char* junk, std::size_t junklen) override;
-
-        void setKeepAlive(const utils::Timeval& timeout) override;
 
         void end(bool fatal = false) override;
         void kill() override;
@@ -90,8 +91,6 @@ namespace mqtt::mqttbroker::websocket {
         core::socket::SocketConnection* getSocketConnection() override;
 
         OnReceivedFromPeerEvent onReceivedFromPeerEvent;
-
-        core::timer::Timer keepAliveTimer;
 
         std::string data;
         std::vector<char> buffer;
