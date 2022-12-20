@@ -21,14 +21,20 @@
 #include "lib/JsonMappingReader.h"
 #include "mqttintegrator/lib/Mqtt.h"
 
+#include <iot/mqtt/MqttSubProtocol.hpp> // IWYU pragma: keep
+
 //
 
 #include <cstdlib>
 
+// Temporary
+#include <iot/mqtt/MqttSubProtocol.h>         // for MqttSubProtocol
+#include <web/websocket/client/SubProtocol.h> // for SubProtocol
+
 namespace mqtt::mqttintegrator::websocket {
 
     MqttSubprotocolFactory::MqttSubprotocolFactory(const std::string& name)
-        : web::websocket::SubProtocolFactory<MqttSubProtocol>::SubProtocolFactory(name) {
+        : web::websocket::SubProtocolFactory<iot::mqtt::client::MqttSubProtocol>::SubProtocolFactory(name) {
         char* mappingFile = getenv("MQTT_MAPPING_FILE");
 
         if (mappingFile != nullptr) {
@@ -41,8 +47,9 @@ namespace mqtt::mqttintegrator::websocket {
         }
     }
 
-    MqttSubProtocol* MqttSubprotocolFactory::create(web::websocket::SubProtocolContext* subProtocolContext) {
-        return new MqttSubProtocol(subProtocolContext, getName(), new mqtt::mqttintegrator::lib::Mqtt(connection, jsonMapping));
+    iot::mqtt::client::MqttSubProtocol* MqttSubprotocolFactory::create(web::websocket::SubProtocolContext* subProtocolContext) {
+        return new iot::mqtt::client::MqttSubProtocol(
+            subProtocolContext, getName(), new mqtt::mqttintegrator::lib::Mqtt(connection, jsonMapping));
     }
 
 } // namespace mqtt::mqttintegrator::websocket
@@ -52,3 +59,5 @@ namespace mqtt::mqttintegrator::websocket {
 extern "C" void* mqttClientSubProtocolFactory() {
     return new mqtt::mqttintegrator::websocket::MqttSubprotocolFactory(NAME);
 }
+
+template class iot::mqtt::MqttSubProtocol<web::websocket::client::SubProtocol>;

@@ -21,16 +21,21 @@
 #include "lib/JsonMappingReader.h"
 #include "mqttbroker/lib/Mqtt.h"
 
+#include <iot/mqtt/MqttSubProtocol.hpp> // IWYU pragma: keep
 #include <iot/mqtt/server/broker/Broker.h>
 
 //
 
 #include <cstdlib>
 
+// Temporary
+#include <iot/mqtt/MqttSubProtocol.h>         // for MqttSubProtocol
+#include <web/websocket/server/SubProtocol.h> // for SubProtocol
+
 namespace mqtt::mqttbroker::websocket {
 
     MqttSubprotocolFactory::MqttSubprotocolFactory(const std::string& name)
-        : web::websocket::SubProtocolFactory<MqttSubProtocol>::SubProtocolFactory(name) {
+        : web::websocket::SubProtocolFactory<iot::mqtt::server::MqttSubProtocol>::SubProtocolFactory(name) {
         char* mappingFile = getenv("MQTT_MAPPING_FILE");
 
         if (mappingFile != nullptr) {
@@ -42,8 +47,8 @@ namespace mqtt::mqttbroker::websocket {
         }
     }
 
-    MqttSubProtocol* MqttSubprotocolFactory::create(web::websocket::SubProtocolContext* subProtocolContext) {
-        return new MqttSubProtocol(
+    iot::mqtt::server::MqttSubProtocol* MqttSubprotocolFactory::create(web::websocket::SubProtocolContext* subProtocolContext) {
+        return new iot::mqtt::server::MqttSubProtocol(
             subProtocolContext,
             getName(),
             new mqtt::mqttbroker::lib::Mqtt(iot::mqtt::server::broker::Broker::instance(SUBSCRIBTION_MAX_QOS), jsonMapping));
@@ -56,3 +61,5 @@ namespace mqtt::mqttbroker::websocket {
 extern "C" void* mqttServerSubProtocolFactory() {
     return new mqtt::mqttbroker::websocket::MqttSubprotocolFactory(NAME);
 }
+
+template class iot::mqtt::MqttSubProtocol<web::websocket::server::SubProtocol>;

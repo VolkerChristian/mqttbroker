@@ -19,12 +19,11 @@
 #ifndef WEB_WEBSOCKET_SUBPROTOCOL_SERVER_MQTTSUBPROTOCOLFACTORY_H
 #define WEB_WEBSOCKET_SUBPROTOCOL_SERVER_MQTTSUBPROTOCOLFACTORY_H
 
-#include "mqttintegrator/websocket/MqttSubProtocol.h"
-
 namespace web::websocket {
     class SubProtocolContext;
 }
 
+#include <iot/mqtt/client/MqttSubProtocol.h>
 #include <web/websocket/SubProtocolFactory.h>
 
 //
@@ -35,12 +34,12 @@ namespace web::websocket {
 
 namespace mqtt::mqttintegrator::websocket {
 
-    class MqttSubprotocolFactory : public web::websocket::SubProtocolFactory<MqttSubProtocol> {
+    class MqttSubprotocolFactory : public web::websocket::SubProtocolFactory<iot::mqtt::client::MqttSubProtocol> {
     public:
         explicit MqttSubprotocolFactory(const std::string& name);
 
     private:
-        MqttSubProtocol* create(web::websocket::SubProtocolContext* subProtocolContext) override;
+        iot::mqtt::client::MqttSubProtocol* create(web::websocket::SubProtocolContext* subProtocolContext) override;
 
         nlohmann::json connection;
         nlohmann::json jsonMapping;

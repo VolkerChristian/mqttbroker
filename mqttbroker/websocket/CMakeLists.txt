@@ -14,9 +14,9 @@ get_target_property(
     WEBSOCKET_SUBPROTOCOL_SERVER_INCLUDE_DIRS
 )
 
-set(MQTTSERVERSUBPROTOCOL_CPP MqttSubProtocol.cpp MqttSubProtocolFactory.cpp)
+set(MQTTSERVERSUBPROTOCOL_CPP MqttSubProtocolFactory.cpp)
 
-set(MQTTSERVERSUBPROTOCOL_H MqttSubProtocol.h MqttSubProtocolFactory.h)
+set(MQTTSERVERSUBPROTOCOL_H MqttSubProtocolFactory.h)
 
 add_library(
     mqttserversubprotocol SHARED ${MQTTSERVERSUBPROTOCOL_CPP}
