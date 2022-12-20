@@ -21,15 +21,11 @@
 #include "lib/JsonMappingReader.h"
 #include "mqttintegrator/lib/Mqtt.h"
 
-#include <iot/mqtt/MqttSubProtocol.hpp> // IWYU pragma: keep
-
 //
 
 #include <cstdlib>
 
-// Temporary
-#include <iot/mqtt/MqttSubProtocol.h>         // for MqttSubProtocol
-#include <web/websocket/client/SubProtocol.h> // for SubProtocol
+// IWYU pragma: no_include  <iot/mqtt/MqttSubProtocol.hpp>
 
 namespace mqtt::mqttintegrator::websocket {
 
@@ -59,5 +55,3 @@ namespace mqtt::mqttintegrator::websocket {
 extern "C" void* mqttClientSubProtocolFactory() {
     return new mqtt::mqttintegrator::websocket::MqttSubprotocolFactory(NAME);
 }
-
-template class iot::mqtt::MqttSubProtocol<web::websocket::client::SubProtocol>;
