@@ -19,16 +19,16 @@
 #ifndef WEB_WEBSOCKET_SUBPROTOCOL_SERVER_MQTTSUBPROTOCOL_H
 #define WEB_WEBSOCKET_SUBPROTOCOL_SERVER_MQTTSUBPROTOCOL_H
 
-namespace iot::mqtt::server::broker {
-    class Broker;
-}
-
 namespace web::websocket {
     class SubProtocolContext;
 }
 
 namespace utils {
     class Timeval;
+}
+
+namespace iot::mqtt::server {
+    class Mqtt;
 }
 
 #include <core/EventReceiver.h>
@@ -41,8 +41,6 @@ namespace utils {
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <memory>
-#include <nlohmann/json_fwd.hpp>
 #include <string>
 #include <vector>
 
@@ -67,10 +65,7 @@ namespace mqtt::mqttbroker::websocket {
         : public web::websocket::server::SubProtocol
         , public iot::mqtt::MqttContext {
     public:
-        MqttSubProtocol(web::websocket::SubProtocolContext* subProtocolContext,
-                        const std::string& name,
-                        const nlohmann::json& mappingJson,
-                        const std::shared_ptr<iot::mqtt::server::broker::Broker>& broker);
+        MqttSubProtocol(web::websocket::SubProtocolContext* subProtocolContext, const std::string& name, iot::mqtt::server::Mqtt* mqtt);
         ~MqttSubProtocol() override = default;
 
         std::size_t receive(char* junk, std::size_t junklen) override;

@@ -19,6 +19,7 @@
 #include "MqttSubProtocolFactory.h"
 
 #include "lib/JsonMappingReader.h"
+#include "mqttbroker/lib/Mqtt.h"
 
 #include <iot/mqtt/server/broker/Broker.h>
 
@@ -43,7 +44,9 @@ namespace mqtt::mqttbroker::websocket {
 
     MqttSubProtocol* MqttSubprotocolFactory::create(web::websocket::SubProtocolContext* subProtocolContext) {
         return new MqttSubProtocol(
-            subProtocolContext, getName(), jsonMapping, iot::mqtt::server::broker::Broker::instance(SUBSCRIBTION_MAX_QOS));
+            subProtocolContext,
+            getName(),
+            new mqtt::mqttbroker::lib::Mqtt(iot::mqtt::server::broker::Broker::instance(SUBSCRIBTION_MAX_QOS), jsonMapping));
     }
 
 } // namespace mqtt::mqttbroker::websocket
