@@ -420,6 +420,8 @@ namespace inja {
         AstNode(size_t pos)
             : pos(pos) {
         }
+        AstNode(const AstNode&) = default;
+        AstNode& operator=(const AstNode&) = default;
         virtual ~AstNode() {
         }
     };
@@ -432,7 +434,7 @@ namespace inja {
             : AstNode(0) {
         }
 
-        void accept(NodeVisitor& v) const {
+        void accept(NodeVisitor& v) const override {
             v.visit(*this);
         }
     };
@@ -446,7 +448,7 @@ namespace inja {
             , length(length) {
         }
 
-        void accept(NodeVisitor& v) const {
+        void accept(NodeVisitor& v) const override {
             v.visit(*this);
         }
     };
@@ -457,7 +459,7 @@ namespace inja {
             : AstNode(pos) {
         }
 
-        void accept(NodeVisitor& v) const {
+        void accept(NodeVisitor& v) const override {
             v.visit(*this);
         }
     };
@@ -471,7 +473,7 @@ namespace inja {
             , value(json::parse(data_text)) {
         }
 
-        void accept(NodeVisitor& v) const {
+        void accept(NodeVisitor& v) const override {
             v.visit(*this);
         }
     };
@@ -498,7 +500,7 @@ namespace inja {
             , ptr(json::json_pointer(convert_dot_to_ptr(ptr_name))) {
         }
 
-        void accept(NodeVisitor& v) const {
+        void accept(NodeVisitor& v) const override {
             v.visit(*this);
         }
     };
@@ -627,7 +629,7 @@ namespace inja {
             }
         }
 
-        void accept(NodeVisitor& v) const {
+        void accept(NodeVisitor& v) const override {
             v.visit(*this);
         }
     };
@@ -643,7 +645,7 @@ namespace inja {
             : AstNode(pos) {
         }
 
-        void accept(NodeVisitor& v) const {
+        void accept(NodeVisitor& v) const override {
             v.visit(*this);
         }
     };
@@ -654,7 +656,7 @@ namespace inja {
             : AstNode(pos) {
         }
 
-        virtual void accept(NodeVisitor& v) const = 0;
+        virtual void accept(NodeVisitor& v) const override = 0;
     };
 
     class ForStatementNode : public StatementNode {
@@ -668,7 +670,7 @@ namespace inja {
             , parent(parent) {
         }
 
-        virtual void accept(NodeVisitor& v) const = 0;
+        virtual void accept(NodeVisitor& v) const override = 0;
     };
 
     class ForArrayStatementNode : public ForStatementNode {
@@ -680,7 +682,7 @@ namespace inja {
             , value(value) {
         }
 
-        void accept(NodeVisitor& v) const {
+        void accept(NodeVisitor& v) const override {
             v.visit(*this);
         }
     };
@@ -696,7 +698,7 @@ namespace inja {
             , value(value) {
         }
 
-        void accept(NodeVisitor& v) const {
+        void accept(NodeVisitor& v) const override {
             v.visit(*this);
         }
     };
@@ -722,7 +724,7 @@ namespace inja {
             , is_nested(is_nested) {
         }
 
-        void accept(NodeVisitor& v) const {
+        void accept(NodeVisitor& v) const override {
             v.visit(*this);
         }
     };
@@ -736,7 +738,7 @@ namespace inja {
             , file(file) {
         }
 
-        void accept(NodeVisitor& v) const {
+        void accept(NodeVisitor& v) const override {
             v.visit(*this);
         }
     };
@@ -750,9 +752,9 @@ namespace inja {
             , file(file) {
         }
 
-        void accept(NodeVisitor& v) const {
+        void accept(NodeVisitor& v) const override {
             v.visit(*this);
-        };
+        }
     };
 
     class BlockStatementNode : public StatementNode {
@@ -767,9 +769,9 @@ namespace inja {
             , parent(parent) {
         }
 
-        void accept(NodeVisitor& v) const {
+        void accept(NodeVisitor& v) const override {
             v.visit(*this);
-        };
+        }
     };
 
     class SetStatementNode : public StatementNode {
@@ -782,7 +784,7 @@ namespace inja {
             , key(key) {
         }
 
-        void accept(NodeVisitor& v) const {
+        void accept(NodeVisitor& v) const override {
             v.visit(*this);
         }
     };
@@ -803,65 +805,65 @@ namespace inja {
      * \brief A class for counting statistics on a Template.
      */
     class StatisticsVisitor : public NodeVisitor {
-        void visit(const BlockNode& node) {
+        void visit(const BlockNode& node) override {
             for (auto& n : node.nodes) {
                 n->accept(*this);
             }
         }
 
-        void visit(const TextNode&) {
+        void visit(const TextNode&) override {
         }
-        void visit(const ExpressionNode&) {
+        void visit(const ExpressionNode&) override {
         }
-        void visit(const LiteralNode&) {
+        void visit(const LiteralNode&) override {
         }
 
-        void visit(const DataNode&) {
+        void visit(const DataNode&) override {
             variable_counter += 1;
         }
 
-        void visit(const FunctionNode& node) {
+        void visit(const FunctionNode& node) override {
             for (auto& n : node.arguments) {
                 n->accept(*this);
             }
         }
 
-        void visit(const ExpressionListNode& node) {
+        void visit(const ExpressionListNode& node) override {
             node.root->accept(*this);
         }
 
-        void visit(const StatementNode&) {
+        void visit(const StatementNode&) override {
         }
-        void visit(const ForStatementNode&) {
+        void visit(const ForStatementNode&) override {
         }
 
-        void visit(const ForArrayStatementNode& node) {
+        void visit(const ForArrayStatementNode& node) override {
             node.condition.accept(*this);
             node.body.accept(*this);
         }
 
-        void visit(const ForObjectStatementNode& node) {
+        void visit(const ForObjectStatementNode& node) override {
             node.condition.accept(*this);
             node.body.accept(*this);
         }
 
-        void visit(const IfStatementNode& node) {
+        void visit(const IfStatementNode& node) override {
             node.condition.accept(*this);
             node.true_statement.accept(*this);
             node.false_statement.accept(*this);
         }
 
-        void visit(const IncludeStatementNode&) {
+        void visit(const IncludeStatementNode&) override {
         }
 
-        void visit(const ExtendsStatementNode&) {
+        void visit(const ExtendsStatementNode&) override {
         }
 
-        void visit(const BlockStatementNode& node) {
+        void visit(const BlockStatementNode& node) override {
             node.block.accept(*this);
         }
 
-        void visit(const SetStatementNode&) {
+        void visit(const SetStatementNode&) override {
         }
 
     public:
@@ -896,7 +898,7 @@ namespace inja {
         int count_variables() {
             auto statistic_visitor = StatisticsVisitor();
             root.accept(statistic_visitor);
-            return statistic_visitor.variable_counter;
+            return static_cast<int>(statistic_visitor.variable_counter);
         }
     };
 
@@ -1556,7 +1558,7 @@ namespace inja {
         std::stack<ForStatementNode*> for_statement_stack;
         std::stack<BlockStatementNode*> block_statement_stack;
 
-        inline void throw_parser_error(const std::string& message) const {
+        inline void throw_parser_error [[noreturn]] (const std::string& message) const {
             INJA_THROW(ParserError(message, lexer.current_position()));
         }
 
@@ -1577,7 +1579,8 @@ namespace inja {
         }
 
         inline void add_literal(Arguments& arguments, const char* content_ptr) {
-            std::string_view data_text(literal_start.data(), tok.text.data() - literal_start.data() + tok.text.size());
+            std::string_view data_text(literal_start.data(),
+                                       static_cast<unsigned long>(tok.text.data() - literal_start.data()) + tok.text.size());
             arguments.emplace_back(std::make_shared<LiteralNode>(data_text, data_text.data() - content_ptr));
         }
 
@@ -2274,7 +2277,7 @@ namespace inja {
             return std::make_shared<json>(*result);
         }
 
-        void throw_renderer_error(const std::string& message, const AstNode& node) {
+        void throw_renderer_error [[noreturn]] (const std::string& message, const AstNode& node) {
             SourceLocation loc = get_source_location(current_template->content, node.pos);
             INJA_THROW(RenderError(message, loc));
         }
@@ -2350,7 +2353,7 @@ namespace inja {
             return result;
         }
 
-        void visit(const BlockNode& node) {
+        void visit(const BlockNode& node) override {
             for (auto& n : node.nodes) {
                 n->accept(*this);
 
@@ -2360,18 +2363,18 @@ namespace inja {
             }
         }
 
-        void visit(const TextNode& node) {
-            output_stream->write(current_template->content.c_str() + node.pos, node.length);
+        void visit(const TextNode& node) override {
+            output_stream->write(current_template->content.c_str() + node.pos, static_cast<std::streamsize>(node.length));
         }
 
-        void visit(const ExpressionNode&) {
+        void visit(const ExpressionNode&) override {
         }
 
-        void visit(const LiteralNode& node) {
+        void visit(const LiteralNode& node) override {
             data_eval_stack.push(&node.value);
         }
 
-        void visit(const DataNode& node) {
+        void visit(const DataNode& node) override {
             if (additional_data.contains(node.ptr)) {
                 data_eval_stack.push(&(additional_data[node.ptr]));
             } else if (data_input->contains(node.ptr)) {
@@ -2391,7 +2394,7 @@ namespace inja {
             }
         }
 
-        void visit(const FunctionNode& node) {
+        void visit(const FunctionNode& node) override {
             switch (node.operation) {
                 case Op::Not: {
                     const auto args = get_arguments<1>(node);
@@ -2496,7 +2499,7 @@ namespace inja {
                     if (args[0]->is_object()) {
                         data_eval_stack.push(&args[0]->at(args[1]->get<std::string>()));
                     } else {
-                        data_eval_stack.push(&args[0]->at(args[1]->get<int>()));
+                        data_eval_stack.push(&args[0]->at(static_cast<nlohmann::json::size_type>(args[1]->get<int>())));
                     }
                 } break;
                 case Op::Default: {
@@ -2563,7 +2566,8 @@ namespace inja {
                     make_result(get_arguments<1>(node)[0]->get<const json::number_integer_t>() % 2 != 0);
                 } break;
                 case Op::Range: {
-                    std::vector<int> result(get_arguments<1>(node)[0]->get<const json::number_integer_t>());
+                    std::vector<int> result(
+                        static_cast<std::vector<int>::size_type>(get_arguments<1>(node)[0]->get<const json::number_integer_t>()));
                     std::iota(result.begin(), result.end(), 0);
                     make_result(std::move(result));
                 } break;
@@ -2619,7 +2623,7 @@ namespace inja {
                 case Op::Super: {
                     const auto args = get_argument_vector(node);
                     const size_t old_level = current_level;
-                    const size_t level_diff = (args.size() == 1) ? args[0]->get<int>() : 1;
+                    const size_t level_diff = (args.size() == 1) ? static_cast<size_t>(args[0]->get<int>()) : 1;
                     const size_t level = current_level + level_diff;
 
                     if (block_statement_stack.empty()) {
@@ -2668,17 +2672,17 @@ namespace inja {
             }
         }
 
-        void visit(const ExpressionListNode& node) {
+        void visit(const ExpressionListNode& node) override {
             print_data(eval_expression_list(node));
         }
 
-        void visit(const StatementNode&) {
+        void visit(const StatementNode&) override {
         }
 
-        void visit(const ForStatementNode&) {
+        void visit(const ForStatementNode&) override {
         }
 
-        void visit(const ForArrayStatementNode& node) {
+        void visit(const ForArrayStatementNode& node) override {
             const auto result = eval_expression_list(node.condition);
             if (!result->is_array()) {
                 throw_renderer_error("object must be an array", node);
@@ -2717,7 +2721,7 @@ namespace inja {
             }
         }
 
-        void visit(const ForObjectStatementNode& node) {
+        void visit(const ForObjectStatementNode& node) override {
             const auto result = eval_expression_list(node.condition);
             if (!result->is_object()) {
                 throw_renderer_error("object must be an object", node);
@@ -2756,7 +2760,7 @@ namespace inja {
             }
         }
 
-        void visit(const IfStatementNode& node) {
+        void visit(const IfStatementNode& node) override {
             const auto result = eval_expression_list(node.condition);
             if (truthy(result.get())) {
                 node.true_statement.accept(*this);
@@ -2765,7 +2769,7 @@ namespace inja {
             }
         }
 
-        void visit(const IncludeStatementNode& node) {
+        void visit(const IncludeStatementNode& node) override {
             auto sub_renderer = Renderer(config, template_storage, function_storage);
             const auto included_template_it = template_storage.find(node.file);
             if (included_template_it != template_storage.end()) {
@@ -2775,7 +2779,7 @@ namespace inja {
             }
         }
 
-        void visit(const ExtendsStatementNode& node) {
+        void visit(const ExtendsStatementNode& node) override {
             const auto included_template_it = template_storage.find(node.file);
             if (included_template_it != template_storage.end()) {
                 const Template* parent_template = &included_template_it->second;
@@ -2786,7 +2790,7 @@ namespace inja {
             }
         }
 
-        void visit(const BlockStatementNode& node) {
+        void visit(const BlockStatementNode& node) override {
             const size_t old_level = current_level;
             current_level = 0;
             current_template = template_stack.front();
@@ -2800,7 +2804,7 @@ namespace inja {
             current_template = template_stack.back();
         }
 
-        void visit(const SetStatementNode& node) {
+        void visit(const SetStatementNode& node) override {
             std::string ptr = node.key;
             replace_substring(ptr, ".", "/");
             ptr = "/" + ptr;
