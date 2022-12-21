@@ -16,7 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "MqttSubProtocolFactory.h"
+#include "SubProtocolFactory.h"
 
 #include "lib/JsonMappingReader.h"
 #include "mqttintegrator/lib/Mqtt.h"
@@ -29,8 +29,8 @@
 
 namespace mqtt::mqttintegrator::websocket {
 
-    MqttSubprotocolFactory::MqttSubprotocolFactory(const std::string& name)
-        : web::websocket::SubProtocolFactory<iot::mqtt::client::MqttSubProtocol>::SubProtocolFactory(name) {
+    SubprotocolFactory::SubprotocolFactory(const std::string& name)
+        : web::websocket::SubProtocolFactory<iot::mqtt::client::SubProtocol>::SubProtocolFactory(name) {
         char* mappingFile = getenv("MQTT_MAPPING_FILE");
 
         if (mappingFile != nullptr) {
@@ -43,8 +43,8 @@ namespace mqtt::mqttintegrator::websocket {
         }
     }
 
-    iot::mqtt::client::MqttSubProtocol* MqttSubprotocolFactory::create(web::websocket::SubProtocolContext* subProtocolContext) {
-        return new iot::mqtt::client::MqttSubProtocol(
+    iot::mqtt::client::SubProtocol* SubprotocolFactory::create(web::websocket::SubProtocolContext* subProtocolContext) {
+        return new iot::mqtt::client::SubProtocol(
             subProtocolContext, getName(), new mqtt::mqttintegrator::lib::Mqtt(connection, jsonMapping));
     }
 
@@ -53,5 +53,5 @@ namespace mqtt::mqttintegrator::websocket {
 #define NAME "mqtt"
 
 extern "C" void* mqttClientSubProtocolFactory() {
-    return new mqtt::mqttintegrator::websocket::MqttSubprotocolFactory(NAME);
+    return new mqtt::mqttintegrator::websocket::SubprotocolFactory(NAME);
 }

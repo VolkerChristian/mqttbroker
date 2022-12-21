@@ -16,7 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "MqttSubProtocolFactory.h"
+#include "SubProtocolFactory.h"
 
 #include "lib/JsonMappingReader.h"
 #include "mqttbroker/lib/Mqtt.h"
@@ -31,8 +31,8 @@
 
 namespace mqtt::mqttbroker::websocket {
 
-    MqttSubprotocolFactory::MqttSubprotocolFactory(const std::string& name)
-        : web::websocket::SubProtocolFactory<iot::mqtt::server::MqttSubProtocol>::SubProtocolFactory(name) {
+    SubprotocolFactory::SubprotocolFactory(const std::string& name)
+        : web::websocket::SubProtocolFactory<iot::mqtt::server::SubProtocol>::SubProtocolFactory(name) {
         char* mappingFile = getenv("MQTT_MAPPING_FILE");
 
         if (mappingFile != nullptr) {
@@ -44,8 +44,8 @@ namespace mqtt::mqttbroker::websocket {
         }
     }
 
-    iot::mqtt::server::MqttSubProtocol* MqttSubprotocolFactory::create(web::websocket::SubProtocolContext* subProtocolContext) {
-        return new iot::mqtt::server::MqttSubProtocol(
+    iot::mqtt::server::SubProtocol* SubprotocolFactory::create(web::websocket::SubProtocolContext* subProtocolContext) {
+        return new iot::mqtt::server::SubProtocol(
             subProtocolContext,
             getName(),
             new mqtt::mqttbroker::lib::Mqtt(iot::mqtt::server::broker::Broker::instance(SUBSCRIBTION_MAX_QOS), jsonMapping));
@@ -56,5 +56,5 @@ namespace mqtt::mqttbroker::websocket {
 #define NAME "mqtt"
 
 extern "C" void* mqttServerSubProtocolFactory() {
-    return new mqtt::mqttbroker::websocket::MqttSubprotocolFactory(NAME);
+    return new mqtt::mqttbroker::websocket::SubprotocolFactory(NAME);
 }

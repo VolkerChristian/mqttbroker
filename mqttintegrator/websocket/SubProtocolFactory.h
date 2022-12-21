@@ -23,7 +23,7 @@ namespace web::websocket {
     class SubProtocolContext;
 }
 
-#include <iot/mqtt/server/MqttSubProtocol.h>
+#include <iot/mqtt/client/SubProtocol.h>
 #include <web/websocket/SubProtocolFactory.h>
 
 //
@@ -32,20 +32,21 @@ namespace web::websocket {
 #include <string>
 // IWYU pragma: no_include <nlohmann/json_fwd.hpp>
 
-namespace mqtt::mqttbroker::websocket {
+namespace mqtt::mqttintegrator::websocket {
 
-    class MqttSubprotocolFactory : public web::websocket::SubProtocolFactory<iot::mqtt::server::MqttSubProtocol> {
+    class SubprotocolFactory : public web::websocket::SubProtocolFactory<iot::mqtt::client::SubProtocol> {
     public:
-        explicit MqttSubprotocolFactory(const std::string& name);
+        explicit SubprotocolFactory(const std::string& name);
 
     private:
-        iot::mqtt::server::MqttSubProtocol* create(web::websocket::SubProtocolContext* subProtocolContext) override;
+        iot::mqtt::client::SubProtocol* create(web::websocket::SubProtocolContext* subProtocolContext) override;
 
+        nlohmann::json connection;
         nlohmann::json jsonMapping;
     };
 
-} // namespace mqtt::mqttbroker::websocket
+} // namespace mqtt::mqttintegrator::websocket
 
-extern "C" void* mqttServerSubProtocolFactory();
+extern "C" void* mqttClientSubProtocolFactory();
 
 #endif // WEB_WEBSOCKET_SUBPROTOCOL_SERVER_MQTTSUBPROTOCOLFACTORY_H
