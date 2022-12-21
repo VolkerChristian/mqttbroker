@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
         decltype([](const WsMqttLegacyIntegrator& inMqttTlsIntegratorClient, const std::function<void()>& stopTimer = nullptr) -> void {
             inMqttTlsIntegratorClient.connect([stopTimer](const WsMqttLegacyIntegrator::SocketAddress& socketAddress, int errnum) -> void {
                 if (errnum != 0) {
-                    PLOG(ERROR) << "OnError: " << socketAddress.toString();
+                    PLOG(ERROR) << "connecting to " << socketAddress.toString();
                 } else {
                     VLOG(0) << "MqttIntegrator connected to " << socketAddress.toString();
 

@@ -98,9 +98,9 @@ int main(int argc, char* argv[]) {
 
     mqttLegacyInServer.listen([mqttLegacyInServer](const MQTTLegacyInServer::SocketAddress& socketAddress, int errnum) mutable -> void {
         if (errnum < 0) {
-            PLOG(ERROR) << "OnError";
+            PLOG(ERROR) << "listening on " << socketAddress.toString();
         } else if (errnum > 0) {
-            PLOG(ERROR) << "OnError";
+            PLOG(ERROR) << "listening on " << socketAddress.toString();
         } else {
             VLOG(0) << mqttLegacyInServer.getConfig().getName() << " listening on " << socketAddress.toString();
         }
@@ -185,9 +185,9 @@ int main(int argc, char* argv[]) {
 
     mqttTLSInServer.listen([mqttTLSInServer](const MQTTTLSInServer::SocketAddress& socketAddress, int errnum) mutable -> void {
         if (errnum < 0) {
-            PLOG(ERROR) << "OnError";
+            PLOG(ERROR) << "listening on " << socketAddress.toString();
         } else if (errnum > 0) {
-            PLOG(ERROR) << "OnError";
+            PLOG(ERROR) << "listening on " << socketAddress.toString();
         } else {
             VLOG(0) << mqttTLSInServer.getConfig().getName() << " listening on " << socketAddress.toString();
         }
@@ -226,9 +226,9 @@ int main(int argc, char* argv[]) {
     mqttLegacyUnServer.listen(
         [mqttLegacyUnServer](const LegacyUnSocketConnection::SocketAddress& socketAddress, int errnum) mutable -> void {
             if (errnum < 0) {
-                PLOG(ERROR) << "OnError";
+                PLOG(ERROR) << "listening on " << socketAddress.toString();
             } else if (errnum > 0) {
-                PLOG(ERROR) << "OnError";
+                PLOG(ERROR) << "listening on " << socketAddress.toString();
             } else {
                 VLOG(0) << mqttLegacyUnServer.getConfig().getName() << " listening on " << socketAddress.toString();
             }
@@ -293,9 +293,9 @@ int main(int argc, char* argv[]) {
 
     mqttWebView.listen([](const express::tls::in::WebApp::SocketAddress& socketAddress, int errnum) mutable -> void {
         if (errnum < 0) {
-            PLOG(ERROR) << "OnError";
+            PLOG(ERROR) << "listening on " << socketAddress.toString();
         } else if (errnum > 0) {
-            PLOG(ERROR) << "OnError";
+            PLOG(ERROR) << "listening on " << socketAddress.toString();
         } else {
             VLOG(0) << "MqttWebFrontend listening on " << socketAddress.toString();
         }
@@ -384,9 +384,9 @@ int main(int argc, char* argv[]) {
 
     mqttLegacyWebView.listen([](const express::legacy::in::WebApp::SocketAddress& socketAddress, int errnum) mutable -> void {
         if (errnum < 0) {
-            PLOG(ERROR) << "OnError";
+            PLOG(ERROR) << "listening on " << socketAddress.toString();
         } else if (errnum > 0) {
-            PLOG(ERROR) << "OnError";
+            PLOG(ERROR) << "listening on " << socketAddress.toString();
         } else {
             VLOG(0) << "MqttWebFrontend listening on " << socketAddress.toString();
         }
