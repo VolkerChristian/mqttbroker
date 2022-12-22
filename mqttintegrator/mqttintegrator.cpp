@@ -22,23 +22,11 @@
 #include <core/timer/Timer.h>
 #include <log/Logger.h>
 #include <net/in/stream/tls/SocketClient.h>
+#include <utils/Config.h>
 
 //
 
-#include <openssl/opensslv.h>
-#include <openssl/ssl3.h>
-#include <utils/Config.h>
-#if OPENSSL_VERSION_NUMBER >= 0x30000000L
-#include <openssl/types.h>
-#elif OPENSSL_VERSION_NUMBER >= 0x10100000L
-#include <openssl/ossl_typ.h>
-#endif
 #include <cstdlib>
-#include <openssl/asn1.h>
-#include <openssl/crypto.h>
-#include <openssl/obj_mac.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
 
 int main(int argc, char* argv[]) {
     std::string mappingFilePath;
@@ -51,107 +39,37 @@ int main(int argc, char* argv[]) {
         setenv("MQTT_MAPPING_FILE", mappingFilePath.data(), 0);
 
         using InMqttTlsIntegratorClient = net::in::stream::tls::SocketClient<mqtt::mqttintegrator::SocketContextFactory>;
-
         using TLSInSocketConnection = InMqttTlsIntegratorClient::SocketConnection;
 
         decltype([](const InMqttTlsIntegratorClient& inMqttTlsIntegratorClient, const std::function<void()>& stopTimer = nullptr) -> void {
-            inMqttTlsIntegratorClient.connect([stopTimer](const TLSInSocketConnection::SocketAddress& socketAddress, int errnum) -> void {
-                if (errnum != 0) {
-                    PLOG(ERROR) << "connecting to " << socketAddress.toString();
-                } else {
-                    VLOG(0) << "MqttIntegrator connected to " << socketAddress.toString();
+            inMqttTlsIntegratorClient.connect(
+                [stopTimer](const InMqttTlsIntegratorClient::SocketAddress& socketAddress, int errnum) -> void {
+                    if (errnum != 0) {
+                        PLOG(ERROR) << "connecting to " << socketAddress.toString();
+                    } else {
+                        VLOG(0) << "MqttIntegrator connected to " << socketAddress.toString();
 
-                    if (stopTimer) {
-                        stopTimer();
+                        if (stopTimer) {
+                            stopTimer();
+                        }
                     }
-                }
-            });
+                });
         }) doConnect;
 
-        static InMqttTlsIntegratorClient inMqttTlsIntegratorClient(
-            "mqtttlsintegrator",
-            [](TLSInSocketConnection* socketConnection) -> void {
-                VLOG(0) << "OnConnect";
+        static InMqttTlsIntegratorClient inMqttTlsIntegratorClient("mqtttlsintegrator");
 
-                VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
-                VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
+        inMqttTlsIntegratorClient.onDisconnect([&doConnect](TLSInSocketConnection* socketConnection) -> void {
+            VLOG(0) << "OnDisconnect";
 
-                // X509_VERIFY_PARAM* param = SSL_get0_param(socketConnection->getSSL());
+            VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
+            VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
 
-                /* Enable automatic hostname checks */
-                // X509_VERIFY_PARAM_set_hostflags(param, X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS);
-                // if (!X509_VERIFY_PARAM_set1_host(param, "localhost", sizeof("localhost") - 1)) {
-                //     // handle error
-                //     socketConnection->close();
-                // }
-            },
-            [](TLSInSocketConnection* socketConnection) -> void {
-                VLOG(0) << "OnConnected";
-
-                X509* server_cert = SSL_get_peer_certificate(socketConnection->getSSL());
-                if (server_cert != nullptr) {
-                    long verifyErr = SSL_get_verify_result(socketConnection->getSSL());
-
-                    VLOG(0) << "\tPeer certificate: " + std::string(X509_verify_cert_error_string(verifyErr));
-
-                    if (verifyErr == X509_V_OK) {
-                        char* str = X509_NAME_oneline(X509_get_subject_name(server_cert), nullptr, 0);
-                        VLOG(0) << "\t   Subject: " + std::string(str);
-                        OPENSSL_free(str);
-
-                        str = X509_NAME_oneline(X509_get_issuer_name(server_cert), nullptr, 0);
-                        VLOG(0) << "\t   Issuer: " + std::string(str);
-                        OPENSSL_free(str);
-
-                        // We could do all sorts of certificate verification stuff here before deallocating the certificate.
-
-                        GENERAL_NAMES* subjectAltNames =
-                            static_cast<GENERAL_NAMES*>(X509_get_ext_d2i(server_cert, NID_subject_alt_name, nullptr, nullptr));
-
-                        int32_t altNameCount = sk_GENERAL_NAME_num(subjectAltNames);
-                        if (altNameCount > 0) {
-                            VLOG(0) << "\t   Subject alternative name count: " << altNameCount;
-                            for (int32_t i = 0; i < altNameCount; ++i) {
-                                GENERAL_NAME* generalName = sk_GENERAL_NAME_value(subjectAltNames, i);
-                                if (generalName->type == GEN_URI) {
-                                    std::string subjectAltName = std::string(
-                                        reinterpret_cast<const char*>(ASN1_STRING_get0_data(generalName->d.uniformResourceIdentifier)),
-                                        static_cast<std::size_t>(ASN1_STRING_length(generalName->d.uniformResourceIdentifier)));
-                                    VLOG(0) << "\t      SAN (URI): '" + subjectAltName;
-                                } else if (generalName->type == GEN_DNS) {
-                                    std::string subjectAltName =
-                                        std::string(reinterpret_cast<const char*>(ASN1_STRING_get0_data(generalName->d.dNSName)),
-                                                    static_cast<std::size_t>(ASN1_STRING_length(generalName->d.dNSName)));
-                                    VLOG(0) << "\t      SAN (DNS): '" + subjectAltName;
-                                } else {
-                                    VLOG(0) << "\t      SAN (Type): '" + std::to_string(generalName->type);
-                                }
-                            }
-                        }
-
-                        sk_GENERAL_NAME_pop_free(subjectAltNames, GENERAL_NAME_free);
-                    } else {
-                        socketConnection->close();
-                    }
-
-                    X509_free(server_cert);
-                } else {
-                    VLOG(0) << "\tPeer certificate: no certificate";
-                    // Here we can close the connection in case client didn't send a certificate
-                }
-            },
-            [&doConnect](TLSInSocketConnection* socketConnection) -> void {
-                VLOG(0) << "OnDisconnect";
-
-                VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
-                VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
-
-                core::timer::Timer timer = core::timer::Timer::intervalTimer(
-                    [&doConnect](const std::function<void()>& stop) -> void {
-                        doConnect(inMqttTlsIntegratorClient, stop);
-                    },
-                    1);
-            });
+            core::timer::Timer timer = core::timer::Timer::intervalTimer(
+                [&doConnect](const std::function<void()>& stop) -> void {
+                    doConnect(inMqttTlsIntegratorClient, stop);
+                },
+                1);
+        });
 
         doConnect(inMqttTlsIntegratorClient);
     }

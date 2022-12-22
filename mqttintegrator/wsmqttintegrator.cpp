@@ -58,15 +58,6 @@ int main(int argc, char* argv[]) {
 
         static WsMqttLegacyIntegrator legacyClient(
             "legacy",
-            [](WsMqttLegacyIntegratorConnection* socketConnection) -> void {
-                VLOG(0) << "OnConnect";
-
-                VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
-                VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
-            },
-            []([[maybe_unused]] WsMqttLegacyIntegratorConnection* socketConnection) -> void {
-                VLOG(0) << "OnConnected";
-            },
             [](web::http::client::Request& request) -> void {
                 VLOG(0) << "OnRequestBegin";
 
@@ -83,19 +74,20 @@ int main(int argc, char* argv[]) {
                 VLOG(0) << "OnResponseError";
                 VLOG(0) << "     Status: " << status;
                 VLOG(0) << "     Reason: " << reason;
-            },
-            [&doConnect](WsMqttLegacyIntegratorConnection* socketConnection) -> void {
-                VLOG(0) << "OnDisconnect";
-
-                VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
-                VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
-
-                core::timer::Timer timer = core::timer::Timer::intervalTimer(
-                    [&doConnect](const std::function<void()>& stop) -> void {
-                        doConnect(legacyClient, stop);
-                    },
-                    1);
             });
+
+        legacyClient.onDisconnect([&doConnect](WsMqttLegacyIntegratorConnection* socketConnection) -> void {
+            VLOG(0) << "OnDisconnect";
+
+            VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
+            VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
+
+            core::timer::Timer timer = core::timer::Timer::intervalTimer(
+                [&doConnect](const std::function<void()>& stop) -> void {
+                    doConnect(legacyClient, stop);
+                },
+                1);
+        });
 
         doConnect(legacyClient);
     }
