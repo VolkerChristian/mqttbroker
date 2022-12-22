@@ -63,6 +63,7 @@ namespace mqtt::mqttintegrator::lib {
 
     void Mqtt::onExit() {
         VLOG(0) << "On Exit";
+
         sendDisconnect();
     }
 
