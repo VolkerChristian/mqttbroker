@@ -98,15 +98,13 @@ int main(int argc, char* argv[]) {
         }
     });
 
-    express::tls::in::WebApp mqttWebView("mqttwebview");
+    express::tls::in::WebApp mqttTLSWebView("mqtttlswebview");
 
-    //    mqttWebView.laxRouting();
-
-    mqttWebView.get("/test", [] APPLICATION(req, res) {
+    mqttTLSWebView.get("/test", [] APPLICATION(req, res) {
         res.send("Response From MQTTWebView");
     });
 
-    mqttWebView.get("/clients", [] APPLICATION(req, res) {
+    mqttTLSWebView.get("/clients", [] APPLICATION(req, res) {
         const std::map<mqtt::mqttbroker::lib::Mqtt*, iot::mqtt::packets::Connect>& connectionList =
             mqtt::mqttbroker::lib::MqttModel::instance().getConnectedClinets();
 
@@ -131,7 +129,7 @@ int main(int argc, char* argv[]) {
         res.send(responseString);
     });
 
-    mqttWebView.get("/ws/", [] APPLICATION(req, res) -> void {
+    mqttTLSWebView.get("/ws/", [] APPLICATION(req, res) -> void {
         std::string uri = req.originalUrl;
 
         VLOG(0) << "OriginalUri: " << uri;
@@ -155,7 +153,7 @@ int main(int argc, char* argv[]) {
         }
     });
 
-    mqttWebView.listen([](const express::tls::in::WebApp::SocketAddress& socketAddress, int errnum) mutable -> void {
+    mqttTLSWebView.listen([](const express::tls::in::WebApp::SocketAddress& socketAddress, int errnum) mutable -> void {
         if (errnum < 0) {
             PLOG(ERROR) << "listening on " << socketAddress.toString();
         } else if (errnum > 0) {
@@ -166,8 +164,6 @@ int main(int argc, char* argv[]) {
     });
 
     express::legacy::in::WebApp mqttLegacyWebView("mqttlegacywebview");
-
-    //    mqttLegacyWebView.laxRouting();
 
     mqttLegacyWebView.get("/test", [] APPLICATION(req, res) {
         res.send("Response From MQTTWebView");
