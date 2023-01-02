@@ -28,6 +28,21 @@
 
 #include <cstdlib>
 
+template <typename Client>
+void doConnect(Client& client, const std::function<void()>& stopTimer = nullptr) {
+    client.connect([stopTimer](const typename Client::SocketAddress& socketAddress, int errnum) -> void {
+        if (errnum != 0) {
+            PLOG(ERROR) << "Connecting to " << socketAddress.toString();
+        } else {
+            VLOG(0) << "MqttIntegrator connected to " << socketAddress.toString();
+
+            if (stopTimer) {
+                stopTimer();
+            }
+        }
+    });
+}
+
 int main(int argc, char* argv[]) {
     std::string mappingFilePath;
     utils::Config::add_option("--mqtt-mapping-file", mappingFilePath, "MQTT mapping file (json format) for integration", true, "[path]");
@@ -40,21 +55,7 @@ int main(int argc, char* argv[]) {
 
     using WsMqttLegacyIntegratorConnection = WsMqttLegacyIntegrator::SocketConnection;
 
-    decltype([](const WsMqttLegacyIntegrator& inMqttTlsIntegratorClient, const std::function<void()>& stopTimer = nullptr) -> void {
-        inMqttTlsIntegratorClient.connect([stopTimer](const WsMqttLegacyIntegrator::SocketAddress& socketAddress, int errnum) -> void {
-            if (errnum != 0) {
-                PLOG(ERROR) << "connecting to " << socketAddress.toString();
-            } else {
-                VLOG(0) << "MqttIntegrator connected to " << socketAddress.toString();
-
-                if (stopTimer) {
-                    stopTimer();
-                }
-            }
-        });
-    }) doConnect;
-
-    static WsMqttLegacyIntegrator legacyClient(
+    WsMqttLegacyIntegrator legacyClient(
         "legacy",
         [](web::http::client::Request& request) -> void {
             VLOG(0) << "OnRequestBegin";
@@ -74,14 +75,14 @@ int main(int argc, char* argv[]) {
             VLOG(0) << "     Reason: " << reason;
         });
 
-    legacyClient.onDisconnect([&doConnect](WsMqttLegacyIntegratorConnection* socketConnection) -> void {
+    legacyClient.onDisconnect([&legacyClient](WsMqttLegacyIntegratorConnection* socketConnection) -> void {
         VLOG(0) << "OnDisconnect";
 
         VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
         VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
 
         core::timer::Timer timer = core::timer::Timer::intervalTimer(
-            [&doConnect](const std::function<void()>& stop) -> void {
+            [&legacyClient](const std::function<void()>& stop) -> void {
                 doConnect(legacyClient, stop);
             },
             1);

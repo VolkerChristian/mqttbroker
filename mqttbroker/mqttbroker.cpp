@@ -114,11 +114,11 @@ int main(int argc, char* argv[]) {
                                      "  <body>"
                                      "    <h1>List of all Connected Clients</h1>"
                                      "    <table>"
-                                     "      <tr><th>ClientId</th><th>Address</th></tr>";
+                                     "      <tr><th>ClientId</th><th>Locale Address</th><th>Remote Address</th></tr>";
 
         for (const auto& [mqtt, connectPacket] : connectionList) {
-            responseString +=
-                "<tr><td>" + mqtt->getClientId() + "</td><td>" + mqtt->getSocketConnection()->getRemoteAddress().toString() + "</td></tr>";
+            responseString += "<tr><td>" + mqtt->getClientId() + "</td><td>" + mqtt->getSocketConnection()->getLocalAddress().toString() +
+                              "</td><td>" + mqtt->getSocketConnection()->getRemoteAddress().toString() + "</td></tr>";
         }
 
         responseString += "    </table>"
@@ -179,11 +179,11 @@ int main(int argc, char* argv[]) {
                                      "  <body>"
                                      "    <h1>List of all Connected Clients</h1>"
                                      "    <table>"
-                                     "      <tr><th>ClientId</th><th>Address</th></tr>";
+                                     "      <tr><th>ClientId</th><th>Locale Address</th><th>Remote Address</th></tr>";
 
         for (const auto& [mqtt, connectPacket] : connectionList) {
-            responseString +=
-                "<tr><td>" + mqtt->getClientId() + "</td><td>" + mqtt->getSocketConnection()->getRemoteAddress().toString() + "</td></tr>";
+            responseString += "<tr><td>" + mqtt->getClientId() + "</td><td>" + mqtt->getSocketConnection()->getLocalAddress().toString() +
+                              "</td><td>" + mqtt->getSocketConnection()->getRemoteAddress().toString() + "</td></tr>";
         }
 
         responseString += "    </table>"
@@ -250,5 +250,6 @@ int main(int argc, char* argv[]) {
             VLOG(0) << "MqttWebFrontend listening on " << socketAddress.toString();
         }
     });
+
     return core::SNodeC::start();
 }
