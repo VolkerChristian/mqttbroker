@@ -1,6 +1,6 @@
 /*
  * snode.c - a slim toolkit for network communication
- * Copyright (C) 2020, 2021, 2022 Volker Christian <me@vchrist.at>
+ * Copyright (C) 2020, 2021, 2022, 2023 Volker Christian <me@vchrist.at>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -34,9 +34,9 @@ namespace web::websocket {
 
 namespace mqtt::mqttintegrator::websocket {
 
-    class SubprotocolFactory : public web::websocket::SubProtocolFactory<iot::mqtt::client::SubProtocol> {
+    class SubProtocolFactory : public web::websocket::SubProtocolFactory<iot::mqtt::client::SubProtocol> {
     public:
-        explicit SubprotocolFactory(const std::string& name);
+        explicit SubProtocolFactory(const std::string& name);
 
     private:
         iot::mqtt::client::SubProtocol* create(web::websocket::SubProtocolContext* subProtocolContext) override;

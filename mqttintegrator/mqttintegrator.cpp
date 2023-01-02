@@ -1,6 +1,6 @@
 /*
  * snode.c - a slim toolkit for network communication
- * Copyright (C) 2020, 2021, 2022 Volker Christian <me@vchrist.at>
+ * Copyright (C) 2020, 2021, 2022, 2023 Volker Christian <me@vchrist.at>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -30,47 +30,45 @@
 
 int main(int argc, char* argv[]) {
     std::string mappingFilePath;
-    utils::Config::add_option(
-        "--mqtt-mapping-file", mappingFilePath, "MQTT mapping file (json format) for integration", true, "[path to json file]");
+    utils::Config::add_option("--mqtt-mapping-file", mappingFilePath, "MQTT mapping file (json format) for integration", true, "[path]");
 
     core::SNodeC::init(argc, argv);
 
-    if (!mappingFilePath.empty()) {
-        setenv("MQTT_MAPPING_FILE", mappingFilePath.data(), 0);
+    setenv("MQTT_MAPPING_FILE", mappingFilePath.data(), 0);
 
-        using InMqttTlsIntegratorClient = net::in::stream::tls::SocketClient<mqtt::mqttintegrator::SocketContextFactory>;
-        using TLSInSocketConnection = InMqttTlsIntegratorClient::SocketConnection;
+    using InMqttTlsIntegratorClient = net::in::stream::tls::SocketClient<mqtt::mqttintegrator::SocketContextFactory>;
+    using TLSInSocketConnection = InMqttTlsIntegratorClient::SocketConnection;
 
-        decltype([](const InMqttTlsIntegratorClient& inMqttTlsIntegratorClient, const std::function<void()>& stopTimer = nullptr) -> void {
-            inMqttTlsIntegratorClient.connect(
-                [stopTimer](const InMqttTlsIntegratorClient::SocketAddress& socketAddress, int errnum) -> void {
-                    if (errnum != 0) {
-                        PLOG(ERROR) << "connecting to " << socketAddress.toString();
-                    } else {
-                        VLOG(0) << "MqttIntegrator connected to " << socketAddress.toString();
+    decltype([](const InMqttTlsIntegratorClient& inMqttTlsIntegratorClient, const std::function<void()>& stopTimer = nullptr) -> void {
+        inMqttTlsIntegratorClient.connect([stopTimer](const InMqttTlsIntegratorClient::SocketAddress& socketAddress, int errnum) -> void {
+            if (errnum != 0) {
+                PLOG(ERROR) << "connecting to " << socketAddress.toString();
+            } else {
+                VLOG(0) << "MqttIntegrator connected to " << socketAddress.toString();
 
-                        if (stopTimer) {
-                            stopTimer();
-                        }
-                    }
-                });
-        }) doConnect;
-
-        static InMqttTlsIntegratorClient inMqttTlsIntegratorClient("mqtttlsintegrator");
-
-        inMqttTlsIntegratorClient.onDisconnect([&doConnect](TLSInSocketConnection* socketConnection) -> void {
-            VLOG(0) << "OnDisconnect";
-
-            VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
-            VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
-
-            core::timer::Timer timer = core::timer::Timer::intervalTimer(
-                [&doConnect](const std::function<void()>& stop) -> void {
-                    doConnect(inMqttTlsIntegratorClient, stop);
-                },
-                1);
+                if (stopTimer) {
+                    stopTimer();
+                }
+            }
         });
+    }) doConnect;
 
+    static InMqttTlsIntegratorClient inMqttTlsIntegratorClient("mqtttlsintegrator");
+
+    inMqttTlsIntegratorClient.onDisconnect([&doConnect](TLSInSocketConnection* socketConnection) -> void {
+        VLOG(0) << "OnDisconnect";
+
+        VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
+        VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
+
+        core::timer::Timer timer = core::timer::Timer::intervalTimer(
+            [&doConnect](const std::function<void()>& stop) -> void {
+                doConnect(inMqttTlsIntegratorClient, stop);
+            },
+            1);
+    });
+
+    if (!mappingFilePath.empty()) {
         doConnect(inMqttTlsIntegratorClient);
     }
 

@@ -1,6 +1,6 @@
 /*
  * snode.c - a slim toolkit for network communication
- * Copyright (C) 2020, 2021, 2022 Volker Christian <me@vchrist.at>
+ * Copyright (C) 2020, 2021, 2022, 2023 Volker Christian <me@vchrist.at>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -30,65 +30,64 @@
 
 int main(int argc, char* argv[]) {
     std::string mappingFilePath;
-    utils::Config::add_option(
-        "--mqtt-mapping-file", mappingFilePath, "MQTT mapping file (json format) for integration", true, "[path to json file]");
+    utils::Config::add_option("--mqtt-mapping-file", mappingFilePath, "MQTT mapping file (json format) for integration", true, "[path]");
 
     core::SNodeC::init(argc, argv);
 
-    if (!mappingFilePath.empty()) {
-        setenv("MQTT_MAPPING_FILE", mappingFilePath.data(), 0);
+    setenv("MQTT_MAPPING_FILE", mappingFilePath.data(), 0);
 
-        using WsMqttLegacyIntegrator = web::http::legacy::in::Client<web::http::client::Request, web::http::client::Response>;
+    using WsMqttLegacyIntegrator = web::http::legacy::in::Client<web::http::client::Request, web::http::client::Response>;
 
-        using WsMqttLegacyIntegratorConnection = WsMqttLegacyIntegrator::SocketConnection;
+    using WsMqttLegacyIntegratorConnection = WsMqttLegacyIntegrator::SocketConnection;
 
-        decltype([](const WsMqttLegacyIntegrator& inMqttTlsIntegratorClient, const std::function<void()>& stopTimer = nullptr) -> void {
-            inMqttTlsIntegratorClient.connect([stopTimer](const WsMqttLegacyIntegrator::SocketAddress& socketAddress, int errnum) -> void {
-                if (errnum != 0) {
-                    PLOG(ERROR) << "connecting to " << socketAddress.toString();
-                } else {
-                    VLOG(0) << "MqttIntegrator connected to " << socketAddress.toString();
+    decltype([](const WsMqttLegacyIntegrator& inMqttTlsIntegratorClient, const std::function<void()>& stopTimer = nullptr) -> void {
+        inMqttTlsIntegratorClient.connect([stopTimer](const WsMqttLegacyIntegrator::SocketAddress& socketAddress, int errnum) -> void {
+            if (errnum != 0) {
+                PLOG(ERROR) << "connecting to " << socketAddress.toString();
+            } else {
+                VLOG(0) << "MqttIntegrator connected to " << socketAddress.toString();
 
-                    if (stopTimer) {
-                        stopTimer();
-                    }
+                if (stopTimer) {
+                    stopTimer();
                 }
-            });
-        }) doConnect;
+            }
+        });
+    }) doConnect;
 
-        static WsMqttLegacyIntegrator legacyClient(
-            "legacy",
-            [](web::http::client::Request& request) -> void {
-                VLOG(0) << "OnRequestBegin";
+    static WsMqttLegacyIntegrator legacyClient(
+        "legacy",
+        [](web::http::client::Request& request) -> void {
+            VLOG(0) << "OnRequestBegin";
 
-                request.set("Sec-WebSocket-Protocol", "mqtt");
+            request.set("Sec-WebSocket-Protocol", "mqtt");
 
-                request.upgrade("/ws/", "websocket");
-            },
-            [](web::http::client::Request& request, web::http::client::Response& response) -> void {
-                VLOG(0) << "OnResponse";
+            request.upgrade("/ws/", "websocket");
+        },
+        [](web::http::client::Request& request, web::http::client::Response& response) -> void {
+            VLOG(0) << "OnResponse";
 
-                response.upgrade(request);
-            },
-            [](int status, const std::string& reason) -> void {
-                VLOG(0) << "OnResponseError";
-                VLOG(0) << "     Status: " << status;
-                VLOG(0) << "     Reason: " << reason;
-            });
-
-        legacyClient.onDisconnect([&doConnect](WsMqttLegacyIntegratorConnection* socketConnection) -> void {
-            VLOG(0) << "OnDisconnect";
-
-            VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
-            VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
-
-            core::timer::Timer timer = core::timer::Timer::intervalTimer(
-                [&doConnect](const std::function<void()>& stop) -> void {
-                    doConnect(legacyClient, stop);
-                },
-                1);
+            response.upgrade(request);
+        },
+        [](int status, const std::string& reason) -> void {
+            VLOG(0) << "OnResponseError";
+            VLOG(0) << "     Status: " << status;
+            VLOG(0) << "     Reason: " << reason;
         });
 
+    legacyClient.onDisconnect([&doConnect](WsMqttLegacyIntegratorConnection* socketConnection) -> void {
+        VLOG(0) << "OnDisconnect";
+
+        VLOG(0) << "\tServer: " + socketConnection->getRemoteAddress().toString();
+        VLOG(0) << "\tClient: " + socketConnection->getLocalAddress().toString();
+
+        core::timer::Timer timer = core::timer::Timer::intervalTimer(
+            [&doConnect](const std::function<void()>& stop) -> void {
+                doConnect(legacyClient, stop);
+            },
+            1);
+    });
+
+    if (!mappingFilePath.empty()) {
         doConnect(legacyClient);
     }
 

@@ -1,6 +1,6 @@
 /*
  * snode.c - a slim toolkit for network communication
- * Copyright (C) 2020, 2021, 2022 Volker Christian <me@vchrist.at>
+ * Copyright (C) 2020, 2021, 2022, 2023 Volker Christian <me@vchrist.at>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -29,7 +29,7 @@
 
 namespace mqtt::mqttintegrator::websocket {
 
-    SubprotocolFactory::SubprotocolFactory(const std::string& name)
+    SubProtocolFactory::SubProtocolFactory(const std::string& name)
         : web::websocket::SubProtocolFactory<iot::mqtt::client::SubProtocol>::SubProtocolFactory(name) {
         char* mappingFile = getenv("MQTT_MAPPING_FILE");
 
@@ -43,7 +43,7 @@ namespace mqtt::mqttintegrator::websocket {
         }
     }
 
-    iot::mqtt::client::SubProtocol* SubprotocolFactory::create(web::websocket::SubProtocolContext* subProtocolContext) {
+    iot::mqtt::client::SubProtocol* SubProtocolFactory::create(web::websocket::SubProtocolContext* subProtocolContext) {
         return new iot::mqtt::client::SubProtocol(
             subProtocolContext, getName(), new mqtt::mqttintegrator::lib::Mqtt(connection, jsonMapping));
     }
@@ -53,5 +53,5 @@ namespace mqtt::mqttintegrator::websocket {
 #define NAME "mqtt"
 
 extern "C" void* mqttClientSubProtocolFactory() {
-    return new mqtt::mqttintegrator::websocket::SubprotocolFactory(NAME);
+    return new mqtt::mqttintegrator::websocket::SubProtocolFactory(NAME);
 }

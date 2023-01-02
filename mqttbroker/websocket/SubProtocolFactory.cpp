@@ -1,6 +1,6 @@
 /*
  * snode.c - a slim toolkit for network communication
- * Copyright (C) 2020, 2021, 2022 Volker Christian <me@vchrist.at>
+ * Copyright (C) 2020, 2021, 2022, 2023 Volker Christian <me@vchrist.at>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -31,7 +31,7 @@
 
 namespace mqtt::mqttbroker::websocket {
 
-    SubprotocolFactory::SubprotocolFactory(const std::string& name)
+    SubProtocolFactory::SubProtocolFactory(const std::string& name)
         : web::websocket::SubProtocolFactory<iot::mqtt::server::SubProtocol>::SubProtocolFactory(name) {
         char* mappingFile = getenv("MQTT_MAPPING_FILE");
 
@@ -44,7 +44,7 @@ namespace mqtt::mqttbroker::websocket {
         }
     }
 
-    iot::mqtt::server::SubProtocol* SubprotocolFactory::create(web::websocket::SubProtocolContext* subProtocolContext) {
+    iot::mqtt::server::SubProtocol* SubProtocolFactory::create(web::websocket::SubProtocolContext* subProtocolContext) {
         return new iot::mqtt::server::SubProtocol(
             subProtocolContext,
             getName(),
@@ -56,5 +56,5 @@ namespace mqtt::mqttbroker::websocket {
 #define NAME "mqtt"
 
 extern "C" void* mqttServerSubProtocolFactory() {
-    return new mqtt::mqttbroker::websocket::SubprotocolFactory(NAME);
+    return new mqtt::mqttbroker::websocket::SubProtocolFactory(NAME);
 }
