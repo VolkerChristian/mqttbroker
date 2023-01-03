@@ -144,7 +144,7 @@ namespace mqtt::lib {
         }
     }
 
-    void MqttMapper::publishMappedMessages(const nlohmann::json& staticMapping, const iot::mqtt::packets::Publish& publish) {
+    void MqttMapper::publishMappedMessage(const nlohmann::json& staticMapping, const iot::mqtt::packets::Publish& publish) {
         const nlohmann::json& messageMappingArray = staticMapping["message_mapping"];
 
         if (messageMappingArray.begin() != messageMappingArray.end()) {
@@ -154,6 +154,16 @@ namespace mqtt::lib {
                 for (const nlohmann::json& messageMappingArrayElement : messageMappingArray) {
                     publishMappedMessage(staticMapping, messageMappingArrayElement, publish);
                 }
+            }
+        }
+    }
+
+    void MqttMapper::publishMappedMessages(const nlohmann::json& staticMapping, const iot::mqtt::packets::Publish& publish) {
+        if (staticMapping.is_object()) {
+            publishMappedMessage(staticMapping, publish);
+        } else if (staticMapping.is_array()) {
+            for (const nlohmann::json& concreteStaticMapping : staticMapping) {
+                publishMappedMessage(concreteStaticMapping, publish);
             }
         }
     }

@@ -140,23 +140,17 @@
               ],
               "properties": {
                 "static": {
-                  "type": "object",
-                  "$ref": "#/$defs/mapping_commons",
-                  "properties": {
-                    "message_mapping": {
-                      "oneOf": [
-                        {
-                          "$ref": "#/$defs/message_mapping"
-                        },
-                        {
-                          "type": "array",
-                          "items": {
-                            "$ref": "#/$defs/message_mapping"
-                          }
-                        }
-                      ]
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/static_mapping"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/$defs/static_mapping"
+                      }
                     }
-                  }
+                  ]
                 }
               }
             },
@@ -196,6 +190,25 @@
                       "type": "array",
                       "items": {
                         "$ref": "#/$defs/template_mapping"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "static_mapping": {
+              "type": "object",
+              "$ref": "#/$defs/mapping_commons",
+              "properties": {
+                "message_mapping": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/message_mapping"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/$defs/message_mapping"
                       }
                     }
                   ]
