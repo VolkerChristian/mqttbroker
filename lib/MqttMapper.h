@@ -58,7 +58,7 @@ namespace mqtt::lib {
                                     const iot::mqtt::packets::Publish& publish);
 
         void publishMappedMessage(const nlohmann::json& staticMapping,
-                                  const nlohmann::json& messageMappingArray,
+                                  const std::string &message,
                                   const iot::mqtt::packets::Publish& publish);
 
         void publishMappedMessage(const nlohmann::json& staticMapping, const iot::mqtt::packets::Publish& publish);
