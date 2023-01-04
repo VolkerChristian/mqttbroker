@@ -40,6 +40,13 @@
                   "message": "pressed",
                   "mapped_message": "front red"
                 }
+              },
+              {
+                "mapped_topic": "strip/strip1/brightness/set",
+                "message_mapping": {
+                  "message": "released",
+                  "mapped_message": "0"
+                }
               }
             ]
           }
