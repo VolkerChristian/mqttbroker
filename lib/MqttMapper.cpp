@@ -89,32 +89,33 @@ namespace mqtt::lib {
     void MqttMapper::publishMappedTemplate(const nlohmann::json& templateMapping,
                                            const nlohmann::json& json,
                                            const iot::mqtt::packets::Publish& publish) {
+        LOG(INFO) << "  -> " << templateMapping["mapped_topic"] << ":" << templateMapping["mapping_template"].dump();
+
         const std::string& commandTopic = templateMapping["mapped_topic"];
         const std::string& mappingTemplate = templateMapping["mapping_template"];
 
         try {
             // Render
-            std::string renderedMessage = inja::render(mappingTemplate, json);
+            std::string message = inja::render(mappingTemplate, json);
 
             bool retain = templateMapping["retain_message"];
             uint8_t qoS = templateMapping.value("qos_override", publish.getQoS());
 
-            if (!renderedMessage.empty()) {
-                LOG(INFO) << "      " << commandTopic << " : " << mappingTemplate << " -> '" << renderedMessage << "'";
+            if (!message.empty()) {
+                LOG(INFO) << "    \"" << publish.getMessage() << "\" -> \"" << message << "\"";
+                LOG(INFO) << "  ... send mapping: \"" << commandTopic << "\":\"" << message << "\"";
 
-                publishMapping(commandTopic, renderedMessage, qoS, retain);
+                publishMapping(commandTopic, message, qoS, retain);
             }
         } catch (const std::exception& e) {
             LOG(ERROR) << e.what();
-            LOG(ERROR) << "Rendering failed: " << mappingTemplate << " : " << json.dump();
+            LOG(ERROR) << "Template rendering failed: " << mappingTemplate << " : " << json.dump();
         }
     }
 
     void MqttMapper::publishMappedTemplates(const nlohmann::json& templateMapping,
                                             const nlohmann::json& json,
                                             const iot::mqtt::packets::Publish& publish) {
-        LOG(INFO) << "  " << publish.getTopic() << " : " << publish.getMessage() << " -> " << json.dump();
-
         if (templateMapping.is_object()) {
             publishMappedTemplate(templateMapping, json, publish);
         } else {
@@ -131,7 +132,8 @@ namespace mqtt::lib {
         bool retain = staticMapping["retain_message"];
         uint8_t qoS = staticMapping.value("qos_override", publish.getQoS());
 
-        LOG(INFO) << "      " << publish.getTopic() << ":" << publish.getMessage() << " -> " << commandTopic << ":" << message;
+        LOG(INFO) << "    \"" << publish.getMessage() << "\" -> \"" << message << "\"";
+        LOG(INFO) << "  ... send mapping: \"" << commandTopic << "\":\"" << message << "\"";
 
         publishMapping(commandTopic, message, qoS, retain);
     }
@@ -139,19 +141,28 @@ namespace mqtt::lib {
     void MqttMapper::publishMappedMessage(const nlohmann::json& staticMapping, const iot::mqtt::packets::Publish& publish) {
         const nlohmann::json& messageMapping = staticMapping["message_mapping"];
 
-        LOG(INFO) << "  " << publish.getTopic() << " : " << publish.getMessage() << " -> " << messageMapping.dump();
-
         if (messageMapping.is_object()) {
+            LOG(INFO) << "  -> " << staticMapping["mapped_topic"] << ":" << messageMapping.dump();
+
             if (messageMapping["message"] == publish.getMessage()) {
                 publishMappedMessage(staticMapping, messageMapping["mapped_message"], publish);
+            } else {
+                LOG(INFO) << "  ... no matching mapped message found";
             }
         } else {
             const nlohmann::json::const_iterator matchedMessageMappingIterator =
-                std::find_if(messageMapping.begin(), messageMapping.end(), [&publish](const nlohmann::json& messageMappingCandidat) {
-                    return messageMappingCandidat["message"] == publish.getMessage();
-                });
+                std::find_if(messageMapping.begin(),
+                             messageMapping.end(),
+                             [&publish, &messageMapping, &staticMapping](const nlohmann::json& messageMappingCandidat) {
+                                 LOG(INFO) << "  -> " << staticMapping["mapped_topic"] << ":" << messageMapping.dump();
+
+                                 return messageMappingCandidat["message"] == publish.getMessage();
+                             });
+
             if (matchedMessageMappingIterator != messageMapping.end()) {
                 publishMappedMessage(staticMapping, (*matchedMessageMappingIterator)["mapped_message"], publish);
+            } else {
+                LOG(INFO) << "  ... no matching mapped message found";
             }
         }
     }
@@ -193,6 +204,7 @@ namespace mqtt::lib {
         return foundTopicLevel;
     }
 
+    /* Topic mapping (static) found: test01/button1 -> mapping/value */
     void MqttMapper::publishMappings(const iot::mqtt::packets::Publish& publish) {
         if (!mappingJson.empty()) {
             nlohmann::json matchingTopicLevel = findMatchingTopicLevel(mappingJson["topic_level"], publish.getTopic());
@@ -201,7 +213,7 @@ namespace mqtt::lib {
                 const nlohmann::json& mapping = matchingTopicLevel["subscription"];
 
                 if (mapping.contains("static")) {
-                    LOG(INFO) << "Topic mapping (static) found:";
+                    LOG(INFO) << "Topic mapping (static) found: \"" << publish.getTopic() << "\":\"" << publish.getMessage() << "\"";
 
                     publishMappedMessages(mapping["static"], publish);
                 } else {
@@ -209,14 +221,14 @@ namespace mqtt::lib {
                     nlohmann::json templateMapping;
 
                     if (mapping.contains("value")) {
-                        LOG(INFO) << "Topic mapping (value) found:";
+                        LOG(INFO) << "Topic mapping (value) found: \"" << publish.getTopic() << "\":\"" << publish.getMessage() << "\"";
 
                         templateMapping = mapping["value"];
 
                         json["value"] = publish.getMessage();
 
                     } else if (mapping.contains("json")) {
-                        LOG(INFO) << "Topic mapping (json) found:";
+                        LOG(INFO) << "Topic mapping (json) found: \"" << publish.getTopic() << "\":\"" << publish.getMessage() << "\"";
 
                         templateMapping = mapping["json"];
 
@@ -238,45 +250,5 @@ namespace mqtt::lib {
             }
         }
     }
-
-    /*
-    iotempower/cfg/test01/ip 192.168.12.183
-    iotempower/cfg/test02/ip 192.168.12.132
-    iotempower/binary_sensor/test01/button1/config
-    {
-        "name": "test01 button1",
-        "state_topic": "test01/button1",
-        "payload_on": "released",
-        "payload_off": "pressed"
-    },
-    iotempower/switch/test02/onboard/config
-    {
-        "name": "test02 onboard",
-        "state_topic": "test02/onboard",
-        "state_on": "on",
-        "state_off": "off",
-        "mapped_topic": "test02/onboard/set",
-        "payload_on": "on",
-        "payload_off": "off"
-    }
-
-    {
-        "binary_sensor" : [{
-            "name": "test01 button1",
-            "state_topic": "test01/button1",
-            "payload_on": "released",
-            "payload_off": "pressed"
-        }],
-        "switch" : [{
-            "name": "test02 onboard",
-            "state_topic": "test02/onboard",
-            "state_on": "on",
-            "state_off": "off",
-            "mapped_topic": "test02/onboard/set",
-            "payload_on": "on",
-            "payload_off": "off"
-        }]
-    }
-    */
 
 } // namespace mqtt::lib
