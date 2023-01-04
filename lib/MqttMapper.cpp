@@ -96,12 +96,14 @@ namespace mqtt::lib {
             // Render
             std::string renderedMessage = inja::render(mappingTemplate, json);
 
-            LOG(INFO) << "      " << commandTopic << " : " << mappingTemplate << " -> '" << renderedMessage << "'";
-
             bool retain = templateMapping["retain_message"];
             uint8_t qoS = templateMapping.value("qos_override", publish.getQoS());
 
-            publishMapping(commandTopic, renderedMessage, qoS, retain);
+            if (!renderedMessage.empty()) {
+                LOG(INFO) << "      " << commandTopic << " : " << mappingTemplate << " -> '" << renderedMessage << "'";
+
+                publishMapping(commandTopic, renderedMessage, qoS, retain);
+            }
         } catch (const std::exception& e) {
             LOG(ERROR) << e.what();
             LOG(ERROR) << "Rendering failed: " << mappingTemplate << " : " << json.dump();
@@ -129,14 +131,15 @@ namespace mqtt::lib {
         bool retain = staticMapping["retain_message"];
         uint8_t qoS = staticMapping.value("qos_override", publish.getQoS());
 
-        LOG(INFO) << "Topic mapping (static) found:";
-        LOG(INFO) << "  " << publish.getTopic() << ":" << publish.getMessage() << " -> " << commandTopic << ":" << message;
+        LOG(INFO) << "      " << publish.getTopic() << ":" << publish.getMessage() << " -> " << commandTopic << ":" << message;
 
         publishMapping(commandTopic, message, qoS, retain);
     }
 
     void MqttMapper::publishMappedMessage(const nlohmann::json& staticMapping, const iot::mqtt::packets::Publish& publish) {
         const nlohmann::json& messageMapping = staticMapping["message_mapping"];
+
+        LOG(INFO) << "  " << publish.getTopic() << " : " << publish.getMessage() << " -> " << messageMapping.dump();
 
         if (messageMapping.is_object()) {
             if (messageMapping["message"] == publish.getMessage()) {
@@ -198,6 +201,8 @@ namespace mqtt::lib {
                 const nlohmann::json& mapping = matchingTopicLevel["subscription"];
 
                 if (mapping.contains("static")) {
+                    LOG(INFO) << "Topic mapping (static) found:";
+
                     publishMappedMessages(mapping["static"], publish);
                 } else {
                     nlohmann::json json;
