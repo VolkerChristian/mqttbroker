@@ -20,19 +20,28 @@
           "subscription": {
             "type": "binary_sensor",
             "qos": 2,
-            "static": {
-              "mapped_topic": "mapping/value",
-              "message_mapping": [
-                {
+            "static": [
+              {
+                "mapped_topic": "mapping/value",
+                "message_mapping": [
+                  {
+                    "message": "pressed",
+                    "mapped_message": "on"
+                  },
+                  {
+                    "message": "released",
+                    "mapped_message": "off"
+                  }
+                ]
+              },
+              {
+                "mapped_topic": "strip/strip1/rgb/set",
+                "message_mapping": {
                   "message": "pressed",
-                  "mapped_message": "on"
-                },
-                {
-                  "message": "released",
-                  "mapped_message": "off"
+                  "mapped_message": "front red"
                 }
-              ]
-            }
+              }
+            ]
           }
         }
       }, {
@@ -52,18 +61,11 @@
             "name": "json",
             "subscription": {
               "qos": 0,
-              "json": [
-                {
-                  "mapped_topic": "test02/onboard/set",
-                  "mapping_template": "{% if state == \"on\" %}on{% else if state == \"off\" %}off{% endif %}",
-                  "retain_message": false
-                },
-                {
-                  "mapped_topic": "strip/strip1/rgb/set",
-                  "mapping_template": "{% if state == \"on\" %}front red{% else if state == \"off\" %}front blue{% endif %}",
-                  "retain_message": false
-                }
-              ]
+              "json": {
+                "mapped_topic": "test02/onboard/set",
+                "mapping_template": "{% if state == \"on\" %}on{% else if state == \"off\" %}off{% endif %}",
+                "retain_message": false
+              }
             }
           }
         ]
