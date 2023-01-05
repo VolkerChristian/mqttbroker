@@ -22,7 +22,6 @@
 #include "lib/JsonMappingReader.h"
 
 #include <iot/mqtt/SocketContext.h>
-#include <iot/mqtt/server/SharedSocketContextFactory.hpp>
 
 //
 

@@ -19,19 +19,15 @@
 #ifndef APPS_MQTTBROKER_BROKER_SOCKETCONTEXTFACTORY_H
 #define APPS_MQTTBROKER_BROKER_SOCKETCONTEXTFACTORY_H
 
-namespace mqtt::mqttbroker {
-    class Mqtt;
-} // namespace mqtt::mqttbroker
-
 namespace core::socket {
     class SocketConnection;
+    class SocketContext;
 } // namespace core::socket
 
 namespace iot::mqtt::server::broker {
     class Broker;
 }
 
-#include <core/socket/SocketContext.h>
 #include <iot/mqtt/server/SharedSocketContextFactory.h>
 
 //
@@ -42,7 +38,7 @@ namespace iot::mqtt::server::broker {
 
 namespace mqtt::mqttbroker {
 
-    class SharedSocketContextFactory : public iot::mqtt::server::SharedSocketContextFactory<Mqtt> {
+    class SharedSocketContextFactory : public iot::mqtt::server::SharedSocketContextFactory {
     public:
         SharedSocketContextFactory();
 
