@@ -22,8 +22,8 @@
 #include "lib/MqttMapper.h"
 
 namespace iot::mqtt::packets {
-    class Publish;
     class Connack;
+    class Publish;
 } // namespace iot::mqtt::packets
 
 #include <iot/mqtt/client/Mqtt.h>

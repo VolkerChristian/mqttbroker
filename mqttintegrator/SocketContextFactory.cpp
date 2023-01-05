@@ -18,8 +18,8 @@
 
 #include "SocketContextFactory.h"
 
-#include "Mqtt.h"
 #include "lib/JsonMappingReader.h"
+#include "mqttintegrator/lib/Mqtt.h"
 
 namespace core::socket {
     class SocketConnection;
