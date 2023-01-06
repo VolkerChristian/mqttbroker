@@ -69,8 +69,8 @@ namespace mqtt::mqttintegrator::lib {
 
     void Mqtt::onConnack(const iot::mqtt::packets::Connack& connack) {
         if (connack.getReturnCode() == 0 && !connack.getSessionPresent()) {
-            sendPublish("snode.c/_cfg_/connection", connectionJson.dump(), 0, false, true);
-            sendPublish("snode.c/_cfg_/mapping", mqtt::lib::MqttMapper::dump(), 0, false, true);
+            sendPublish("snode.c/_cfg_/connection", connectionJson.dump(), 0, true);
+            sendPublish("snode.c/_cfg_/mapping", mqtt::lib::MqttMapper::dump(), 0, true);
 
             std::list<iot::mqtt::Topic> topicList = MqttMapper::extractTopics();
 
@@ -87,7 +87,7 @@ namespace mqtt::mqttintegrator::lib {
     }
 
     void Mqtt::publishMapping(const std::string& topic, const std::string& message, uint8_t qoS, bool retain) {
-        sendPublish(topic, message, qoS, false, retain);
+        sendPublish(topic, message, qoS, retain);
     }
 
 } // namespace mqtt::mqttintegrator::lib
