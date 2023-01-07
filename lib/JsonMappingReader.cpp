@@ -98,7 +98,7 @@ namespace mqtt::lib {
             }
             mapFile.close();
         } else {
-            VLOG(0) << "MappingFilePath: " << mapFilePath << " not found";
+            LOG(INFO) << "MappingFilePath: " << mapFilePath << " not found";
         }
 
         return mapFileJson;
