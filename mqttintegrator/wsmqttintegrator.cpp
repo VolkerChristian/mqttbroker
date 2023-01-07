@@ -47,9 +47,13 @@ int main(int argc, char* argv[]) {
     std::string mappingFilePath;
     utils::Config::add_option("--mqtt-mapping-file", mappingFilePath, "MQTT mapping file (json format) for integration", true, "[path]");
 
+    std::string sessionStore;
+    utils::Config::add_option("--mqtt-session-store", sessionStore, "Path to file for the persistent session store", false, "[path]");
+
     core::SNodeC::init(argc, argv);
 
     setenv("MQTT_MAPPING_FILE", mappingFilePath.data(), 0);
+    setenv("MQTT_SESSION_STORE", sessionStore.data(), 0);
 
     using WsMqttLegacyIntegrator = web::http::legacy::in::Client<web::http::client::Request, web::http::client::Response>;
 

@@ -96,6 +96,7 @@ namespace mqtt::lib {
                 LOG(ERROR) << "JSON map file parsing failed: " << e.what() << " at " << mapFile.tellg();
                 mapFileJson.clear();
             }
+            mapFile.close();
         } else {
             VLOG(0) << "MappingFilePath: " << mapFilePath << " not found";
         }

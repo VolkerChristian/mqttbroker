@@ -47,9 +47,13 @@ int main(int argc, char* argv[]) {
     std::string mappingFilePath;
     utils::Config::add_option("--mqtt-mapping-file", mappingFilePath, "MQTT mapping file (json format) for integration", true, "[path]");
 
+    std::string sessionStore;
+    utils::Config::add_option("--mqtt-session-store", sessionStore, "Path to file for the persistent session store", false, "[path]");
+
     core::SNodeC::init(argc, argv);
 
     setenv("MQTT_MAPPING_FILE", mappingFilePath.data(), 0);
+    setenv("MQTT_SESSION_STORE", sessionStore.data(), 0);
 
     using InMqttTlsIntegratorClient = net::in::stream::tls::SocketClient<mqtt::mqttintegrator::SocketContextFactory>;
     using TLSInSocketConnection = InMqttTlsIntegratorClient::SocketConnection;
