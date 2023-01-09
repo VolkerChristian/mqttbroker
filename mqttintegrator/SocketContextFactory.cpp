@@ -30,6 +30,7 @@ namespace core::socket {
 //
 
 #include <cstdlib>
+#include <memory>
 
 namespace mqtt::mqttintegrator {
 
