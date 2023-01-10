@@ -27,7 +27,6 @@
 //
 
 #include <algorithm>
-#include <exception>
 #include <initializer_list>
 #include <map>
 #include <nlohmann/json.hpp>
@@ -76,12 +75,12 @@ namespace mqtt::lib {
     std::list<iot::mqtt::Topic> MqttMapper::extractTopics() {
         std::list<iot::mqtt::Topic> topicList;
 
-        try {
-            extractTopics(mappingJson, "", topicList);
-        } catch (const nlohmann::json::exception& e) {
-            LOG(ERROR) << e.what();
-            LOG(ERROR) << "Extracting topics failed.";
-        }
+        //        try {
+        extractTopics(mappingJson, "", topicList);
+        //        } catch (const nlohmann::json::exception& e) {
+        //            LOG(ERROR) << e.what();
+        //            LOG(ERROR) << "Extracting topics failed.";
+        //        }
 
         return topicList;
     }
@@ -102,13 +101,15 @@ namespace mqtt::lib {
             uint8_t qoS = templateMapping.value("qos_override", publish.getQoS());
 
             if (!message.empty()) {
-                LOG(INFO) << "    \"" << publish.getMessage() << "\" -> \"" << message << "\"";
+                LOG(INFO) << "     \"" << publish.getMessage() << "\" -> \"" << message << "\"";
                 LOG(INFO) << "  ... send mapping: \"" << commandTopic << "\":\"" << message << "\"";
 
                 publishMapping(commandTopic, message, qoS, retain);
             }
-        } catch (const std::exception& e) {
+        } catch (const inja::InjaError& e) {
             LOG(ERROR) << e.what();
+            LOG(ERROR) << "INJA " << e.type << ": " << e.message;
+            LOG(ERROR) << "INJA (line:column):" << e.location.line << ":" << e.location.column;
             LOG(ERROR) << "Template rendering failed: " << mappingTemplate << " : " << json.dump();
         }
     }
@@ -132,7 +133,7 @@ namespace mqtt::lib {
         bool retain = staticMapping["retain_message"];
         uint8_t qoS = staticMapping.value("qos_override", publish.getQoS());
 
-        LOG(INFO) << "    \"" << publish.getMessage() << "\" -> \"" << message << "\"";
+        LOG(INFO) << "     \"" << publish.getMessage() << "\" -> \"" << message << "\"";
         LOG(INFO) << "  ... send mapping: \"" << commandTopic << "\":\"" << message << "\"";
 
         publishMapping(commandTopic, message, qoS, retain);
@@ -204,7 +205,6 @@ namespace mqtt::lib {
         return foundTopicLevel;
     }
 
-    /* Topic mapping (static) found: test01/button1 -> mapping/value */
     void MqttMapper::publishMappings(const iot::mqtt::packets::Publish& publish) {
         if (!mappingJson.empty()) {
             nlohmann::json matchingTopicLevel = findMatchingTopicLevel(mappingJson["topic_level"], publish.getTopic());
@@ -234,9 +234,12 @@ namespace mqtt::lib {
 
                         try {
                             json = nlohmann::json::parse(publish.getMessage());
-                        } catch (const nlohmann::json::exception& e) {
-                            LOG(ERROR) << e.what();
+                        } catch (const nlohmann::json::parse_error& e) {
+                            LOG(ERROR) << e.what() << ": " << e.id;
                             LOG(ERROR) << "Parsing message into json failed: " << publish.getMessage();
+                            LOG(ERROR) << "Parse Error: Message: " << e.what() << '\n'
+                                       << "Exception Id: " << e.id << '\n'
+                                       << "Byte position of error: " << e.byte;
                             json.clear();
                         }
                     }
